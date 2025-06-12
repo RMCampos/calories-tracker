@@ -5,94 +5,184 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Calorie Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
 </head>
 <body>
-    <div class="container">
-        <h1>🍎 Daily Calorie Tracker</h1>
-        
-        <div class="date-display" id="currentDate"></div>
-        
-        <div class="calories-banner">
-            <div class="calories-number" id="caloriesCounter">0</div>
-            <div class="calories-text">Calories Today</div>
-        </div>
-
-        <div class="nutrition-summary" id="nutritionSummary">
-            <div class="nutrition-item">
-                <div class="nutrition-value" id="proteinValue">0</div>
-                <div class="nutrition-label">Protein (g)</div>
+    <!-- Authentication Header -->
+    <header class="auth-header">
+        <div class="auth-container">
+            <div class="logo">
+                <h2>🍎 Food Tracker</h2>
             </div>
-            <div class="nutrition-item">
-                <div class="nutrition-value" id="fatValue">0</div>
-                <div class="nutrition-label">Fat (g)</div>
-            </div>
-            <div class="nutrition-item">
-                <div class="nutrition-value" id="carboValue">0</div>
-                <div class="nutrition-label">Carbs (g)</div>
-            </div>
-            <div class="nutrition-item">
-                <div class="nutrition-value" id="fiberValue">0</div>
-                <div class="nutrition-label">Fiber (g)</div>
-            </div>
-        </div>
-
-        <div class="add-food-section">
-            <h2 class="add-food-title">Add Food</h2>
-            <div class="add-food-form">
-                <div class="form-group">
-                    <label for="foodSelect">Food Item</label>
-                    <select id="foodSelect">
-                        <option value="">Select a food item...</option>
-                    </select>
+            
+            <!-- Authentication Forms -->
+            <div id="auth-section" class="auth-section">
+                <!-- Login Form -->
+                <div id="login-form" class="auth-form">
+                    <h3>Login</h3>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <input type="email" id="loginEmail" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="loginPassword" placeholder="Password" required>
+                        </div>
+                        <button type="submit" class="auth-btn">Login</button>
+                        <p class="auth-switch">
+                            Don't have an account? 
+                            <a href="#" id="showRegister">Register here</a>
+                        </p>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label for="gramAmount">Amount (grams)</label>
-                    <input type="number" id="gramAmount" min="1" step="1" value="100">
+
+                <!-- Register Form -->
+                <div id="register-form" class="auth-form hidden">
+                    <h3>Register</h3>
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <input type="text" id="registerName" placeholder="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="registerEmail" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="registerPassword" placeholder="Password" required minlength="8">
+                        </div>
+                        <button type="submit" class="auth-btn">Register</button>
+                        <p class="auth-switch">
+                            Already have an account? 
+                            <a href="#" id="showLogin">Login here</a>
+                        </p>
+                    </form>
                 </div>
-                <button class="add-btn" id="add-food-btn">Add Food</button>
             </div>
-            <div id="food-preview" class="add-food-form-item display-none">
-              <p>Calories: 0 - Protein: 0 - Fat: 0 - Carbohydrates: 0</p>
-            </div>
-        </div>
 
-        <div class="food-table-section">
-            <div class="table-title">Food Log</div>
-            <div class="table-wrapper">
-                <table class="food-table">
-                    <thead>
-                        <tr>
-                            <th class="hidden-column">ID</th>
-                            <th>Time</th>
-                            <th>Food</th>
-                            <th>Grams</th>
-                            <th>Calories</th>
-                            <th>Protein (g)</th>
-                            <th>Fat (g)</th>
-                            <th>Carbs (g)</th>
-                            <th>Fiber (g)</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="foodTableBody">
-                        <!-- Food entries will be added here -->
-                    </tbody>
-                </table>
+            <!-- User Info (shown when logged in) -->
+            <div id="user-info" class="user-info hidden">
+                <div class="user-details">
+                    <span id="userName">Welcome, User!</span>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
             </div>
         </div>
+    </header>
 
-        <div class="calendar-section">
-            <div class="calendar-header">
-                <button class="calendar-nav" id="previous-month-btn">‹</button>
-                <div class="calendar-title" id="calendarTitle">Month Year</div>
-                <button class="calendar-nav" id="next-month-btn">›</button>
-            </div>
-            <div class="calendar-grid" id="calendarGrid">
-                <!-- Calendar will be generated here -->
-            </div>
-        </div>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
     </div>
 
-    <script type="module" src="index.js"></script>
+    <!-- Main App Content -->
+    <main id="app-content" class="hidden">
+        <div class="container">
+            <h1>🍎 Daily Calorie Tracker</h1>
+            
+            <div class="date-display" id="currentDate"></div>
+            
+            <div class="calories-banner">
+                <div class="calories-number" id="caloriesCounter">0</div>
+                <div class="calories-text">Calories Today</div>
+            </div>
+
+            <div class="nutrition-summary" id="nutritionSummary">
+                <div class="nutrition-item">
+                    <div class="nutrition-value" id="proteinValue">0</div>
+                    <div class="nutrition-label">Protein (g)</div>
+                </div>
+                <div class="nutrition-item">
+                    <div class="nutrition-value" id="fatValue">0</div>
+                    <div class="nutrition-label">Fat (g)</div>
+                </div>
+                <div class="nutrition-item">
+                    <div class="nutrition-value" id="carboValue">0</div>
+                    <div class="nutrition-label">Carbs (g)</div>
+                </div>
+                <div class="nutrition-item">
+                    <div class="nutrition-value" id="fiberValue">0</div>
+                    <div class="nutrition-label">Fiber (g)</div>
+                </div>
+            </div>
+
+            <div class="add-food-section">
+                <h2 class="add-food-title">Add Food</h2>
+                <div class="add-food-form">
+                    <div class="form-group">
+                        <label for="foodSelect">Food Item</label>
+                        <select id="foodSelect">
+                            <option value="">Select a food item...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gramAmount">Amount (grams)</label>
+                        <input type="number" id="gramAmount" min="1" step="1" value="100">
+                    </div>
+                    <button class="add-btn" id="add-food-btn">Add Food</button>
+                </div>
+                <div class="display-none" id="food-preview">
+                    <div class="nutrition-summary">
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" id="calorieValuePreview">0</div>
+                            <div class="nutrition-label">Calories</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" id="proteinValuePreview">0</div>
+                            <div class="nutrition-label">Protein (g)</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" id="fatValuePreview">0</div>
+                            <div class="nutrition-label">Fat (g)</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" id="carboValuePreview">0</div>
+                            <div class="nutrition-label">Carbs (g)</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" id="fiberValuePreview">0</div>
+                            <div class="nutrition-label">Fiber (g)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="food-table-section">
+                <div class="table-title">Food Log</div>
+                <div class="table-wrapper">
+                    <table class="food-table">
+                        <thead>
+                            <tr>
+                                <th class="hidden-column">ID</th>
+                                <th>Time</th>
+                                <th>Food</th>
+                                <th>Grams</th>
+                                <th>Calories</th>
+                                <th>Protein (g)</th>
+                                <th>Fat (g)</th>
+                                <th>Carbs (g)</th>
+                                <th>Fiber (g)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="foodTableBody">
+                            <!-- Food entries will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="calendar-section">
+                <div class="calendar-header">
+                    <button class="calendar-nav" id="previous-month-btn">‹</button>
+                    <div class="calendar-title" id="calendarTitle">Month Year</div>
+                    <button class="calendar-nav" id="next-month-btn">›</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="src/index.ts"></script>
 </body>
 </html>
