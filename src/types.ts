@@ -4,7 +4,7 @@ export type FoodItem = {
 }
 
 export type FoodStorage = {
-  id: number;
+  id?: string;
   name: string;
   grams: number;
   calories: number;
@@ -13,4 +13,5 @@ export type FoodStorage = {
   carbs: number;
   fiber: number;
   time: string;
+  date: string;
 };

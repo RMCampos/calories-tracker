@@ -1,21 +1,173 @@
 import { foodDatabase } from './foodDatabase.js';
 import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './HtmlUtil.ts';
 import { FoodItem, FoodStorage } from './types.js';
+import { AppwriteAuth, AppwriteDB } from './appwrite.js';
 
 // App state
-let selectedDate = new Date().toISOString().split('T')[0];
+let selectedDate = new Date();
 let currentViewDate = new Date();
 
-// Initialize the app
-const init = () => {
+// Authentication state
+let currentUser: any | null = null;
+
+// DOM Elements
+const authSection = document.getElementById('auth-section');
+const userInfo = document.getElementById('user-info');
+const appContent = document.getElementById('app-content');
+const loadingOverlay = getDivById('loading-overlay');
+const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', async function() {
+  await initializeAuth();
   populateFoodSelect();
   updateCurrentDate();
-  loadDayData(selectedDate);
-  renderCalendar();
-  addEvents();
+  setupEventListeners();
+});
+
+// Initialize application
+async function initializeAuth() {
+  showLoading();
+  
+  try {
+    // Check if user is already logged in
+    const isLoggedIn = await AppwriteAuth.isLoggedIn();
+    
+    if (isLoggedIn) {
+      currentUser = await AppwriteAuth.getCurrentUser();
+      showMainApp();
+      selectDate(selectedDate);
+    } else {
+      showAuthForms();
+    }
+  } catch (error) {
+    console.error('Initialize app error:', error);
+    showAuthForms();
+  } finally {
+    hideLoading();
+  }
 }
 
-const getFoodProportion = (grams: number, foodData: FoodItem): FoodItem => {
+// Toggle between login and register forms
+function toggleAuthForms() {
+  loginForm?.classList.toggle('hidden');
+  registerForm?.classList.toggle('hidden');
+  
+  // Clear form data
+  const logForm = document.getElementById('loginForm') as HTMLFormElement;
+  logForm.reset();
+
+  const resetForm = document.getElementById('registerForm') as HTMLFormElement;
+  resetForm.reset();
+}
+
+// Handle user registration
+async function handleRegister(e: SubmitEvent) {
+  e.preventDefault();
+  showLoading();
+
+  const name = getInputById('registerName').value;
+  const email = getInputById('registerEmail').value;
+  const password = getInputById('registerPassword').value;
+
+  try {
+    await AppwriteAuth.register(email, password, name);
+    
+    // Auto login after registration
+    await AppwriteAuth.login(email, password);
+    currentUser = await AppwriteAuth.getCurrentUser();
+    
+    showMainApp();
+    selectDate(selectedDate);
+    
+    alert('Registration successful! Welcome to Food Tracker.');
+  } catch (error) {
+    console.error('Registration error:', error);
+    alert('Registration failed: ' + error.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+// Handle user login
+async function handleLogin(e: SubmitEvent) {
+  e.preventDefault();
+  showLoading();
+
+  const email = getInputById('loginEmail').value;
+  const password = getInputById('loginPassword').value;
+
+  try {
+    await AppwriteAuth.login(email, password);
+    currentUser = await AppwriteAuth.getCurrentUser();
+    
+    showMainApp();
+    selectDate(selectedDate);
+      
+  } catch (error) {
+    console.error('Login error:', error);
+    alert('Login failed: ' + error.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+async function handleLogout() {
+  showLoading();
+  
+  try {
+    await AppwriteAuth.logout();
+    currentUser = null;
+    showAuthForms();
+    clearAppData();
+  } catch (error) {
+    console.error('Logout error:', error);
+    alert('Logout failed: ' + error.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+// Show authentication forms
+function showAuthForms() {
+  authSection?.classList.remove('hidden');
+  userInfo?.classList.add('hidden');
+  appContent?.classList.add('hidden');
+}
+
+function showMainApp() {
+  authSection?.classList.add('hidden');
+  userInfo?.classList.remove('hidden');
+  appContent?.classList.remove('hidden');
+    
+  // Update user info display
+  if (currentUser) {
+    getDivById('userName').textContent = `Welcome, ${currentUser.name}!`;
+  }
+    
+  // Update date display
+  updateCurrentDate();
+}
+
+// Show/hide loading overlay
+function showLoading() {
+  loadingOverlay.classList.remove('hidden');
+}
+
+function hideLoading() {
+  loadingOverlay.classList.add('hidden');
+}
+
+// Clear application data
+function clearAppData() {
+  getDivById('foodTableBody').innerHTML = '';
+  getDivById('caloriesCounter').textContent = '0';
+  getInputById('foodSelect').value = '';
+  getInputById('gramAmount').value = '100';
+}
+
+const getFoodData = (grams: number, foodData: FoodItem): FoodItem => {
   const multiplier = grams / 100; // Database values are per 100g
   return {
     ...foodData,
@@ -52,7 +204,7 @@ const previewCalories = () => {
   }
 
   const foodData: FoodItem = getFoodItemByName(foodSelect.value);
-  const proportion = getFoodProportion(grams, foodData);
+  const proportion = getFoodData(grams, foodData);
 
   getDivById('calorieValuePreview').textContent = proportion.info.calories.toString();
   getDivById('proteinValuePreview').textContent = (Math.round(proportion.info.protein * 10) / 10).toString ();
@@ -63,7 +215,7 @@ const previewCalories = () => {
   showFoodPreview(true);
 }
 
-const addEvents = () => {
+const setupEventListeners = () => {
   getInputById('foodSelect').addEventListener('change', () => {
     previewCalories();
   });
@@ -83,6 +235,25 @@ const addEvents = () => {
   getButtonById('previous-month-btn').addEventListener('click', () => {
     previousMonth();
   });
+
+  // Form switching
+  document.getElementById('showRegister')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleAuthForms();
+  });
+  
+  document.getElementById('showLogin')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleAuthForms();
+  });
+
+  // Auth forms
+  document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
+  document.getElementById('registerForm')?.addEventListener('submit', handleRegister);
+  document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
+
+  // Food table delete buttons (event delegation)
+  // document.getElementById('foodTableBody')?.addEventListener('click', handleDeleteFood);
 }
 
 const addDeleteEvents = () => {
@@ -92,9 +263,8 @@ const addDeleteEvents = () => {
       const target = e.target as HTMLElement;
       const row = target.closest('tr');
       const entryId = row?.querySelector('.hidden-column')?.textContent;
-      const entryIdNumber = entryId ? parseInt(entryId) : 0;
-      if (entryIdNumber) {
-        deleteEntry(selectedDate, entryIdNumber);
+      if (entryId && row) {
+        handleDeleteFood(entryId, row);
       }
     });
   });
@@ -126,7 +296,12 @@ const updateCurrentDate = () => {
 }
 
 // Add food to the log
-const addFood = () => {
+const addFood = async () => {
+  if (!currentUser) {
+    alert('Please log in to add food entries.');
+    return;
+  }
+
   const foodSelect = getInputById('foodSelect');
   const gramAmount = getInputById('gramAmount');
     
@@ -135,118 +310,155 @@ const addFood = () => {
     return;
   }
 
-  const grams: number = parseFloat(gramAmount.value);
-  const foodData: FoodItem = getFoodItemByName(foodSelect.value);
-    
-  // Calculate nutrition for the amount
-  const proportion: FoodItem = getFoodProportion(grams, foodData);
-  const entry: FoodStorage = {
-    id: Date.now(),
-    name: foodSelect.value,
-    grams: grams,
-    calories: proportion.info.calories,
-    protein: proportion.info.protein,
-    fat: proportion.info.fat,
-    carbs: proportion.info.carbs,
-    fiber: proportion.info.fiber,
-    time: new Date().toLocaleTimeString('en-US', { 
-      hour12: false, 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })
-  };
+  showLoading();
 
-  // Save to localStorage
-  const dayData = getDayData(selectedDate);
-  dayData.push(entry);
-  saveDayData(selectedDate, dayData);
+  try {
+    const grams: number = parseFloat(gramAmount.value);
+    const foodData: FoodItem = getFoodItemByName(foodSelect.value);
 
-  // Update display
-  loadDayData(selectedDate);
-  renderCalendar();
+    // Calculate nutrition for the amount
+    const proportion: FoodItem = getFoodData(grams, foodData);
+    const entry: FoodStorage = {
+      name: foodSelect.value,
+      grams: grams,
+      calories: proportion.info.calories,
+      protein: proportion.info.protein,
+      fat: proportion.info.fat,
+      carbs: proportion.info.carbs,
+      fiber: proportion.info.fiber,
+      date: selectedDate.toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })
+    };
 
-  // Reset form
-  foodSelect.value = '';
-  gramAmount.value = '100';
-  showFoodPreview(false);
-}
+    // Save to Appwrite
+    const savedEntry = await AppwriteDB.saveFoodEntry(entry);
 
-// Get day data from localStorage
-const getDayData = (date: string): FoodStorage[] => {
-  const key = `calories_${date}`;
-  const saved = localStorage.getItem(key);
-  if (!saved) {
-    return [];
-  }
-  return JSON.parse(saved);
-}
+    // Add to HTML table with Appwrite document ID
+    addFoodToTable(entry, savedEntry.$id);
 
-// Save day data to localStorage
-const saveDayData = (date: string, data: FoodStorage[]) => {
-  const key = `calories_${date}`;
-  localStorage.setItem(key, JSON.stringify(data));
-}
+    // Update totals
+    updateTotalCalories();
 
-// Load and display day data
-const loadDayData = (date: string) => {
-  const dayData = getDayData(date);
-  
-  // Update counters
-  let totalCalories = 0;
-  let totalProtein = 0;
-  let totalFat = 0;
-  let totalCarbs = 0;
-  let totalFiber = 0;
-
-  dayData.forEach(entry => {
-    totalCalories += entry.calories;
-    totalProtein += entry.protein;
-    totalFat += entry.fat;
-    totalCarbs += entry.carbs;
-    totalFiber += entry.fiber;
-  });
-
-  getDivById('caloriesCounter').textContent = totalCalories.toString();
-  getDivById('proteinValue').textContent = (Math.round(totalProtein * 10) / 10).toString ();
-  getDivById('fatValue').textContent = (Math.round(totalFat * 10) / 10).toString ();
-  getDivById('carboValue').textContent = (Math.round(totalCarbs * 10) / 10).toString ();
-  getDivById('fiberValue').textContent = (Math.round(totalFiber * 10) / 10).toString ();
-
-  // Update table
-  const tbody = document.getElementById('foodTableBody');
-  if (!tbody) {
-    throw Error('Unable to create row tables!');
-  }
-  tbody.innerHTML = '';
-
-  dayData.forEach(entry => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td class="hidden-column">${entry.id}</td>
-      <td>${entry.time}</td>
-      <td>${entry.name}</td>
-      <td>${entry.grams}</td>
-      <td>${entry.calories}</td>
-      <td>${entry.protein}</td>
-      <td>${entry.fat}</td>
-      <td>${entry.carbs}</td>
-      <td>${entry.fiber}</td>
-      <td><button class="delete-btn delete-food-entry">Delete</button></td>
-    `;
-    tbody.appendChild(row);
-  });
-  addDeleteEvents();
-}
-
-// Delete an entry
-const deleteEntry = (date: string, entryId: number) => {
-  if (confirm('Are you sure you want to delete this entry?')) {
-    let dayData: FoodStorage[] = getDayData(date);
-    dayData = dayData.filter(entry => entry.id !== entryId);
-    saveDayData(date, dayData);
-    loadDayData(selectedDate);
+    // Update display
     renderCalendar();
+
+    // Reset form
+    foodSelect.value = '';
+    gramAmount.value = '100';
+    showFoodPreview(false);
+  } catch (error) {
+      console.error('Add food error:', error);
+      alert('Failed to add food entry: ' + error.message);
+  } finally {
+      hideLoading();
   }
+}
+
+// Load food entries from Appwrite
+async function loadFoodEntries(date: Date) {
+  if (!currentUser) return;
+
+  showLoading();
+
+  try {
+    const entries = await AppwriteDB.getFoodEntries(date);
+    
+    // Clear current table
+    getDivById('foodTableBody').innerHTML = '';
+    
+    // Add each entry to table
+    entries.forEach(entry => {
+      const foodData: FoodStorage = {
+        id: entry.$id,
+        name: entry.name,
+        grams: entry.grams,
+        calories: entry.calories,
+        protein: entry.protein,
+        fat: entry.fat,
+        carbs: entry.carbs,
+        fiber: entry.fiber,
+        time: entry.time,
+        date: entry.date,
+      };
+      
+      addFoodToTable(foodData, entry.$id);
+    });
+
+    // Setup Delete events
+    addDeleteEvents();
+    
+    // Update total calories
+    updateTotalCalories();
+      
+  } catch (error) {
+      console.error('Load food entries error:', error);
+      alert('Failed to load food entries: ' + error.message);
+  } finally {
+      hideLoading();
+  }
+}
+
+// Handle food deletion
+async function handleDeleteFood(documentId: string, row: HTMLTableRowElement) {
+  if (!documentId) return;
+  
+  if (!confirm('Are you sure you want to delete this food entry?')) return;
+  
+  showLoading();
+  
+  try {
+    // Delete from Appwrite
+    await AppwriteDB.deleteFoodEntry(documentId);
+    
+    // Remove from table
+    row.remove();
+    
+    // Update totals
+    updateTotalCalories();
+      
+  } catch (error) {
+    console.error('Delete food error:', error);
+    alert('Failed to delete food entry: ' + error.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+// Add food to table (existing function - update to use document ID)
+function addFoodToTable(foodData: FoodStorage, documentId: string) {
+  const tableBody = document.getElementById('foodTableBody');
+  const row = document.createElement('tr');
+  
+  row.innerHTML = `
+      <td class="hidden-column">${documentId}</td>
+      <td>${foodData.time || new Date().toLocaleTimeString()}</td>
+      <td>${foodData.name}</td>
+      <td>${foodData.grams}</td>
+      <td>${foodData.calories}</td>
+      <td>${foodData.protein}</td>
+      <td>${foodData.fat}</td>
+      <td>${foodData.carbs}</td>
+      <td>${foodData.fiber}</td>
+      <td><button class="delete-btn delete-food-entry">Delete</button></td>
+  `;
+  
+  tableBody?.appendChild(row);
+}
+
+// Update total calories
+function updateTotalCalories() {
+  const caloriesCells = document.querySelectorAll('#foodTableBody td:nth-child(5)'); // 5th column is calories
+  let total = 0;
+  
+  caloriesCells.forEach((cell: Element) => {
+      total += parseInt(cell.innerHTML) || 0;
+  });
+  
+  getDivById('caloriesCounter').textContent = total.toString();
 }
 
 // Calendar functions
@@ -260,10 +472,10 @@ const nextMonth = () => {
   renderCalendar();
 }
 
-const selectDate = (date: string) => {
+const selectDate = async (date: Date) => {
   selectedDate = date;
   updateCurrentDate();
-  loadDayData(selectedDate);
+  await loadFoodEntries(date);
   renderCalendar();
 }
 
@@ -343,7 +555,7 @@ function createDayElement(day: number, isOtherMonth: boolean, year: number, mont
   if (isOtherMonth) {
     dayElement.classList.add('other-month');
   } else {
-    dayElement.onclick = () => selectDate(dateString);
+    dayElement.onclick = () => selectDate(dayDate);
   }
   
   // Check if this is today
@@ -353,15 +565,15 @@ function createDayElement(day: number, isOtherMonth: boolean, year: number, mont
   }
   
   // Check if this is selected date
-  if (!isOtherMonth && dateString === selectedDate) {
+  if (!isOtherMonth && dateString === selectedDate.toISOString().split('T')[0]) {
     dayElement.classList.add('selected');
   }
   
   // Check if this day has data
-  const dayData = getDayData(dateString);
+  const dayData = []; // FIXME get from AppWrite
   if (dayData.length > 0) {
     dayElement.classList.add('has-data');
-    const totalCalories = dayData.reduce((sum, entry) => sum + entry.calories, 0);
+    const totalCalories = 0; // dayData.reduce((sum, entry) => sum + entry.calories, 0);
     
     dayElement.innerHTML = `
         <div>${day}</div>
@@ -374,5 +586,4 @@ function createDayElement(day: number, isOtherMonth: boolean, year: number, mont
   return dayElement;
 }
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', init);
+
