@@ -26,8 +26,10 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Vegetais - Spirulina', info: { calories: 290, protein: 57.5, fat: 23.9, carbs: 7.7, fiber: 0 } },
   { name: 'Vegetais - Tomate', info: { calories: 15, protein: 1.1, fat: 0.2, carbs: 3.1, fiber: 1.2 } },
   
+  { name: 'Carboidratos - Batata doce (assada)', info: { calories: 90, protein: 2.0, fat: 0.1, carbs: 20.7, fiber: 3.3 } },
   { name: 'Carboidratos - Batata doce (cozida)', info: { calories: 77, protein: 0.6, fat: 0.1, carbs: 18.4, fiber: 2.2 } },
   { name: 'Carboidratos - Batata doce (crua)', info: { calories: 118, protein: 1.3, fat: 0.1, carbs: 28.2, fiber: 2.6 } },
+  { name: 'Carboidratos - Batata inglesa (assada)', info: { calories: 94, protein: 2.1, fat: 0.1, carbs: 21.8, fiber: 2.1 } },
   { name: 'Carboidratos - Batata inglesa (cozida)', info: { calories: 52, protein: 1.2, fat: 0, carbs: 11.9, fiber: 1.3 } },
   { name: 'Carboidratos - Batata inglesa (crua)', info: { calories: 64, protein: 1.8, fat: 0, carbs: 14.7, fiber: 1.2 } },
   { name: 'Carboidratos - Pão Francês', info: { calories: 300, protein: 8, fat: 3.1, carbs: 58.6, fiber: 2.3 } },

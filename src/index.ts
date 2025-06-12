@@ -1,5 +1,5 @@
 import { foodDatabase } from './foodDatabase.js';
-import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './HtmlUtil.js';
+import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './HtmlUtil.ts';
 import { FoodItem, FoodStorage } from './types.js';
 
 // App state
