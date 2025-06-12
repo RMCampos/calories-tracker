@@ -27,7 +27,11 @@ export const foodDatabase = {
   'Vegetais - Tomate': { calories: 15, protein: 1.1, fat: 0.2, carbs: 3.1, fiber: 1.2 },
   
   // Carbohydrates
-  'Carboidrados - Pão Francês': { calories: 300, protein: 8, fat: 3.1, carbs: 58.6, fiber: 2.3 },
+  'Carboidratos - Batata doce (cozida)': { calories: 77, protein, 0.6, fat: 0.1, carbs: 18.4, fiber: 2.2 },
+  'Carboidratos - Batata doce (crua)': { calories: 118, protein: 1.3, fat: 0.1, carbs: 28.2, fiber: 2.6 },
+  'Carboidratos - Batata inglesa (cozida)': { calories: 52, protein: 1.2, fat: 0, carbs: 11.9, fiber: 1.3 },
+  'Carboidratos - Batata inglesa (crua)': { calories: 64, protein: 1.8, fat: 0, carbs: 14.7, fiber: 1.2 },
+  'Carboidratos - Pão Francês': { calories: 300, protein: 8, fat: 3.1, carbs: 58.6, fiber: 2.3 },
   'Carboidrados - Polenta (cozida)': { calories: 192, protein: 4.8, fat: 1.2, carbs: 40, fiber: 3.8 },
   
   // Proteins
