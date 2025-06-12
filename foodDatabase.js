@@ -1,4 +1,4 @@
-const foodDatabase = {
+export const foodDatabase = {
   // Fruits
   'Frutas - Abacate': { calories: 96, protein: 1.2, fat: 8.4, carbs: 6, fiber: 6.3 },
   'Frutas - Abacaxi': { calories: 48, protein: 0.9, fat: 0.1, carbs: 12.3, fiber: 1 },

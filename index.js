@@ -1,3 +1,5 @@
+import { foodDatabase } from './foodDatabase.js';
+
 // App state
 let selectedDate = new Date().toISOString().split('T')[0];
 let currentViewDate = new Date();
@@ -59,6 +61,29 @@ function addEvents() {
 
   document.getElementById('gramAmount').addEventListener('change', () => {
     previewCalories();
+  });
+
+  document.getElementById('add-food-btn').addEventListener('click', () => {
+    addFood();
+  });
+  
+  document.getElementById('next-month-btn').addEventListener('click', () => {
+    nextMonth();
+  });
+  
+  document.getElementById('previous-month-btn').addEventListener('click', () => {
+    previousMonth();
+  });
+}
+
+function addDeleteEvents() {
+  const elements = document.getElementsByClassName('delete-food-entry');
+  Array.from(elements).forEach(el => {
+    el.addEventListener('click', (e) => {
+      const row = e.target.closest('tr');
+      const entryId = row.querySelector('.hidden-column').textContent;
+      deleteEntry(selectedDate, entryId);
+    });
   });
 }
 
@@ -180,25 +205,27 @@ function loadDayData(date) {
     dayData.forEach(entry => {
         const row = document.createElement('tr');
         row.innerHTML = `
+            <td class="hidden-column">${entry.id}</td>
             <td>${entry.time}</td>
-            <td>${entry.name.charAt(0).toUpperCase() + entry.name.slice(1)}</td>
+            <td>${entry.name}</td>
             <td>${entry.grams}</td>
             <td>${entry.calories}</td>
             <td>${entry.protein}</td>
             <td>${entry.fat}</td>
             <td>${entry.carbs}</td>
             <td>${entry.fiber}</td>
-            <td><button class="delete-btn" onclick="deleteEntry('${date}', ${entry.id})">Delete</button></td>
+            <td><button class="delete-btn delete-food-entry">Delete</button></td>
         `;
         tbody.appendChild(row);
     });
+    addDeleteEvents();
 }
 
 // Delete an entry
 function deleteEntry(date, entryId) {
     if (confirm('Are you sure you want to delete this entry?')) {
         let dayData = getDayData(date);
-        dayData = dayData.filter(entry => entry.id !== entryId);
+        dayData = dayData.filter(entry => entry.id !== parseInt(entryId));
         saveDayData(date, dayData);
         loadDayData(selectedDate);
         renderCalendar();

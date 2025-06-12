@@ -342,6 +342,10 @@ select:focus, input:focus {
     margin-top: 2px;
 }
 
+.hidden-column {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .container {
         margin: 0px;
