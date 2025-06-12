@@ -31,8 +31,5 @@ export const getButtonListByClassName = (name: string): Array<HTMLButtonElement>
 }
 
 export const showFoodPreview = (show: boolean) => {
-  if (!show) {
-    getDivById('food-preview').innerHTML = '';
-  }
   getDivById('food-preview').classList = `add-food-form-item ${show ? 'display-block' : 'display-none'}`;
 }

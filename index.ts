@@ -54,14 +54,12 @@ const previewCalories = () => {
   const foodData: FoodItem = getFoodItemByName(foodSelect.value);
   const proportion = getFoodProportion(grams, foodData);
 
-  const textArray: string[] = [];
-  textArray.push(`Calories in ${grams}g: ${proportion.info.calories}; `);
-  textArray.push(`Protein: ${proportion.info.protein}g; `);
-  textArray.push(`Fat: ${proportion.info.fat}g; `);
-  textArray.push(`Carbohydrates: ${proportion.info.carbs}g; `);
-  textArray.push(`Fiber: ${proportion.info.fiber}g;`);
+  getDivById('calorieValuePreview').textContent = proportion.info.calories.toString();
+  getDivById('proteinValuePreview').textContent = (Math.round(proportion.info.protein * 10) / 10).toString ();
+  getDivById('fatValuePreview').textContent = (Math.round(proportion.info.fat * 10) / 10).toString ();
+  getDivById('carboValuePreview').textContent = (Math.round(proportion.info.carbs * 10) / 10).toString ();
+  getDivById('fiberValuePreview').textContent = (Math.round(proportion.info.fiber * 10) / 10).toString ();
 
-  getDivById('food-preview').innerHTML = textArray.join('');
   showFoodPreview(true);
 }
 
@@ -70,7 +68,7 @@ const addEvents = () => {
     previewCalories();
   });
 
-  getInputById('gramAmount')?.addEventListener('change', () => {
+  getInputById('gramAmount').addEventListener('change', () => {
     previewCalories();
   });
 
