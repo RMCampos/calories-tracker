@@ -1,0 +1,394 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    backdrop-filter: blur(10px);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    color: #4a5568;
+    font-weight: 300;
+}
+
+.calories-banner {
+    text-align: center;
+    background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+    color: white;
+    padding: 60px 40px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.calories-banner:hover {
+    transform: translateY(-5px);
+}
+
+.calories-number {
+    font-size: 4rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.calories-text {
+    font-size: 1.3rem;
+    opacity: 0.9;
+}
+
+.date-display {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.add-food-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.add-food-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #4a5568;
+    text-align: center;
+}
+
+.add-food-form {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 15px;
+    align-items: end;
+    overflow: hidden;
+}
+
+.add-food-form-item {
+  margin-top: 15px;
+  margin-left: 3px;
+}
+
+.display-none {
+  display: none;
+}
+
+.display-block {
+  display: block;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+select, input {
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+select:focus, input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.add-btn {
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    height: fit-content;
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+.food-table-section {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.table-title {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+.food-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.food-table th,
+.food-table td {
+    padding: 15px 10px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.food-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.food-table tr:hover {
+    background: #f7fafc;
+}
+
+.delete-btn {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.3s ease;
+}
+
+.delete-btn:hover {
+    background: #e55656;
+}
+
+.calendar-section {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.calendar-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.calendar-nav {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background 0.3s ease;
+}
+
+.calendar-nav:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.calendar-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #e2e8f0;
+}
+
+.calendar-day-header {
+    background: #f8fafc;
+    padding: 15px 5px;
+    text-align: center;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.calendar-day {
+    background: white;
+    padding: 15px 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.calendar-day:hover {
+    background: #f7fafc;
+}
+
+.calendar-day.other-month {
+    color: #cbd5e0;
+    background: #f8fafc;
+}
+
+.calendar-day.today {
+    background: #667eea;
+    /*color: white;*/
+    font-weight: bold;
+}
+
+.calendar-day.selected {
+    background: #4CAF50;
+    color: white;
+    font-weight: bold;
+}
+
+.calendar-day.has-data {
+    background: #e6fffa;
+    border: 2px solid #4ECDC4;
+}
+
+.calendar-day.has-data.selected {
+    background: #4CAF50;
+    border-color: #45a049;
+}
+
+.day-calories {
+    font-size: 0.7rem;
+    margin-top: 2px;
+    opacity: 0.8;
+}
+
+.nutrition-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+
+.nutrition-item {
+    text-align: center;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nutrition-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #4a5568;
+}
+
+.nutrition-label {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        margin: 0px;
+        padding: 15px;
+    }
+
+    .calories-number {
+        font-size: 3rem;
+    }
+
+    .add-food-form {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .food-table {
+        font-size: 0.8rem;
+        min-width: 650px;
+    }
+
+    .food-table th,
+    .food-table td {
+        padding: 8px 5px;
+        white-space: nowrap;
+    }
+
+    .table-wrapper {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    /* Optional: Add a subtle shadow to indicate scrollability */
+    .table-wrapper::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .table-wrapper::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+}
