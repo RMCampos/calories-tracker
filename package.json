@@ -16,6 +16,7 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
-    "appwrite": "^18.1.1"
+    "appwrite": "^18.1.1",
+    "sweetalert": "^2.1.2"
   }
 }

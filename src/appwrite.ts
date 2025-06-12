@@ -90,7 +90,7 @@ export class AppwriteDB {
               createdAt: new Date().toISOString()
           }
       );
-      console.log('Food entry saved:', response);
+      console.debug('Food entry saved:', response);
       return response;
     } catch (error) {
       console.error('Save food entry error:', error);

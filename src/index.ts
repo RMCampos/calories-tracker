@@ -2,6 +2,7 @@ import { foodDatabase } from './foodDatabase.js';
 import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './HtmlUtil.ts';
 import { FoodItem, FoodStorage } from './types.js';
 import { AppwriteAuth, AppwriteDB } from './appwrite.js';
+import swal from 'sweetalert';
 
 // App state
 let selectedDate = new Date();
@@ -81,10 +82,10 @@ async function handleRegister(e: SubmitEvent) {
     showMainApp();
     selectDate(selectedDate);
     
-    alert('Registration successful! Welcome to Food Tracker.');
+    swal('Registration successful! Welcome to Food Tracker.');
   } catch (error) {
     console.error('Registration error:', error);
-    alert('Registration failed: ' + error.message);
+    swal('Oh no!', 'Registration failed: ' + error.message, 'error');
   } finally {
     hideLoading();
   }
@@ -107,7 +108,7 @@ async function handleLogin(e: SubmitEvent) {
       
   } catch (error) {
     console.error('Login error:', error);
-    alert('Login failed: ' + error.message);
+    swal('Oh no!', 'Login failed: ' + error.message, 'error');
   } finally {
     hideLoading();
   }
@@ -123,7 +124,7 @@ async function handleLogout() {
     clearAppData();
   } catch (error) {
     console.error('Logout error:', error);
-    alert('Logout failed: ' + error.message);
+    swal('Oh no!', 'Logout failed: ' + error.message, 'error');
   } finally {
     hideLoading();
   }
@@ -251,9 +252,6 @@ const setupEventListeners = () => {
   document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
   document.getElementById('registerForm')?.addEventListener('submit', handleRegister);
   document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
-
-  // Food table delete buttons (event delegation)
-  // document.getElementById('foodTableBody')?.addEventListener('click', handleDeleteFood);
 }
 
 const addDeleteEvents = () => {
@@ -298,7 +296,7 @@ const updateCurrentDate = () => {
 // Add food to the log
 const addFood = async () => {
   if (!currentUser) {
-    alert('Please log in to add food entries.');
+    swal('Hey!', 'Please log in to add food entries.', 'info');
     return;
   }
 
@@ -306,7 +304,7 @@ const addFood = async () => {
   const gramAmount = getInputById('gramAmount');
     
   if (!foodSelect.value || !gramAmount.value) {
-    alert('Please select a food item and enter amount');
+    swal('Hey!', 'Please select a food item and enter amount', 'error');
     return;
   }
 
@@ -343,16 +341,13 @@ const addFood = async () => {
     // Update totals
     updateTotalCalories();
 
-    // Update display
-    renderCalendar();
-
     // Reset form
     foodSelect.value = '';
     gramAmount.value = '100';
     showFoodPreview(false);
   } catch (error) {
       console.error('Add food error:', error);
-      alert('Failed to add food entry: ' + error.message);
+      swal('Oh no!', 'Failed to add food entry: ' + error.message, 'error');
   } finally {
       hideLoading();
   }
@@ -396,7 +391,7 @@ async function loadFoodEntries(date: Date) {
       
   } catch (error) {
       console.error('Load food entries error:', error);
-      alert('Failed to load food entries: ' + error.message);
+      swal('Oh no!', 'Failed to load food entries: ' + error.message, 'error');
   } finally {
       hideLoading();
   }
@@ -405,8 +400,17 @@ async function loadFoodEntries(date: Date) {
 // Handle food deletion
 async function handleDeleteFood(documentId: string, row: HTMLTableRowElement) {
   if (!documentId) return;
+
+  const willDelete = await swal({
+    title: "Are you sure?",
+    text: 'You want to delete this food entry?',
+    icon: 'warning',
+    dangerMode: true,
+    closeOnEsc: true,
+    buttons:["No, abort", "Yes, Do it!"],
+  });
   
-  if (!confirm('Are you sure you want to delete this food entry?')) return;
+  if (!willDelete) return;
   
   showLoading();
   
@@ -422,7 +426,7 @@ async function handleDeleteFood(documentId: string, row: HTMLTableRowElement) {
       
   } catch (error) {
     console.error('Delete food error:', error);
-    alert('Failed to delete food entry: ' + error.message);
+    swal('Oh no!', 'Failed to delete food entry: ' + error.message, 'error');
   } finally {
     hideLoading();
   }
@@ -447,6 +451,9 @@ function addFoodToTable(foodData: FoodStorage, documentId: string) {
   `;
   
   tableBody?.appendChild(row);
+
+  // Setup Delete events
+  addDeleteEvents();
 }
 
 // Update total calories
