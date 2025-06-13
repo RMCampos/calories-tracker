@@ -388,7 +388,26 @@ async function loadFoodEntries(date: Date) {
     
     // Update total calories
     updateTotalCalories();
-      
+
+    // Update counters
+    let totalCalories = 0;
+    let totalProtein = 0;
+    let totalFat = 0;
+    let totalCarbs = 0;
+    let totalFiber = 0;
+
+    entries.forEach(entry => {
+      totalCalories += entry.calories;
+      totalProtein += entry.protein;
+      totalFat += entry.fat;
+      totalCarbs += entry.carbs;
+      totalFiber += entry.fiber;
+    });
+
+    getDivById('proteinValue').textContent = (Math.round(totalProtein * 10) / 10).toString();
+    getDivById('fatValue').textContent = (Math.round(totalFat * 10) / 10).toString();
+    getDivById('carboValue').textContent = (Math.round(totalCarbs * 10) / 10).toString();
+    getDivById('fiberValue').textContent = (Math.round(totalFiber * 10) / 10).toString(); 
   } catch (error) {
       console.error('Load food entries error:', error);
       swal('Oh no!', 'Failed to load food entries: ' + error.message, 'error');
