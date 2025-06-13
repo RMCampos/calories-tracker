@@ -15,6 +15,7 @@ let currentUser: any | null = null;
 const authSection = document.getElementById('auth-section');
 const userInfo = document.getElementById('user-info');
 const appContent = document.getElementById('app-content');
+const settingsContent = document.getElementById('settings-content');
 const loadingOverlay = getDivById('loading-overlay');
 const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');
@@ -114,6 +115,77 @@ async function handleLogin(e: SubmitEvent) {
   }
 }
 
+async function processResponseItems<T, R>(
+  response: T[],
+  processItem: (item: T) => Promise<R>
+): Promise<R[]> {
+  
+  // Create promises for each item (but don't execute yet)
+  const promises = response.map(item => processItem(item));
+  
+  // Execute all promises concurrently and wait for completion
+  const results = await Promise.all(promises);
+  
+  return results;
+}
+
+// Example usage with API calls
+interface ResponseItem {
+  id: string;
+  data: string;
+}
+async function fetchItemDetails(item: ResponseItem): Promise<any> {
+  const response = await fetch(`/api/items/${item.id}`);
+  return response.json();
+}
+
+// Main function that processes the response
+async function handleResponse(response: ResponseItem[]): Promise<void> {
+  try {
+    // This creates and executes all promises concurrently
+    const results = await processResponseItems(response, fetchItemDetails);
+    
+    console.log('All requests completed:', results);
+  } catch (error) {
+    console.error('One or more requests failed:', error);
+  }
+}
+
+async function handleSaveSettings(e: SubmitEvent) {
+  e.preventDefault();
+  showLoading();
+
+  try {
+    const proteinGoal = getInputById('proteinGoal').value;
+    const fatGoal = getInputById('fatGoal').value;
+    const carboGoal = getInputById('carboGoal').value;
+    const fiberGoal = getInputById('fiberGoal').value;
+
+    // Delete existing settings - keep only the new one
+    const documents = await AppwriteDB.getUserSettings();
+    const promises = [];
+    for (let i=0; i<documents.length; i++) {
+      // keep going from here, the promises
+    }
+
+    // Save to Appwrite
+    await AppwriteDB.saveUserSettings({
+      proteinGoal: parseInt(proteinGoal),
+      fatGoal: parseInt(fatGoal),
+      carboGoal: parseInt(carboGoal),
+      fiberGoal: parseInt(fiberGoal),
+    });
+
+    hideLoading();
+    handleSettings();
+    selectDate(selectedDate);
+  } catch (error) {
+    hideLoading();
+    console.error('Saving error:', error);
+    swal('Oh no!', 'Saving failed: ' + error.message, 'error');
+  }
+}
+
 async function handleLogout() {
   showLoading();
   
@@ -122,11 +194,52 @@ async function handleLogout() {
     currentUser = null;
     showAuthForms();
     clearAppData();
+    hideLoading();
   } catch (error) {
+    hideLoading();
     console.error('Logout error:', error);
     swal('Oh no!', 'Logout failed: ' + error.message, 'error');
-  } finally {
-    hideLoading();
+  }
+}
+
+async function handleSettings() {
+  const showSettings = getButtonById('settingsBtn').textContent === 'Settings';
+
+  if (showSettings) {
+    showLoading();
+
+    try {
+      // Fetch goals from settings
+      const settings = await AppwriteDB.getUserSettings();
+      const hasGoals = Array.isArray(settings) && settings.length > 0;
+      if (hasGoals) {
+        const index = settings.length - 1;
+        getInputById('proteinGoal').value = settings[index].proteinGoal;
+        getInputById('fatGoal').value = settings[index].fatGoal;
+        getInputById('carboGoal').value = settings[index].carboGoal;
+        getInputById('fiberGoal').value = settings[index].fiberGoal;
+      } else {
+        getInputById('proteinGoal').value = '';
+        getInputById('fatGoal').value = '';
+        getInputById('carboGoal').value = '';
+        getInputById('fiberGoal').value = '';
+      }
+      
+      getButtonById('settingsBtn').textContent = 'Back to App';
+
+      appContent?.classList.add('hidden');
+      settingsContent?.classList.remove('hidden');
+      hideLoading();
+    } catch (error) {
+      hideLoading();
+      console.error('Fetching settings failed:', error);
+      swal('Oh no!', 'Fetching settings failed: ' + error.message, 'error');
+    }
+  }
+  else {
+    appContent?.classList.remove('hidden');
+    settingsContent?.classList.add('hidden');
+    getButtonById('settingsBtn').textContent = 'Settings';
   }
 }
 
@@ -252,6 +365,8 @@ const setupEventListeners = () => {
   document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
   document.getElementById('registerForm')?.addEventListener('submit', handleRegister);
   document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
+  document.getElementById('settingsBtn')?.addEventListener('click', handleSettings);
+  document.getElementById('settingsForm')?.addEventListener('submit', handleSaveSettings);
 }
 
 const addDeleteEvents = () => {
@@ -341,6 +456,22 @@ const addFood = async () => {
     // Update totals
     updateTotalCalories();
 
+    // Update total macros
+    const proteinDiv: HTMLElement = getDivById('proteinValue');
+    const fatDiv: HTMLElement = getDivById('fatValue');
+    const carboDiv: HTMLElement = getDivById('carboValue');
+    const fiberDiv: HTMLElement = getDivById('fiberValue');
+
+    const totalProtein: number = parseInt(proteinDiv.textContent ?? '0') + proportion.info.protein;
+    const totalFat: number = parseInt(fatDiv.textContent ?? '0') + proportion.info.fat;
+    const totalCarbs: number = parseInt(carboDiv.textContent ?? '0') + proportion.info.carbs;
+    const totalFiber: number = parseInt(fiberDiv.textContent ?? '0') + proportion.info.fiber;
+
+    proteinDiv.textContent = (Math.round(totalProtein * 10) / 10).toString();
+    fatDiv.textContent = (Math.round(totalFat * 10) / 10).toString();
+    carboDiv.textContent = (Math.round(totalCarbs * 10) / 10).toString();
+    fiberDiv.textContent = (Math.round(totalFiber * 10) / 10).toString();
+
     // Reset form
     foodSelect.value = '';
     gramAmount.value = '100';
@@ -407,7 +538,42 @@ async function loadFoodEntries(date: Date) {
     getDivById('proteinValue').textContent = (Math.round(totalProtein * 10) / 10).toString();
     getDivById('fatValue').textContent = (Math.round(totalFat * 10) / 10).toString();
     getDivById('carboValue').textContent = (Math.round(totalCarbs * 10) / 10).toString();
-    getDivById('fiberValue').textContent = (Math.round(totalFiber * 10) / 10).toString(); 
+    getDivById('fiberValue').textContent = (Math.round(totalFiber * 10) / 10).toString();
+
+    // Update goals
+    const settings = await AppwriteDB.getUserSettings();
+    const hasGoals = Array.isArray(settings) && settings.length > 0;
+    if (hasGoals) {
+      const index = settings.length - 1;
+      getDivById('proteinGoalText').classList.add('hidden');
+      if (parseInt(settings[index].proteinGoal) > 0) {
+        getDivById('proteinGoalText').textContent = `of ${settings[index].proteinGoal}`;
+        getDivById('proteinGoalText').classList.remove('hidden');
+      }
+
+      getDivById('fatGoalText').classList.add('hidden');
+      if (parseInt(settings[index].fatGoal) > 0) {
+        getDivById('fatGoalText').textContent = `of ${settings[index].fatGoal}`;
+        getDivById('fatGoalText').classList.remove('hidden');
+      }
+
+      getDivById('carboGoalText').classList.add('hidden');
+      if (parseInt(settings[index].carboGoal) > 0) {
+        getDivById('carboGoalText').textContent = `of ${settings[index].carboGoal}`;
+        getDivById('carboGoalText').classList.remove('hidden');
+      }
+
+      getDivById('fiberGoalText').classList.add('hidden');
+      if (parseInt(settings[index].fiberGoal) > 0) {
+        getDivById('fiberGoalText').textContent = `of ${settings[index].fiberGoal}`;
+        getDivById('fiberGoalText').classList.remove('hidden');
+      }
+    } else {
+      getDivById('proteinGoalText').classList.add('hidden');
+      getDivById('fatGoalText').classList.add('hidden');
+      getDivById('carboGoalText').classList.add('hidden');
+      getDivById('fiberGoalText').classList.add('hidden');
+    }
   } catch (error) {
       console.error('Load food entries error:', error);
       swal('Oh no!', 'Failed to load food entries: ' + error.message, 'error');
@@ -437,11 +603,7 @@ async function handleDeleteFood(documentId: string, row: HTMLTableRowElement) {
     // Delete from Appwrite
     await AppwriteDB.deleteFoodEntry(documentId);
     
-    // Remove from table
-    row.remove();
-    
-    // Update totals
-    updateTotalCalories();
+    selectDate(selectedDate);
       
   } catch (error) {
     console.error('Delete food error:', error);

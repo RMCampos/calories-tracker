@@ -191,7 +191,8 @@
 }
 
 /* Update main content spacing */
-#app-content {
+#app-content,
+#settings-content {
     padding-top: 20px;
 }
 
@@ -214,7 +215,8 @@
         justify-content: center;
     }
     
-    .auth-form {
+    .auth-form,
+    .settings-form {
         min-width: 280px;
         padding: 20px;
     }

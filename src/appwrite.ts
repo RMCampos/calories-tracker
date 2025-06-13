@@ -1,5 +1,5 @@
 import { Client, Account, Databases, Query } from 'appwrite';
-import { FoodStorage } from './types';
+import { FoodStorage, UserSettings } from './types';
 
 // Initialize Appwrite client
 const client = new Client();
@@ -15,6 +15,7 @@ export const databases = new Databases(client);
 // Configuration constants
 export const DATABASE_ID = '684b38db000fac8c781c'; // Replace with your database ID
 export const FOOD_ENTRIES_COLLECTION_ID = '684b38e300336fc605dc'; // Replace with your collection ID
+export const USER_SETTINGS_COLLECTION_ID = '684c75140026689fe603'; // Replace with your collection ID
 
 // Auth helper functions
 export class AppwriteAuth {
@@ -98,6 +99,26 @@ export class AppwriteDB {
     }
   }
 
+  // Save food entry
+  static async saveUserSettings(userSettings: UserSettings) {
+    try {
+      const response = await databases.createDocument(
+          DATABASE_ID,
+          USER_SETTINGS_COLLECTION_ID,
+          'unique()',
+          {
+              ...userSettings,
+              userId: (await account.get()).$id,
+          }
+      );
+      console.debug('User settings saved:', response);
+      return response;
+    } catch (error) {
+      console.error('Save user settings error:', error);
+      throw error;
+    }
+  }
+
   // Get user's food entries for a specific date
   static async getFoodEntries(date: Date) {
     try {
@@ -115,6 +136,40 @@ export class AppwriteDB {
       return response.documents;
     } catch (error) {
       console.error('Get food entries error:', error);
+      throw error;
+    }
+  }
+
+  // get user's settings
+  static async getUserSettings() {
+    try {
+      const user = await account.get();
+
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        USER_SETTINGS_COLLECTION_ID,
+        [
+          Query.equal('userId', user.$id),
+        ]
+      );
+      console.debug('User settings retrieved:', response);
+      return response.documents;
+    } catch (error) {
+      console.error('Get user settings error:', error);
+      throw error;
+    }
+  }
+
+  static async deleteUserSettings(documentId: string) {
+    try {
+      await databases.deleteDocument(
+        DATABASE_ID,
+        USER_SETTINGS_COLLECTION_ID,
+        documentId
+      );
+      console.debug('User settings deleted:', documentId);
+    } catch (error) {
+      console.error('Delete user settings error:', error);
       throw error;
     }
   }

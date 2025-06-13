@@ -6,6 +6,7 @@
     <title>Daily Calorie Tracker</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="settings.css">
 </head>
 <body>
     <!-- Authentication Header -->
@@ -61,6 +62,7 @@
             <div id="user-info" class="user-info hidden">
                 <div class="user-details">
                     <span id="userName">Welcome, User!</span>
+                    <button id="settingsBtn" class="logout-btn">Settings</button>
                     <button id="logoutBtn" class="logout-btn">Logout</button>
                 </div>
             </div>
@@ -88,18 +90,22 @@
             <div class="nutrition-summary" id="nutritionSummary">
                 <div class="nutrition-item">
                     <div class="nutrition-value" id="proteinValue">0</div>
+                    <div class="nutrition-label hidden" id="proteinGoalText">of 190</div>
                     <div class="nutrition-label">Protein (g)</div>
                 </div>
                 <div class="nutrition-item">
                     <div class="nutrition-value" id="fatValue">0</div>
+                    <div class="nutrition-label hidden" id="fatGoalText">of 190</div>
                     <div class="nutrition-label">Fat (g)</div>
                 </div>
                 <div class="nutrition-item">
                     <div class="nutrition-value" id="carboValue">0</div>
+                    <div class="nutrition-label hidden" id="carboGoalText">of 190</div>
                     <div class="nutrition-label">Carbs (g)</div>
                 </div>
                 <div class="nutrition-item">
                     <div class="nutrition-value" id="fiberValue">0</div>
+                    <div class="nutrition-label hidden" id="fiberGoalText">of 190</div>
                     <div class="nutrition-label">Fiber (g)</div>
                 </div>
             </div>
@@ -182,6 +188,31 @@
             </div>
         </div>
     </main>
+
+    <!-- Settings -->
+    <section id="settings-content" class="hidden">
+        <div class="container">
+            <h1>⚙️ Settings</h1>
+            
+            <div class="date-display">Define your macros goal</div>
+            
+            <form id="settingsForm" class="settings-form">
+                <div class="form-group">
+                    <input type="number" id="proteinGoal" placeholder="Proteins in grams" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="fatGoal" placeholder="Fat in grams" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="carboGoal" placeholder="Carbo in grams" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="fiberGoal" placeholder="Fiber in grams" required>
+                </div>
+                <button type="submit" class="settings-btn">Save</button>
+            </form>
+        </div>
+    </section>
 
     <script type="module" src="src/index.ts"></script>
 </body>

@@ -15,3 +15,11 @@ export type FoodStorage = {
   time: string;
   date: string;
 };
+
+export type UserSettings = {
+  id?: string;
+  proteinGoal: number;
+  fatGoal: number;
+  carboGoal: number;
+  fiberGoal: number;
+};
