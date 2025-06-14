@@ -129,23 +129,17 @@ async function processResponseItems<T, R>(
   return results;
 }
 
-// Example usage with API calls
-interface ResponseItem {
-  id: string;
-  data: string;
-}
-async function fetchItemDetails(item: ResponseItem): Promise<any> {
-  const response = await fetch(`/api/items/${item.id}`);
-  return response.json();
+async function fetchUserSettings(documentId: string): Promise<any> {
+  return AppwriteDB.deleteUserSettings(documentId);
 }
 
 // Main function that processes the response
-async function handleResponse(response: ResponseItem[]): Promise<void> {
+async function handleBulkDelete(idsToDelete: string[]): Promise<void> {
   try {
     // This creates and executes all promises concurrently
-    const results = await processResponseItems(response, fetchItemDetails);
+    const results = await processResponseItems(idsToDelete, fetchUserSettings);
     
-    console.log('All requests completed:', results);
+    console.debug('All requests completed:', results);
   } catch (error) {
     console.error('One or more requests failed:', error);
   }
@@ -163,9 +157,13 @@ async function handleSaveSettings(e: SubmitEvent) {
 
     // Delete existing settings - keep only the new one
     const documents = await AppwriteDB.getUserSettings();
-    const promises = [];
+    const documentsToDelete: string[] = [];
     for (let i=0; i<documents.length; i++) {
-      // keep going from here, the promises
+      documentsToDelete.push(documents[i].$id);
+    }
+
+    if (documentsToDelete) {
+      await handleBulkDelete(documentsToDelete);
     }
 
     // Save to Appwrite

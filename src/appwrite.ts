@@ -5,17 +5,17 @@ import { FoodStorage, UserSettings } from './types';
 const client = new Client();
 
 client
-    .setEndpoint('https://cloud.appwrite.io/v1') // Your Appwrite endpoint
-    .setProject("684ac3bf000ee8950f5a"); // Replace with your project ID
+    .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)
+    .setProject("684ac3bf000ee8950f5a");
 
 // Initialize services
 export const account = new Account(client);
 export const databases = new Databases(client);
 
 // Configuration constants
-export const DATABASE_ID = '684b38db000fac8c781c'; // Replace with your database ID
-export const FOOD_ENTRIES_COLLECTION_ID = '684b38e300336fc605dc'; // Replace with your collection ID
-export const USER_SETTINGS_COLLECTION_ID = '684c75140026689fe603'; // Replace with your collection ID
+export const DATABASE_ID = import.meta.env.VITE_APPWRITE_DBID
+export const FOOD_ENTRIES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_FOODENTRIESID
+export const USER_SETTINGS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_USERSETTINGSID
 
 // Auth helper functions
 export class AppwriteAuth {
