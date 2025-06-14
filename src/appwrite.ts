@@ -123,13 +123,14 @@ export class AppwriteDB {
   static async getFoodEntries(date: Date) {
     try {
       const user = await account.get();
+      const localDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
 
       const response = await databases.listDocuments(
         DATABASE_ID,
         FOOD_ENTRIES_COLLECTION_ID,
         [
           Query.equal('userId', user.$id),
-          Query.equal('date', date.toISOString().split('T')[0]),
+          Query.equal('date', localDateTime.split('T')[0]),
         ]
       );
       console.debug('Food entries retrieved:', response);
