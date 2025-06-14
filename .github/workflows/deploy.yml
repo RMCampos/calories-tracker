@@ -14,6 +14,12 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_APPWRITE_PROJECT_ID: ${{ secrets.VITE_APPWRITE_PROJECT_ID }}
+      VITE_APPWRITE_ENDPOINT: ${{ secrets.VITE_APPWRITE_ENDPOINT }}
+      VITE_APPWRITE_DBID: ${{ secrets.VITE_APPWRITE_DBID }}
+      VITE_APPWRITE_FOODENTRIESID: ${{ secrets.VITE_APPWRITE_FOODENTRIESID }}
+      VITE_APPWRITE_USERSETTINGSID: ${{ secrets.VITE_APPWRITE_USERSETTINGSID }}
     
     steps:
     - name: Checkout
