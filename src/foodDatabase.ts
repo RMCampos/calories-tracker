@@ -66,13 +66,14 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Sementes - Semente de Linhaça', info: { calories: 495, protein: 14.1, fat: 32.3, carbs: 43.3, fiber: 33.5 } },
   { name: 'Sementes - Semente de Gergelim', info: { calories: 584, protein: 21.2, fat: 50.4, carbs: 21.6, fiber: 11.9 } },
   
+  { name: 'Lanches - 70% Nibs Garoto', info: { calories: 544, protein: 8.4, fat: 40, carbs: 34, fiber: 0 } },
   { name: 'Lanches - Barra de Proteína Vegana Growth', info: { calories: 400, protein: 25, fat: 22, carbs: 25, fiber: 8 } },
   { name: 'Lanches - Goiabada', info: { calories: 320, protein: 0, fat: 0, carbs: 80, fiber: 4.5 } },
+  { name: 'Lanches - Goma de Tapioca', info: { calories: 226, protein: 0, fat: 0, carbs: 57, fiber: 0 } },
   { name: 'Lanches - Mel Silvestre', info: { calories: 230, protein: 0, fat: 0, carbs: 65, fiber: 0 } },
   { name: 'Lanches - Melado', info: { calories: 297, protein: 0, fat: 0, carbs: 76.6, fiber: 0 } },
   { name: 'Lanches - Pasta de Amendoim Growth', info: { calories: 544, protein: 27, fat: 33, carbs: 20, fiber: 8 } },
-  { name: 'Lanches - Goma de Tapioca', info: { calories: 226, protein: 0, fat: 0, carbs: 57, fiber: 0 } },
-  { name: 'Lanches - 70% Nibs Garoto', info: { calories: 544, protein: 8.4, fat: 40, carbs: 34, fiber: 0 } },
+  { name: 'Lanches - Tâmara desidratada', info: { calories: 230, protein: 0.3, fat: 33, carbs: 63.3, fiber: 7 } },
 
   { name: 'Óleos - Azeite de Oliva EV', info: { calories: 844, protein: 0, fat: 100, carbs: 0, fiber: 0 } }
 ];
