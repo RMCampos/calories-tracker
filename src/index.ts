@@ -7,6 +7,10 @@ import swal from 'sweetalert';
 // App state
 let selectedDate = new Date();
 let currentViewDate = new Date();
+let searchTimeout: number | null = null;
+let selectedFood: FoodItem | null = null; // review here
+let currentHighlightIndex: number = -1;
+let currentResults: FoodItem[] = [];
 
 // Authentication state
 let currentUser: any | null = null;
@@ -19,11 +23,13 @@ const settingsContent = document.getElementById('settings-content');
 const loadingOverlay = getDivById('loading-overlay');
 const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');
+const searchInput = getInputById('foodSearchInput');
+const searchLoading = document.getElementById('searchLoading');
+const searchResults = getDivById('searchResults');
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', async function() {
   await initializeAuth();
-  populateFoodSelect();
   updateCurrentDate();
   setupEventListeners();
 });
@@ -223,7 +229,7 @@ async function handleSettings() {
         getInputById('fiberGoal').value = '';
       }
       
-      getButtonById('settingsBtn').textContent = 'Back to App';
+      getButtonById('settingsBtn').textContent = 'Back';
 
       appContent?.classList.add('hidden');
       settingsContent?.classList.remove('hidden');
@@ -275,8 +281,9 @@ function hideLoading() {
 function clearAppData() {
   getDivById('foodTableBody').innerHTML = '';
   getDivById('caloriesCounter').textContent = '0';
-  getInputById('foodSelect').value = '';
+  getInputById('foodSearchInput').value = '';
   getInputById('gramAmount').value = '100';
+  selectedFood = null;
 }
 
 const getFoodData = (grams: number, foodData: FoodItem): FoodItem => {
@@ -288,7 +295,8 @@ const getFoodData = (grams: number, foodData: FoodItem): FoodItem => {
       protein: Math.round(foodData.info.protein * multiplier * 10) / 10,
       fat: Math.round(foodData.info.fat * multiplier * 10) / 10,
       carbs: Math.round(foodData.info.carbs * multiplier * 10) / 10,
-      fiber: Math.round(foodData.info.fiber * multiplier * 10) / 10
+      fiber: Math.round(foodData.info.fiber * multiplier * 10) / 10,
+      category: foodData.info.category
     }
   };
 }
@@ -301,11 +309,11 @@ const getFoodItemByName = (foodName: string): FoodItem => {
   return foodDataSearch[0];
 }
 
-const previewCalories = () => {
-  const foodSelect = getInputById('foodSelect');
+const previewCalories = (foodSelected?: FoodItem) => {
+  const foodToPreview = foodSelected ?? selectedFood;
   const gramAmount = getInputById('gramAmount');
   
-  if (!foodSelect.value) {
+  if (!foodToPreview) {
     showFoodPreview(false);
     return;
   }
@@ -315,7 +323,7 @@ const previewCalories = () => {
     grams = parseFloat(gramAmount.value);
   }
 
-  const foodData: FoodItem = getFoodItemByName(foodSelect.value);
+  const foodData: FoodItem = getFoodItemByName(foodToPreview.name);
   const proportion = getFoodData(grams, foodData);
 
   getDivById('calorieValuePreview').textContent = proportion.info.calories.toString();
@@ -328,8 +336,11 @@ const previewCalories = () => {
 }
 
 const setupEventListeners = () => {
-  getInputById('foodSelect').addEventListener('change', () => {
-    previewCalories();
+  getInputById('foodSearchInput').addEventListener('change', (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.value === ''){
+      showFoodPreview(false);
+    }
   });
 
   getInputById('gramAmount').addEventListener('change', () => {
@@ -365,6 +376,146 @@ const setupEventListeners = () => {
   document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
   document.getElementById('settingsBtn')?.addEventListener('click', handleSettings);
   document.getElementById('settingsForm')?.addEventListener('submit', handleSaveSettings);
+
+  // Search functionality
+  searchInput.addEventListener('input', function(e: Event) {
+    const target = e.target as HTMLInputElement;
+    const query = target.value.trim();
+    
+    if (query.length === 0) {
+      hideSearchResults();
+      return;
+    }
+
+    // Show loading
+    searchLoading?.classList.add('show');
+    
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    // Debounce search
+    searchTimeout = setTimeout(() => {
+      performSearch(query);
+    }, 300);
+  });
+
+  // Keyboard navigation
+  searchInput?.addEventListener('keydown', function(e) {
+    if (!searchResults?.classList.contains('show')) return;
+      
+    switch(e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        navigateResults(1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        navigateResults(-1);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (currentHighlightIndex >= 0 && currentResults[currentHighlightIndex]) {
+          selectFood(currentResults[currentHighlightIndex]);
+        }
+        break;
+      case 'Escape':
+        hideSearchResults();
+        break;
+    }
+  });
+
+  // Click outside to close
+  document.addEventListener('click', function(e: Event) {
+    const target = e.target as HTMLElement;
+    if (!searchResults.contains(target) && !searchInput.contains(target)) {
+      hideSearchResults();
+    }
+  });
+}
+
+// Perform search
+function performSearch(query: string) {
+  // Simulate API call - replace with your actual database search
+  const results: FoodItem[] = foodDatabase.filter(food => 
+    food.name.toLowerCase().includes(query.toLowerCase()) ||
+    food.info.category.toLowerCase().includes(query.toLowerCase())
+  ).slice(0, 5); // Limit to 5 results
+
+  currentResults = results;
+  displaySearchResults(results);
+  searchLoading?.classList.remove('show');
+}
+
+// Display search results
+function displaySearchResults(results: FoodItem[]) {
+  if (results.length === 0) {
+    searchResults.innerHTML = '<div class="no-results">No foods found. Try a different search term.</div>';
+  } else {
+    const icons = {
+      'fats': '🥑',
+      'proteins': '🫘',
+      'carbs (high)': '🍞',
+      'leaves': '🥬', 
+      'fruits': '🍊',
+      'carbs (low)': '🍍'
+    };
+
+    searchResults.innerHTML = results.map((food, index) => `
+        <div class="search-result-item" data-index="${index}" onclick="selectFood(${JSON.stringify(food).replace(/"/g, '&quot;')})">
+            <div class="food-info">
+                <div class="food-name">${icons[food.info.category]} ${food.name}</div>
+                <div class="food-details">${food.info.category} • 100 g</div>
+            </div>
+            <div class="food-calories">${food.info.calories} cal</div>
+        </div>
+    `).join('');
+  }
+    
+  searchResults.classList.add('show');
+  currentHighlightIndex = -1;
+}
+
+// Navigate results with keyboard
+function navigateResults(direction: number) {
+  const items = searchResults.querySelectorAll('.search-result-item');
+  if (items.length === 0) return;
+  
+  // Remove current highlight
+  if (currentHighlightIndex >= 0) {
+      items[currentHighlightIndex].classList.remove('highlighted');
+  }
+  
+  // Calculate new index
+  currentHighlightIndex += direction;
+  if (currentHighlightIndex < 0) currentHighlightIndex = items.length - 1;
+  if (currentHighlightIndex >= items.length) currentHighlightIndex = 0;
+  
+  // Add new highlight
+  items[currentHighlightIndex].classList.add('highlighted');
+  items[currentHighlightIndex].scrollIntoView({ block: 'nearest' });
+}
+
+// Select food
+function selectFood(food: FoodItem) {
+  selectedFood = food;
+  
+  // Clear search and hide results
+  searchInput.value = food.name;
+  hideSearchResults();
+  
+  // Focus on quantity input
+  getInputById('gramAmount').focus();
+  
+  // Update calories
+  previewCalories(food);
+}
+
+// Hide search results
+function hideSearchResults() {
+  searchResults.classList.remove('show');
+  currentHighlightIndex = -1;
 }
 
 const addDeleteEvents = () => {
@@ -378,20 +529,6 @@ const addDeleteEvents = () => {
         handleDeleteFood(entryId, row);
       }
     });
-  });
-}
-
-// Populate food select dropdown
-const populateFoodSelect = () => {
-  const select = getInputById('foodSelect');
-  select.innerHTML = '<option value="">Select a food item...</option>';
-    
-  const sortedFoods = foodDatabase.sort((f1, f2) => f1.name.localeCompare(f2.name));
-  sortedFoods.forEach((food: FoodItem) => {
-    const option = document.createElement('option') as HTMLOptionElement;
-    option.value = food.name;
-    option.textContent = food.name;
-    select.appendChild(option);
   });
 }
 
@@ -413,10 +550,9 @@ const addFood = async () => {
     return;
   }
 
-  const foodSelect = getInputById('foodSelect');
   const gramAmount = getInputById('gramAmount');
     
-  if (!foodSelect.value || !gramAmount.value) {
+  if (!selectedFood || !gramAmount.value) {
     swal('Hey!', 'Please select a food item and enter amount', 'error');
     return;
   }
@@ -425,19 +561,22 @@ const addFood = async () => {
 
   try {
     const grams: number = parseFloat(gramAmount.value);
-    const foodData: FoodItem = getFoodItemByName(foodSelect.value);
+    const foodData: FoodItem = getFoodItemByName(selectedFood.name);
+
+    // Current date, with timezone
+    const date = new Date(selectedDate.getTime() - (selectedDate.getTimezoneOffset() * 60000)).toISOString();
 
     // Calculate nutrition for the amount
     const proportion: FoodItem = getFoodData(grams, foodData);
     const entry: FoodStorage = {
-      name: foodSelect.value,
+      name: selectedFood.name,
       grams: grams,
       calories: proportion.info.calories,
       protein: proportion.info.protein,
       fat: proportion.info.fat,
       carbs: proportion.info.carbs,
       fiber: proportion.info.fiber,
-      date: selectedDate.toISOString().split('T')[0],
+      date: date.split('T')[0],
       time: new Date().toLocaleTimeString('en-US', { 
         hour12: false, 
         hour: '2-digit', 
@@ -471,7 +610,8 @@ const addFood = async () => {
     fiberDiv.textContent = (Math.round(totalFiber * 10) / 10).toString();
 
     // Reset form
-    foodSelect.value = '';
+    selectedFood = null;
+    getInputById('foodSearchInput').value = '';
     gramAmount.value = '100';
     showFoodPreview(false);
   } catch (error) {
@@ -772,4 +912,4 @@ function createDayElement(day: number, isOtherMonth: boolean, year: number, mont
   return dayElement;
 }
 
-
+(window as any).selectFood = selectFood;

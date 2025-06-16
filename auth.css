@@ -2,9 +2,9 @@
 .auth-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 15px 0;
+    padding: 12px 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: sticky;
+    border-radius: 6px;
     top: 0;
     z-index: 1000;
 }
@@ -12,15 +12,16 @@
 .auth-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    min-height: 50px;
 }
 
 .logo h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 600;
 }
 
@@ -32,7 +33,7 @@
 .auth-form {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    border-radius: 10px;
+    border-radius: 6px;
     padding: 25px;
     min-width: 300px;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -110,28 +111,28 @@
 .user-info {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
 .user-details {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
 .user-details span {
     font-weight: 500;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .logout-btn {
-    padding: 8px 16px;
+    padding: 6px 12px;
     background: rgba(255, 255, 255, 0.2);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
 }
@@ -198,14 +199,21 @@
 
 /* Mobile Responsive for Auth */
 @media (max-width: 768px) {
+    .auth-header {
+        padding: 10px 0;
+    }
+
     .auth-container {
-        flex-direction: column;
-        gap: 15px;
-        padding: 0 15px;
+        min-height: 45px;
+        padding: 0 12px;
     }
     
     .logo {
         order: 1;
+    }
+
+    .logo h2 {
+        font-size: 1.1rem;
     }
     
     .auth-section,
@@ -222,8 +230,6 @@
     }
     
     .user-details {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
+        gap: 8px;
     }
 }

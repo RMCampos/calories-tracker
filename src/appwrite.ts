@@ -88,7 +88,6 @@ export class AppwriteDB {
           {
               ...entryData,
               userId: (await account.get()).$id,
-              createdAt: new Date().toISOString()
           }
       );
       console.debug('Food entry saved:', response);
