@@ -296,7 +296,8 @@ const getFoodData = (grams: number, foodData: FoodItem): FoodItem => {
       fat: Math.round(foodData.info.fat * multiplier * 10) / 10,
       carbs: Math.round(foodData.info.carbs * multiplier * 10) / 10,
       fiber: Math.round(foodData.info.fiber * multiplier * 10) / 10,
-      category: foodData.info.category
+      category: foodData.info.category,
+      alkaline: foodData.info.alkaline
     }
   };
 }
@@ -591,6 +592,7 @@ const addFood = async () => {
       carbs: proportion.info.carbs,
       fiber: proportion.info.fiber,
       date: date.split('T')[0],
+      alkaline: selectedFood.info.alkaline,
       time: new Date().toLocaleTimeString('en-US', { 
         hour12: false, 
         hour: '2-digit', 
@@ -622,6 +624,9 @@ const addFood = async () => {
     fatDiv.textContent = (Math.round(totalFat * 10) / 10).toString();
     carboDiv.textContent = (Math.round(totalCarbs * 10) / 10).toString();
     fiberDiv.textContent = (Math.round(totalFiber * 10) / 10).toString();
+
+    // Update alkaline level
+    const div = getDivById('alkaline-level');
 
     // Reset form
     selectedFood = null;
@@ -661,6 +666,7 @@ async function loadFoodEntries(date: Date) {
         fiber: entry.fiber,
         time: entry.time,
         date: entry.date,
+        alkaline: entry.alkaline,
       };
       
       addFoodToTable(foodData, entry.$id);
@@ -781,6 +787,7 @@ function addFoodToTable(foodData: FoodStorage, documentId: string) {
       <td>${foodData.carbs}</td>
       <td>${foodData.fiber}</td>
       <td><button class="delete-btn delete-food-entry">Delete</button></td>
+      <td class="hidden-column">${foodData.alkaline}</td>
   `;
   
   tableBody?.appendChild(row);
@@ -795,10 +802,37 @@ function updateTotalCalories() {
   let total = 0;
   
   caloriesCells.forEach((cell: Element) => {
-      total += parseInt(cell.innerHTML) || 0;
+    total += parseInt(cell.innerHTML) || 0;
   });
   
   getDivById('caloriesCounter').textContent = total.toString();
+  // Update alkaline level
+  const gramsCell = document.querySelectorAll('#foodTableBody td:nth-child(4)'); // 4th is grams
+  let totalGrams = 0;
+  let indexMap: {index: number, grams: number}[] = [];
+  gramsCell.forEach((cell: Element, key: number) => {
+    totalGrams += parseInt(cell.innerHTML) || 0;
+    indexMap.push({
+      index: key,
+      grams: parseInt(cell.innerHTML) || 0
+    });
+  });
+
+  const alkalineCell = document.querySelectorAll('#foodTableBody td:nth-child(11)'); // 11th is alkaline
+  let totalAlkaline = 0;
+  alkalineCell.forEach((cell: Element, key: number) => {
+    if (cell.innerHTML === 'true') {
+      for (let ob of indexMap) {
+        if (ob.index === key) {
+          totalAlkaline += ob.grams;
+          break;
+        }
+      }
+    }
+  });
+
+  const alkalinePercent = totalAlkaline / totalGrams * 100;
+  getDivById('alkaline-level').textContent = (Math.round(alkalinePercent * 10) / 10).toString() + '% Alkaline';
 }
 
 // Calendar functions

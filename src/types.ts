@@ -2,7 +2,7 @@ type FoodCategory = 'fats' | 'proteins' | 'carbs (high)' | 'leaves' | 'fruits' |
 
 export type FoodItem = {
   name: string;
-  info: { calories: number, protein: number, fat: number, carbs: number, fiber: number, category: FoodCategory }
+  info: { calories: number, protein: number, fat: number, carbs: number, fiber: number, category: FoodCategory, alkaline: boolean }
 }
 
 export type FoodStorage = {
@@ -16,6 +16,7 @@ export type FoodStorage = {
   fiber: number;
   time: string;
   date: string;
+  alkaline: boolean | null;
 };
 
 export type UserSettings = {
