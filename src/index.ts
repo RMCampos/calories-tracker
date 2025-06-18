@@ -435,13 +435,27 @@ const setupEventListeners = () => {
   });
 }
 
+const getCleanName = (foodName: string): string => {
+  const newName = foodName
+    .replace(/á/g, 'a')
+    .replace(/ã/g, 'a')
+    .replace(/â/g, 'a')
+    .replace(/ê/g, 'e')
+    .replace(/é/g, 'e')
+    .replace(/ó/g, 'o')
+    .replace(/ú/g, 'u')
+    .replace(/ç/g, 'c');
+  return newName.toLowerCase();
+}
+
 // Perform search
 function performSearch(query: string) {
   // Simulate API call - replace with your actual database search
-  const results: FoodItem[] = foodDatabase.filter(food => 
-    food.name.toLowerCase().includes(query.toLowerCase()) ||
-    food.info.category.toLowerCase().includes(query.toLowerCase())
-  ).slice(0, 5); // Limit to 5 results
+  const results: FoodItem[] = foodDatabase.filter(food => {
+    const cleanName = getCleanName(food.name);
+    const category = food.info.category.toLowerCase();
+    return cleanName.includes(query.toLowerCase()) || category.includes(query.toLowerCase())
+  }).slice(0, 5); // Limit to 5 results
 
   currentResults = results;
   displaySearchResults(results);
