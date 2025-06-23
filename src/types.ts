@@ -21,6 +21,7 @@ export type FoodStorage = {
 
 export type UserSettings = {
   id?: string;
+  caloriesGoal?: number;
   proteinGoal: number;
   fatGoal: number;
   carboGoal: number;

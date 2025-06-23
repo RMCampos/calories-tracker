@@ -58,6 +58,11 @@ h1 {
     opacity: 0.9;
 }
 
+.calories-text-goal {
+    font-size: 0.9rem;
+    color: #fff;
+}
+
 .calories-text-alkaline {
     font-size: 0.9rem;
     color: #cecece;

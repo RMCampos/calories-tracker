@@ -156,6 +156,7 @@ async function handleSaveSettings(e: SubmitEvent) {
   showLoading();
 
   try {
+    const caloriesGoal = getInputById('caloriesGoal').value;
     const proteinGoal = getInputById('proteinGoal').value;
     const fatGoal = getInputById('fatGoal').value;
     const carboGoal = getInputById('carboGoal').value;
@@ -174,6 +175,7 @@ async function handleSaveSettings(e: SubmitEvent) {
 
     // Save to Appwrite
     await AppwriteDB.saveUserSettings({
+      caloriesGoal: parseInt(caloriesGoal),
       proteinGoal: parseInt(proteinGoal),
       fatGoal: parseInt(fatGoal),
       carboGoal: parseInt(carboGoal),
@@ -218,11 +220,13 @@ async function handleSettings() {
       const hasGoals = Array.isArray(settings) && settings.length > 0;
       if (hasGoals) {
         const index = settings.length - 1;
+        getInputById('caloriesGoal').value = settings[index].caloriesGoal;
         getInputById('proteinGoal').value = settings[index].proteinGoal;
         getInputById('fatGoal').value = settings[index].fatGoal;
         getInputById('carboGoal').value = settings[index].carboGoal;
         getInputById('fiberGoal').value = settings[index].fiberGoal;
       } else {
+        getInputById('caloriesGoal').value = '';
         getInputById('proteinGoal').value = '';
         getInputById('fatGoal').value = '';
         getInputById('carboGoal').value = '';
@@ -703,6 +707,12 @@ async function loadFoodEntries(date: Date) {
     const hasGoals = Array.isArray(settings) && settings.length > 0;
     if (hasGoals) {
       const index = settings.length - 1;
+      getDivById('caloriesGoalText').classList.add('hidden');
+      if (parseInt(settings[index].caloriesGoal) > 0) {
+        getDivById('caloriesGoalText').textContent = `of ${settings[index].caloriesGoal}`;
+        getDivById('caloriesGoalText').classList.remove('hidden');
+      }
+
       getDivById('proteinGoalText').classList.add('hidden');
       if (parseInt(settings[index].proteinGoal) > 0) {
         getDivById('proteinGoalText').textContent = `of ${settings[index].proteinGoal}`;

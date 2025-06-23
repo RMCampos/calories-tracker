@@ -100,6 +100,7 @@
             <div class="calories-banner">
                 <div class="calories-number" id="caloriesCounter">0</div>
                 <div class="calories-text">Calories Today</div>
+                <div class="calories-text-goal" id="caloriesGoalText">of 0</div>
                 <div class="calories-text-alkaline" id="alkaline-level">80% Alkaline</div>
             </div>
 
@@ -229,6 +230,10 @@
             <div class="date-display">Define your macros goal</div>
             
             <form id="settingsForm" class="settings-form">
+                <div class="form-group">
+                    <label for="caloriesGoal">Calories goal</label>
+                    <input type="number" id="caloriesGoal" placeholder="Calories" required>
+                </div>
                 <div class="form-group">
                     <label for="proteinGoal">Protein goal</label>
                     <input type="number" id="proteinGoal" placeholder="Proteins in grams" required>
