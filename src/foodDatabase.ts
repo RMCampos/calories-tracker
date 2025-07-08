@@ -25,6 +25,8 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Tofu', info: { calories: 65, protein: 6.5, fat: 4, carbs: 2, fiber: 0.75, category: 'proteins', alkaline: false } },
   { name: 'Feijão preto, cozido', info: { calories: 77, protein: 4.5, fat: 0.5, carbs: 14, fiber: 8.4, category: 'proteins', alkaline: false } },
   { name: 'Lentilha, cozida', info: { calories: 93, protein: 6.3, fat: 0.5, carbs: 16.3, fiber: 7.9, category: 'proteins', alkaline: false } },
+  { name: 'Frango, peito, sem pele, cozido', info: { calories: 163, protein: 31.5, fat: 3.2, carbs: 0, fiber: 0, category: 'proteins', alkaline: false } },
+  { name: 'Frango, peito, sem pele, grelhado', info: { calories: 159, protein: 32, fat: 2.5, carbs: 0, fiber: 0, category: 'proteins', alkaline: false } },
   
   // Carboidratos, amiláceos - Carbs
   { name: 'Grão de Bico, cozido', info: { calories: 180, protein: 9.5, fat: 3, carbs: 30, fiber: 8.6, category: 'carbs (high)', alkaline: false } },
