@@ -45,7 +45,8 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Arroz branco, cozido', info: { calories: 128, protein: 2.5, fat: 0.2, carbs: 28.1, fiber: 1.6, category: 'carbs (high)', alkaline: false } },
   { name: 'Arroz integral, cozido', info: { calories: 124, protein: 2.6, fat: 1.0, carbs: 25.8, fiber: 2.7, category: 'carbs (high)', alkaline: false } },
   { name: 'Aveia', info: { calories: 394, protein: 13.9, fat: 8.5, carbs: 66.6, fiber: 9.1, category: 'carbs (high)', alkaline: false } },
-  { name: 'Ervilha, cozida', info: { calories: 88, protein: 7.5, fat: 0.5, carbs: 14.2, fiber: 9.7, category: 'carbs (high)', alkaline: true } },
+  { name: 'Ervilha seca, cozida', info: { calories: 88, protein: 7.5, fat: 0.5, carbs: 14.2, fiber: 9.7, category: 'carbs (high)', alkaline: true } },
+  { name: 'Ervilha congelada, cozida', info: { calories: 57, protein: 5, fat: 1, carbs: 7, fiber: 8, category: 'carbs (high)', alkaline: true } },
   { name: 'Pão integral de forma', info: { calories: 253, protein: 9.4, fat: 3.7, carbs: 49.9, fiber: 6.9, category: 'carbs (high)', alkaline: false } },
   { name: 'Pipoca c/óleo', info: { calories: 448, protein: 9.9, fat: 15.9, carbs: 70.3, fiber: 14.3, category: 'carbs (high)', alkaline: false } },
   { name: 'Pipoca s/óleo', info: { calories: 178, protein: 3.3, fat: 7.2, carbs: 25, fiber: 4.3, category: 'carbs (high)', alkaline: false } },
@@ -87,6 +88,5 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Couve flor, cozida', info: { calories: 19, protein: 1.2, fat: 0.3, carbs: 3.9, fiber: 2.1, category: 'carbs (low)', alkaline: true } },
   { name: 'Pepino', info: { calories: 10, protein: 0.9, fat: 0, carbs: 2, fiber: 1.1, category: 'carbs (low)', alkaline: true } },
   { name: 'Chuchu, cozido', info: { calories: 19, protein: 0.4, fat: 0, carbs: 4.9, fiber: 1.0, category: 'carbs (low)', alkaline: true } },
-  
-  
+  { name: 'Cogumelo Paris, in natura', info: { calories: 17, protein: 4.9, fat: 0, carbs: 1, fiber: 1.7, category: 'proteins', alkaline: true } },
 ];
