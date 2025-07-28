@@ -12,6 +12,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Semente de Linhaça', info: { calories: 495, protein: 14.1, fat: 32.3, carbs: 43.3, fiber: 33.5, category: 'fats', alkaline: true } },
   { name: 'Semente de Gergelim', info: { calories: 584, protein: 21.2, fat: 50.4, carbs: 21.6, fiber: 11.9, category: 'fats', alkaline: true } },
   { name: 'Pasta de Amendoim Growth', info: { calories: 544, protein: 27, fat: 33, carbs: 20, fiber: 8, category: 'fats', alkaline: false } }, // TBC
+  { name: 'Semente de Abóbora', info: { calories: 446, protein: 18.55, fat: 19.4, carbs: 53.75, fiber: 6, category: 'fats', alkaline: true } },
 
   // Proteínas - Proteins
   { name: 'Atum Sólido, natural', info: { calories: 135, protein: 28.3, fat: 2.7, carbs: 0, fiber: 0, category: 'proteins', alkaline: false } },
