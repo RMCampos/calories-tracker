@@ -6,3 +6,4 @@
 - [x] Display the percentage of Alkaline daily
 - [ ] Remove the table and create a list-like component
 - [x] Add logo
+- [ ] Group food added by time and consider a meal
