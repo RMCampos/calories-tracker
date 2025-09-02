@@ -545,7 +545,7 @@ const addDeleteEvents = () => {
       const row = target.closest('tr');
       const entryId = row?.querySelector('.hidden-column')?.textContent;
       if (entryId && row) {
-        handleDeleteFood(entryId, row);
+        handleDeleteFood(entryId);
       }
     });
   });
@@ -656,6 +656,7 @@ async function loadFoodEntries(date: Date) {
     
     // Clear current table
     getDivById('foodTableBody').innerHTML = '';
+    getDivById('foodCardsContainer').innerHTML = '';
     
     // Add each entry to table
     entries.forEach(entry => {
@@ -675,6 +676,16 @@ async function loadFoodEntries(date: Date) {
       
       addFoodToTable(foodData, entry.$id);
     });
+
+    if (entries.length === 0) {
+      getDivById('foodCardsContainer').innerHTML = `
+          <div class="empty-state">
+              <div class="empty-state-icon">🍽️</div>
+              <div>No food items logged yet.</div>
+              <div style="margin-top: 8px; font-size: 14px; opacity: 0.7;">Add your first item to get started!</div>
+          </div>
+      `;
+    }
 
     // Setup Delete events
     addDeleteEvents();
@@ -751,7 +762,7 @@ async function loadFoodEntries(date: Date) {
 }
 
 // Handle food deletion
-async function handleDeleteFood(documentId: string, row: HTMLTableRowElement) {
+async function handleDeleteFood(documentId: string) {
   if (!documentId) return;
 
   const willDelete = await swal({
@@ -804,6 +815,53 @@ function addFoodToTable(foodData: FoodStorage, documentId: string) {
 
   // Setup Delete events
   addDeleteEvents();
+
+  // New Food card
+  const container = document.getElementById('foodCardsContainer');
+  const card = document.createElement('div');
+  card.className = 'food-card';
+  card.setAttribute('data-id', documentId);
+
+  card.innerHTML = `
+    <div class="card-header" onclick="toggleCard(${documentId})">
+      <div class="card-main-info">
+          <div class="food-name-time">
+            <div class="food-name">${foodData.name}</div>
+            <div class="food-time">${foodData.time || new Date().toLocaleTimeString()} • ${foodData.grams}g</div>
+          </div>
+          <div class="calories-display">${foodData.calories} cal</div>
+      </div>
+      <div class="expand-icon">▼</div>
+    </div>
+    <div class="card-details">
+      <div class="details-content">
+          <div class="nutrition-grid">
+            <div class="nutrition-item">
+                <div class="nutrition-label">Protein</div>
+                <div class="nutrition-value">${foodData.protein}g</div>
+            </div>
+            <div class="nutrition-item">
+                <div class="nutrition-label">Fat</div>
+                <div class="nutrition-value">${foodData.fat}g</div>
+            </div>
+            <div class="nutrition-item">
+                <div class="nutrition-label">Carbs</div>
+                <div class="nutrition-value">${foodData.carbs}g</div>
+            </div>
+            <div class="nutrition-item">
+                <div class="nutrition-label">Fiber</div>
+                <div class="nutrition-value">${foodData.fiber}g</div>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-edit" onclick="editFood(${documentId})">Edit</button>
+            <button class="btn btn-delete" onclick="deleteFood(${documentId})">Delete</button>
+          </div>
+      </div>
+    </div>
+  `;
+
+  container?.appendChild(card);
 }
 
 // Update total calories
@@ -970,4 +1028,20 @@ function createDayElement(day: number, isOtherMonth: boolean, year: number, mont
   return dayElement;
 }
 
+function toggleCard(id) {
+  const card = document.querySelector(`[data-id="${id}"]`);
+  card.classList.toggle('expanded');
+}
+
+function deleteFood(id) {
+  handleDeleteFood(id);
+}
+
+function editFood(id) {
+  alert(`Edit functionality for food item ${id} would be implemented here`);
+}
+
 (window as any).selectFood = selectFood;
+(window as any).toggleCard = toggleCard;
+(window as any).editFood = editFood;
+(window as any).deleteFood = deleteFood;
