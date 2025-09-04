@@ -88,6 +88,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Melão', info: { calories: 29, protein: 0.7, fat: 0, carbs: 7.5, fiber: 0.3, category: 'fruits', alkaline: true } },
   { name: 'Uva', info: { calories: 53, protein: 0.7, fat: 0.2, carbs: 13.6, fiber: 0.9, category: 'fruits', alkaline: true } },
   { name: 'Goiaba, branca, com casca, crua', info: { calories: 52, protein: 0.9, fat: 0.5, carbs: 12.4, fiber: 6.3, category: 'fruits', alkaline: true } },
+  { name: 'Morango, cru', info: { calories: 30, protein: 0.9, fat: 0.3, carbs: 6.8, fiber: 1.7, category: 'fruits', alkaline: true } },
 
   // Dairy
   { name: 'Iogurte, natural, desnatado', info: { calories: 41, protein: 3.8, fat: 0.3, carbs: 5.8, fiber: 0, category: 'dairy', alkaline: true } },
@@ -117,7 +118,6 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Couve flor, cozida', info: { calories: 19, protein: 1.2, fat: 0.3, carbs: 3.9, fiber: 2.1, category: 'carbs (low)', alkaline: true } },
   { name: 'Pepino', info: { calories: 10, protein: 0.9, fat: 0, carbs: 2, fiber: 1.1, category: 'carbs (low)', alkaline: true } },
   { name: 'Chuchu, cozido', info: { calories: 19, protein: 0.4, fat: 0, carbs: 4.9, fiber: 1.0, category: 'carbs (low)', alkaline: true } },
-  { name: 'Cogumelo Paris, in natura', info: { calories: 17, protein: 4.9, fat: 0, carbs: 1, fiber: 1.7, category: 'proteins', alkaline: true } },
-  { name: 'Milho, verde, enlatado, drenado', info: { calories: 98, protein: 3.2, fat: 2.4, carbs: 17.1, fiber: 4.6, category: 'proteins', alkaline: true } },
-  { name: 'Morango, cru', info: { calories: 30, protein: 0.9, fat: 0.3, carbs: 6.8, fiber: 1.7, category: 'proteins', alkaline: true } },
+  { name: 'Cogumelo Paris, in natura', info: { calories: 17, protein: 4.9, fat: 0, carbs: 1, fiber: 1.7, category: 'carbs (low)', alkaline: true } },
+  { name: 'Milho, verde, enlatado, drenado', info: { calories: 98, protein: 3.2, fat: 2.4, carbs: 17.1, fiber: 4.6, category: 'carbs (low)', alkaline: true } },
 ];

@@ -98,6 +98,26 @@ export class AppwriteDB {
     }
   }
 
+  // Upadte food entry
+  static async updateFoodEntry(documentId: string, entryData: Partial<FoodStorage>) {
+    try {
+      const response = await databases.updateDocument(
+          DATABASE_ID,
+          FOOD_ENTRIES_COLLECTION_ID,
+          documentId,
+          {
+              ...entryData,
+              userId: (await account.get()).$id,
+          }
+      );
+      console.debug('Food entry updated:', response);
+      return response;
+    } catch (error) {
+      console.error('Update food entry error:', error);
+      throw error;
+    }
+  }
+
   // Save food entry
   static async saveUserSettings(userSettings: UserSettings) {
     try {

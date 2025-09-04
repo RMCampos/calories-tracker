@@ -285,6 +285,14 @@ function hideLoading() {
   loadingOverlay.classList.add('hidden');
 }
 
+function clearEditing() {
+  searchInput.value = '';
+  getInputById('gramAmount').value = '100';
+  showFoodPreview(false);
+  getButtonById('add-food-btn').innerHTML = 'Add Food';
+  selectedFood = null;
+}
+
 // Clear application data
 function clearAppData() {
   getDivById('caloriesCounter').textContent = '0';
@@ -301,6 +309,7 @@ function clearAppData() {
   totalCaloriesToday = 0;
   totalGramsToday = 0;
   totalAlkalineToday = 0;
+  getButtonById('cancel-food-btn').style.display = 'none';
 }
 
 const getFoodData = (grams: number, foodData: FoodItem): FoodItem => {
@@ -322,7 +331,7 @@ const getFoodData = (grams: number, foodData: FoodItem): FoodItem => {
 const getFoodItemByName = (foodName: string): FoodItem => {
   const foodDataSearch: FoodItem[] = foodDatabase.filter(f => f.name === foodName);
   if (foodDataSearch.length === 0) {
-    throw new Error(`Food not found for name ${name}`);
+    throw new Error(`Food not found for name ${foodName}`);
   }
   return foodDataSearch[0];
 }
@@ -366,7 +375,11 @@ const setupEventListeners = () => {
   });
 
   getButtonById('add-food-btn').addEventListener('click', () => {
-    addFood();
+    if (getButtonById('add-food-btn').innerHTML === 'Add Food') {
+      addFood();
+    } else {
+      updateFood();
+    }
   });
   
   getButtonById('next-month-btn').addEventListener('click', () => {
@@ -386,6 +399,10 @@ const setupEventListeners = () => {
   document.getElementById('showLogin')?.addEventListener('click', (e) => {
       e.preventDefault();
       toggleAuthForms();
+  });
+
+  getButtonById('cancel-food-btn').addEventListener('click', () => {
+    clearEditing();
   });
 
   // Auth forms
@@ -545,6 +562,38 @@ function selectFood(food: FoodItem) {
   previewCalories(food);
 }
 
+async function setFoodToEdit(foodId: string) {
+  showLoading();
+
+  try {
+    // get food item
+    const entries = await AppwriteDB.getFoodEntries(selectedDate);
+    const foodToEdit = entries.filter(entry => entry.$id === foodId);
+    if (foodToEdit.length === 0) {
+      swal('Hey!', 'Unable to get food entry from server', 'error');
+      return;
+    }
+
+    // set the selected food name and quantity
+    const foodData: FoodItem = getFoodItemByName(foodToEdit[0].name);
+    selectedFood = foodData;
+    searchInput.value = foodToEdit[0].name;
+    getInputById('gramAmount').value = foodToEdit[0].grams;
+    previewCalories(foodData)
+
+    getButtonById('add-food-btn').innerHTML = 'Save Food';
+    getInputById('foodIdToUpdate').value = foodId;
+    getInputById('foodTimeToUpdate').value = foodToEdit[0].time;
+
+    hideLoading();
+  } catch (error) {
+    console.error('Set food to edit error:', error);
+    swal('Oh no!', 'Failed to load food entry: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
 // Hide search results
 function hideSearchResults() {
   searchResults.classList.remove('show');
@@ -584,9 +633,7 @@ function editCardHandler(e: Event) {
   const foodId = card.getAttribute('data-food-id');
 
   if (foodId) {
-    // FIXME: Implement edit functionality
-    // handleEditFood(foodId);
-    window.alert('Edit functionality is not implemented yet.');
+    setFoodToEdit(foodId);
   }
 }
 
@@ -624,6 +671,56 @@ const updateCurrentDate = () => {
   });
 }
 
+const updateFood = async () => {
+  if (!currentUser) {
+    swal('Hey!', 'Please log in to add food entries.', 'info');
+    return;
+  }
+
+  const gramAmount = getInputById('gramAmount');
+    
+  if (!selectedFood || !gramAmount.value) {
+    swal('Hey!', 'Please select a food item and enter the amount', 'error');
+    return;
+  }
+
+  showLoading();
+
+  try {
+    const foodId = getInputById('foodIdToUpdate').value;
+    const grams: number = parseFloat(gramAmount.value);
+    const foodData: FoodItem = getFoodItemByName(selectedFood.name);
+
+    // Current date, with timezone
+    const date = new Date(selectedDate.getTime() - (selectedDate.getTimezoneOffset() * 60000)).toISOString();
+
+    // Calculate nutrition for the amount
+    const proportion: FoodItem = getFoodData(grams, foodData);
+    const entry: FoodStorage = {
+      name: selectedFood.name,
+      grams: grams,
+      calories: proportion.info.calories,
+      protein: proportion.info.protein,
+      fat: proportion.info.fat,
+      carbs: proportion.info.carbs,
+      fiber: proportion.info.fiber,
+      date: date.split('T')[0],
+      alkaline: selectedFood.info.alkaline,
+      time: getInputById('foodTimeToUpdate').value,
+    };
+
+    // Save to Appwrite
+    await AppwriteDB.updateFoodEntry(foodId, entry);
+    clearEditing();
+    selectDate(selectedDate);
+  } catch (error) {
+      console.error('Update food error:', error);
+      swal('Oh no!', 'Failed to update food entry: ' + error.message, 'error');
+  } finally {
+      hideLoading();
+  }
+}
+
 // Add food to the log
 const addFood = async () => {
   if (!currentUser) {
@@ -634,7 +731,7 @@ const addFood = async () => {
   const gramAmount = getInputById('gramAmount');
     
   if (!selectedFood || !gramAmount.value) {
-    swal('Hey!', 'Please select a food item and enter amount', 'error');
+    swal('Hey!', 'Please select a food item and enter the amount', 'error');
     return;
   }
 
@@ -1090,6 +1187,3 @@ function editFood(id: string) {
 }
 
 (window as any).selectFood = selectFood;
-(window as any).toggleCard = toggleCard;
-(window as any).editFood = editFood;
-(window as any).deleteFood = deleteFood;
