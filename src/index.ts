@@ -213,7 +213,7 @@ async function handleLogout() {
 }
 
 async function handleSettings() {
-  const showSettings = getButtonById('settingsBtn').textContent === 'Settings';
+  const showSettings = getButtonById('settingsBtn').textContent === 'Settings' || getButtonById('settingsBtn').textContent === '⚙️ Settings';
 
   if (showSettings) {
     showLoading();
@@ -251,7 +251,46 @@ async function handleSettings() {
   else {
     appContent?.classList.remove('hidden');
     settingsContent?.classList.add('hidden');
-    getButtonById('settingsBtn').textContent = 'Settings';
+    getButtonById('settingsBtn').textContent = '⚙️ Settings';
+  }
+}
+
+// Handle settings for mobile (same logic but different button)
+async function handleSettingsMobile() {
+  closeMobileMenu();
+  await handleSettings();
+}
+
+// Handle calendar button - scroll to calendar section
+function handleCalendar() {
+  const calendarSection = document.querySelector('.calendar-section') as HTMLElement;
+  if (calendarSection) {
+    calendarSection.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+}
+
+// Handle calendar for mobile
+function handleCalendarMobile() {
+  closeMobileMenu();
+  handleCalendar();
+}
+
+// Toggle mobile menu
+function toggleMobileMenu() {
+  const mobileMenu = document.getElementById('mobileMenu');
+  if (mobileMenu) {
+    mobileMenu.classList.toggle('hidden');
+  }
+}
+
+// Close mobile menu
+function closeMobileMenu() {
+  const mobileMenu = document.getElementById('mobileMenu');
+  if (mobileMenu) {
+    mobileMenu.classList.add('hidden');
   }
 }
 
@@ -408,8 +447,21 @@ const setupEventListeners = () => {
   // Auth forms
   document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
   document.getElementById('registerForm')?.addEventListener('submit', handleRegister);
+  
+  // Desktop header buttons
   document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
   document.getElementById('settingsBtn')?.addEventListener('click', handleSettings);
+  document.getElementById('calendarBtn')?.addEventListener('click', handleCalendar);
+  
+  // Mobile header buttons
+  document.getElementById('logoutBtnMobile')?.addEventListener('click', handleLogout);
+  document.getElementById('settingsBtnMobile')?.addEventListener('click', handleSettingsMobile);
+  document.getElementById('calendarBtnMobile')?.addEventListener('click', handleCalendarMobile);
+  
+  // Mobile menu toggle
+  document.getElementById('mobileMenuToggle')?.addEventListener('click', toggleMobileMenu);
+  
+  // Settings form
   document.getElementById('settingsForm')?.addEventListener('submit', handleSaveSettings);
 
   // Search functionality
@@ -461,11 +513,24 @@ const setupEventListeners = () => {
     }
   });
 
-  // Click outside to close
+  // Click outside to close search results
   document.addEventListener('click', function(e: Event) {
     const target = e.target as HTMLElement;
     if (!searchResults.contains(target) && !searchInput.contains(target)) {
       hideSearchResults();
+    }
+  });
+
+  // Click outside to close mobile menu
+  document.addEventListener('click', function(e: Event) {
+    const target = e.target as HTMLElement;
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    
+    if (mobileMenu && mobileMenuToggle && 
+        !mobileMenu.contains(target) && 
+        !mobileMenuToggle.contains(target)) {
+      closeMobileMenu();
     }
   });
 }

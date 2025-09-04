@@ -79,8 +79,19 @@
             <div id="user-info" class="user-info hidden">
                 <div class="user-details">
                     <span id="userName">Welcome, User!</span>
-                    <button id="settingsBtn" class="logout-btn">Settings</button>
-                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                    <div class="header-buttons">
+                        <button id="calendarBtn" class="header-btn">📅 Calendar</button>
+                        <button id="settingsBtn" class="header-btn">⚙️ Settings</button>
+                        <button id="logoutBtn" class="header-btn logout">🚪 Logout</button>
+                    </div>
+                </div>
+                <!-- Mobile menu toggle -->
+                <button id="mobileMenuToggle" class="mobile-menu-toggle hidden">☰</button>
+                <!-- Mobile dropdown menu -->
+                <div id="mobileMenu" class="mobile-menu hidden">
+                    <button id="calendarBtnMobile" class="mobile-menu-item">📅 Calendar</button>
+                    <button id="settingsBtnMobile" class="mobile-menu-item">⚙️ Settings</button>
+                    <button id="logoutBtnMobile" class="mobile-menu-item logout">🚪 Logout</button>
                 </div>
             </div>
         </div>
