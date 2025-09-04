@@ -3,6 +3,7 @@ import { getButtonById, getButtonListByClassName, getDivById, getInputById, show
 import { FoodItem, FoodStorage } from './types.js';
 import { AppwriteAuth, AppwriteDB } from './appwrite.js';
 import swal from 'sweetalert';
+import { Models } from 'appwrite';
 
 // App state
 let selectedDate = new Date();
@@ -11,6 +12,9 @@ let searchTimeout: number | null = null;
 let selectedFood: FoodItem | null = null; // review here
 let currentHighlightIndex: number = -1;
 let currentResults: FoodItem[] = [];
+let totalCaloriesToday: number = 0;
+let totalGramsToday: number = 0;
+let totalAlkalineToday: number = 0;
 
 // Authentication state
 let currentUser: any | null = null;
@@ -281,13 +285,31 @@ function hideLoading() {
   loadingOverlay.classList.add('hidden');
 }
 
+function clearEditing() {
+  searchInput.value = '';
+  getInputById('gramAmount').value = '100';
+  showFoodPreview(false);
+  getButtonById('add-food-btn').innerHTML = 'Add Food';
+  selectedFood = null;
+}
+
 // Clear application data
 function clearAppData() {
-  getDivById('foodTableBody').innerHTML = '';
   getDivById('caloriesCounter').textContent = '0';
   getInputById('foodSearchInput').value = '';
   getInputById('gramAmount').value = '100';
+  getDivById('foodCardsContainer').innerHTML = `
+      <div class="empty-state">
+          <div class="empty-state-icon">🍽️</div>
+          <div>No food items logged yet.</div>
+          <div style="margin-top: 8px; font-size: 14px; opacity: 0.7;">Add your first item to get started!</div>
+      </div>
+  `;
   selectedFood = null;
+  totalCaloriesToday = 0;
+  totalGramsToday = 0;
+  totalAlkalineToday = 0;
+  getButtonById('cancel-food-btn').style.display = 'none';
 }
 
 const getFoodData = (grams: number, foodData: FoodItem): FoodItem => {
@@ -309,7 +331,7 @@ const getFoodData = (grams: number, foodData: FoodItem): FoodItem => {
 const getFoodItemByName = (foodName: string): FoodItem => {
   const foodDataSearch: FoodItem[] = foodDatabase.filter(f => f.name === foodName);
   if (foodDataSearch.length === 0) {
-    throw new Error(`Food not found for name ${name}`);
+    throw new Error(`Food not found for name ${foodName}`);
   }
   return foodDataSearch[0];
 }
@@ -353,7 +375,11 @@ const setupEventListeners = () => {
   });
 
   getButtonById('add-food-btn').addEventListener('click', () => {
-    addFood();
+    if (getButtonById('add-food-btn').innerHTML === 'Add Food') {
+      addFood();
+    } else {
+      updateFood();
+    }
   });
   
   getButtonById('next-month-btn').addEventListener('click', () => {
@@ -373,6 +399,10 @@ const setupEventListeners = () => {
   document.getElementById('showLogin')?.addEventListener('click', (e) => {
       e.preventDefault();
       toggleAuthForms();
+  });
+
+  getButtonById('cancel-food-btn').addEventListener('click', () => {
+    clearEditing();
   });
 
   // Auth forms
@@ -473,12 +503,13 @@ function displaySearchResults(results: FoodItem[]) {
     searchResults.innerHTML = '<div class="no-results">No foods found. Try a different search term.</div>';
   } else {
     const icons = {
-      'fats': '🥑',
-      'proteins': '🫘',
-      'carbs (high)': '🍞',
-      'leaves': '🥬', 
-      'fruits': '🍊',
-      'carbs (low)': '🍍'
+      'fats': '🥑 🍳 🍟',
+      'proteins': '🫘 🥩 🥚',
+      'carbs (high)': '🍞 🥔 🍠',
+      'leaves': '🥬 🥗 🌿',
+      'fruits': '🍊 🍇 🍎',
+      'carbs (low)': '🥦 🍅 🍓',
+      'dairy': '🧀 🧈 🥛'
     };
 
     searchResults.innerHTML = results.map((food, index) => `
@@ -531,23 +562,101 @@ function selectFood(food: FoodItem) {
   previewCalories(food);
 }
 
+async function setFoodToEdit(foodId: string) {
+  showLoading();
+
+  try {
+    // get food item
+    const entries = await AppwriteDB.getFoodEntries(selectedDate);
+    const foodToEdit = entries.filter(entry => entry.$id === foodId);
+    if (foodToEdit.length === 0) {
+      swal('Hey!', 'Unable to get food entry from server', 'error');
+      return;
+    }
+
+    // set the selected food name and quantity
+    const foodData: FoodItem = getFoodItemByName(foodToEdit[0].name);
+    selectedFood = foodData;
+    searchInput.value = foodToEdit[0].name;
+    getInputById('gramAmount').value = foodToEdit[0].grams;
+    previewCalories(foodData)
+
+    getButtonById('add-food-btn').innerHTML = 'Save Food';
+    getInputById('foodIdToUpdate').value = foodId;
+    getInputById('foodTimeToUpdate').value = foodToEdit[0].time;
+
+    hideLoading();
+  } catch (error) {
+    console.error('Set food to edit error:', error);
+    swal('Oh no!', 'Failed to load food entry: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
 // Hide search results
 function hideSearchResults() {
   searchResults.classList.remove('show');
   currentHighlightIndex = -1;
 }
 
+function toggleCardHandler(e: Event) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  const card = e.currentTarget as HTMLElement;
+  card.classList.toggle('expanded');
+  
+  const cardDetails = card.nextElementSibling as HTMLElement;
+  if (cardDetails && cardDetails.classList.contains('card-details')) {
+    cardDetails.classList.toggle('expanded');
+  }
+}
+
+function deleteCardHandler(e: Event) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const card = e.currentTarget as HTMLElement;
+  const foodId = card.getAttribute('data-food-id');
+
+  if (foodId) {
+    handleDeleteFood(foodId);
+  }
+}
+
+function editCardHandler(e: Event) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const card = e.currentTarget as HTMLElement;
+  const foodId = card.getAttribute('data-food-id');
+
+  if (foodId) {
+    setFoodToEdit(foodId);
+  }
+}
+
 const addDeleteEvents = () => {
-  const elements = getButtonListByClassName('delete-food-entry');
-  Array.from(elements).forEach((el: HTMLButtonElement) => {
-    el.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      const row = target.closest('tr');
-      const entryId = row?.querySelector('.hidden-column')?.textContent;
-      if (entryId && row) {
-        handleDeleteFood(entryId, row);
-      }
-    });
+  // Setup toggle show cards events
+  const cards = getButtonListByClassName('card-header-toggle');
+  Array.from(cards).forEach((card: HTMLElement) => {
+    card.removeEventListener('click', toggleCardHandler);
+    card.addEventListener('click', toggleCardHandler);
+  });
+
+  // Setup delete card events
+  const deleteCards = getButtonListByClassName('btn-delete');
+  Array.from(deleteCards).forEach((card: HTMLElement) => {
+    card.removeEventListener('click', deleteCardHandler);
+    card.addEventListener('click', deleteCardHandler);
+  });
+
+  // Setup edit card events
+  const editCards = getButtonListByClassName('btn-edit');
+  Array.from(editCards).forEach((card: HTMLElement) => {
+    card.removeEventListener('click', editCardHandler);
+    card.addEventListener('click', editCardHandler);
   });
 }
 
@@ -562,6 +671,56 @@ const updateCurrentDate = () => {
   });
 }
 
+const updateFood = async () => {
+  if (!currentUser) {
+    swal('Hey!', 'Please log in to add food entries.', 'info');
+    return;
+  }
+
+  const gramAmount = getInputById('gramAmount');
+    
+  if (!selectedFood || !gramAmount.value) {
+    swal('Hey!', 'Please select a food item and enter the amount', 'error');
+    return;
+  }
+
+  showLoading();
+
+  try {
+    const foodId = getInputById('foodIdToUpdate').value;
+    const grams: number = parseFloat(gramAmount.value);
+    const foodData: FoodItem = getFoodItemByName(selectedFood.name);
+
+    // Current date, with timezone
+    const date = new Date(selectedDate.getTime() - (selectedDate.getTimezoneOffset() * 60000)).toISOString();
+
+    // Calculate nutrition for the amount
+    const proportion: FoodItem = getFoodData(grams, foodData);
+    const entry: FoodStorage = {
+      name: selectedFood.name,
+      grams: grams,
+      calories: proportion.info.calories,
+      protein: proportion.info.protein,
+      fat: proportion.info.fat,
+      carbs: proportion.info.carbs,
+      fiber: proportion.info.fiber,
+      date: date.split('T')[0],
+      alkaline: selectedFood.info.alkaline,
+      time: getInputById('foodTimeToUpdate').value,
+    };
+
+    // Save to Appwrite
+    await AppwriteDB.updateFoodEntry(foodId, entry);
+    clearEditing();
+    selectDate(selectedDate);
+  } catch (error) {
+      console.error('Update food error:', error);
+      swal('Oh no!', 'Failed to update food entry: ' + error.message, 'error');
+  } finally {
+      hideLoading();
+  }
+}
+
 // Add food to the log
 const addFood = async () => {
   if (!currentUser) {
@@ -572,7 +731,7 @@ const addFood = async () => {
   const gramAmount = getInputById('gramAmount');
     
   if (!selectedFood || !gramAmount.value) {
-    swal('Hey!', 'Please select a food item and enter amount', 'error');
+    swal('Hey!', 'Please select a food item and enter the amount', 'error');
     return;
   }
 
@@ -611,7 +770,7 @@ const addFood = async () => {
     addFoodToTable(entry, savedEntry.$id);
 
     // Update totals
-    updateTotalCalories();
+    updateTotalCalories([savedEntry]);
 
     // Update total macros
     const proteinDiv: HTMLElement = getDivById('proteinValue');
@@ -655,7 +814,7 @@ async function loadFoodEntries(date: Date) {
     const entries = await AppwriteDB.getFoodEntries(date);
     
     // Clear current table
-    getDivById('foodTableBody').innerHTML = '';
+    getDivById('foodCardsContainer').innerHTML = '';
     
     // Add each entry to table
     entries.forEach(entry => {
@@ -676,11 +835,21 @@ async function loadFoodEntries(date: Date) {
       addFoodToTable(foodData, entry.$id);
     });
 
+    if (entries.length === 0) {
+      getDivById('foodCardsContainer').innerHTML = `
+          <div class="empty-state">
+              <div class="empty-state-icon">🍽️</div>
+              <div>No food items logged yet.</div>
+              <div style="margin-top: 8px; font-size: 14px; opacity: 0.7;">Add your first item to get started!</div>
+          </div>
+      `;
+    }
+
     // Setup Delete events
     addDeleteEvents();
     
     // Update total calories
-    updateTotalCalories();
+    updateTotalCalories(entries);
 
     // Update counters
     let totalCalories = 0;
@@ -751,7 +920,7 @@ async function loadFoodEntries(date: Date) {
 }
 
 // Handle food deletion
-async function handleDeleteFood(documentId: string, row: HTMLTableRowElement) {
+async function handleDeleteFood(documentId: string) {
   if (!documentId) return;
 
   const willDelete = await swal({
@@ -772,7 +941,6 @@ async function handleDeleteFood(documentId: string, row: HTMLTableRowElement) {
     await AppwriteDB.deleteFoodEntry(documentId);
     
     selectDate(selectedDate);
-      
   } catch (error) {
     console.error('Delete food error:', error);
     swal('Oh no!', 'Failed to delete food entry: ' + error.message, 'error');
@@ -783,55 +951,87 @@ async function handleDeleteFood(documentId: string, row: HTMLTableRowElement) {
 
 // Add food to table (existing function - update to use document ID)
 function addFoodToTable(foodData: FoodStorage, documentId: string) {
-  const tableBody = document.getElementById('foodTableBody');
-  const row = document.createElement('tr');
-  
-  row.innerHTML = `
-      <td class="hidden-column">${documentId}</td>
-      <td>${foodData.time || new Date().toLocaleTimeString()}</td>
-      <td>${foodData.name}</td>
-      <td>${foodData.grams}</td>
-      <td>${foodData.calories}</td>
-      <td>${foodData.protein}</td>
-      <td>${foodData.fat}</td>
-      <td>${foodData.carbs}</td>
-      <td>${foodData.fiber}</td>
-      <td><button class="delete-btn delete-food-entry">Delete</button></td>
-      <td class="hidden-column">${foodData.alkaline}</td>
+  // New Food card
+  const container = getDivById('foodCardsContainer');
+  const card = document.createElement('div');
+  card.className = 'food-card';
+  card.setAttribute('data-id', documentId);
+
+  if (container.innerHTML.includes('empty-state')) {
+    container.innerHTML = '';
+  }
+
+  card.innerHTML = `
+    <div class="card-header card-header-toggle">
+      <div class="card-main-info">
+          <div class="food-name-time">
+            <div class="food-name">${foodData.name}</div>
+            <div class="food-time">${foodData.time || new Date().toLocaleTimeString()} • ${foodData.grams}g</div>
+          </div>
+          <div class="calories-display">${foodData.calories} cal</div>
+      </div>
+      <div class="expand-icon">▼</div>
+    </div>
+    <div class="card-details">
+      <div class="details-content">
+          <div class="nutrition-grid">
+            <div class="nutrition-item">
+                <div class="nutrition-label">Protein</div>
+                <div class="nutrition-value">${foodData.protein}g</div>
+            </div>
+            <div class="nutrition-item">
+                <div class="nutrition-label">Fat</div>
+                <div class="nutrition-value">${foodData.fat}g</div>
+            </div>
+            <div class="nutrition-item">
+                <div class="nutrition-label">Carbs</div>
+                <div class="nutrition-value">${foodData.carbs}g</div>
+            </div>
+            <div class="nutrition-item">
+                <div class="nutrition-label">Fiber</div>
+                <div class="nutrition-value">${foodData.fiber}g</div>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-edit" data-food-id="${documentId}">Edit</button>
+            <button class="btn btn-delete" data-food-id="${documentId}">Delete</button>
+          </div>
+      </div>
+    </div>
   `;
-  
-  tableBody?.appendChild(row);
+
+  container?.appendChild(card);
 
   // Setup Delete events
   addDeleteEvents();
 }
 
 // Update total calories
-function updateTotalCalories() {
-  const caloriesCells = document.querySelectorAll('#foodTableBody td:nth-child(5)'); // 5th column is calories
-  let total = 0;
-  
-  caloriesCells.forEach((cell: Element) => {
-    total += parseInt(cell.innerHTML) || 0;
+function updateTotalCalories(entries: Models.DefaultDocument[]) {
+  let total = totalCaloriesToday;
+
+  entries.forEach((entry: Models.DefaultDocument) => {
+    total += entry.calories || 0;
   });
-  
+
   getDivById('caloriesCounter').textContent = total.toString();
+  totalCaloriesToday = total;
+ 
+  // FIX ME: alkaline count
   // Update alkaline level
-  const gramsCell = document.querySelectorAll('#foodTableBody td:nth-child(4)'); // 4th is grams
-  let totalGrams = 0;
+  let totalGrams = totalGramsToday;
   let indexMap: {index: number, grams: number}[] = [];
-  gramsCell.forEach((cell: Element, key: number) => {
-    totalGrams += parseInt(cell.innerHTML) || 0;
+  entries.forEach((entry: Models.DefaultDocument, key: number) => {
+    totalGrams += entry.grams || 0;
     indexMap.push({
       index: key,
-      grams: parseInt(cell.innerHTML) || 0
+      grams: entry.grams || 0
     });
   });
 
-  const alkalineCell = document.querySelectorAll('#foodTableBody td:nth-child(11)'); // 11th is alkaline
-  let totalAlkaline = 0;
-  alkalineCell.forEach((cell: Element, key: number) => {
-    if (cell.innerHTML === 'true') {
+  let totalAlkaline = totalAlkalineToday;
+  entries.forEach((entry: Models.DefaultDocument, key: number) => {
+    if (entry.alkaline) {
       for (let ob of indexMap) {
         if (ob.index === key) {
           totalAlkaline += ob.grams;
@@ -858,6 +1058,9 @@ const nextMonth = () => {
 
 const selectDate = async (date: Date) => {
   selectedDate = date;
+  totalCaloriesToday = 0;
+  totalGramsToday = 0;
+  totalAlkalineToday = 0;
   updateCurrentDate();
   await loadFoodEntries(date);
   renderCalendar();
@@ -968,6 +1171,19 @@ function createDayElement(day: number, isOtherMonth: boolean, year: number, mont
   }
   
   return dayElement;
+}
+
+function toggleCard(id: string) {
+  const card = document.querySelector(`[data-id="${id}"]`);
+  card?.classList.toggle('expanded');
+}
+
+function deleteFood(id: string) {
+  handleDeleteFood(id);
+}
+
+function editFood(id: string) {
+  alert(`Edit functionality for food item ${id} would be implemented here`);
 }
 
 (window as any).selectFood = selectFood;

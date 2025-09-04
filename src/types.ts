@@ -1,4 +1,4 @@
-type FoodCategory = 'fats' | 'proteins' | 'carbs (high)' | 'leaves' | 'fruits' | 'carbs (low)';
+type FoodCategory = 'fats' | 'proteins' | 'carbs (high)' | 'leaves' | 'fruits' | 'carbs (low)' | 'dairy';
 
 export type FoodItem = {
   name: string;
