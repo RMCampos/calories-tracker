@@ -1,6 +1,6 @@
 import { foodDatabase } from './foodDatabase.js';
 import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './HtmlUtil.ts';
-import { FoodItem, FoodStorage } from './types.js';
+import { DailyTotalCalories, FoodItem, FoodStorage } from './types.js';
 import { AppwriteAuth, AppwriteDB } from './appwrite.js';
 import swal from 'sweetalert';
 import { Models } from 'appwrite';
@@ -12,6 +12,7 @@ let searchTimeout: number | null = null;
 let selectedFood: FoodItem | null = null; // review here
 let currentHighlightIndex: number = -1;
 let currentResults: FoodItem[] = [];
+let calendarMonthlyCalories: DailyTotalCalories[] = [];
 
 // Authentication state
 let currentUser: any | null = null;
@@ -45,7 +46,7 @@ async function initializeAuth() {
     
     if (isLoggedIn) {
       currentUser = await AppwriteAuth.getCurrentUser();
-      showMainApp();
+      await showMainApp();
       selectDate(selectedDate);
     } else {
       showAuthForms();
@@ -87,7 +88,7 @@ async function handleRegister(e: SubmitEvent) {
     await AppwriteAuth.login(email, password);
     currentUser = await AppwriteAuth.getCurrentUser();
     
-    showMainApp();
+    await showMainApp();
     selectDate(selectedDate);
     
     swal('Registration successful! Welcome to Food Tracker.');
@@ -111,7 +112,7 @@ async function handleLogin(e: SubmitEvent) {
     await AppwriteAuth.login(email, password);
     currentUser = await AppwriteAuth.getCurrentUser();
     
-    showMainApp();
+    await showMainApp();
     selectDate(selectedDate);
       
   } catch (error) {
@@ -300,7 +301,7 @@ function showAuthForms() {
   appContent?.classList.add('hidden');
 }
 
-function showMainApp() {
+async function showMainApp() {
   authSection?.classList.add('hidden');
   userInfo?.classList.remove('hidden');
   appContent?.classList.remove('hidden');
@@ -312,6 +313,14 @@ function showMainApp() {
     
   // Update date display
   updateCurrentDate();
+
+  // Get entries with total
+  const entries = await AppwriteDB.getMonthlyCalories(selectedDate);
+  entries.forEach((entry) => {
+    const calories = parseInt(entry.totalCalories);
+    const day = parseInt(entry.date.substring(8));
+    updateDocumentIdForDay(entry.$id, calories, day);
+  });
 }
 
 // Show/hide loading overlay
@@ -645,6 +654,7 @@ async function setFoodToEdit(foodId: string) {
     getButtonById('add-food-btn').innerHTML = 'Save Food';
     getInputById('foodIdToUpdate').value = foodId;
     getInputById('foodTimeToUpdate').value = foodToEdit[0].time;
+    getInputById('foodCaloriesToUpdate').value = foodToEdit[0].calories;
 
     hideLoading();
   } catch (error) {
@@ -772,6 +782,19 @@ const updateFood = async () => {
 
     // Save to Appwrite
     await AppwriteDB.updateFoodEntry(foodId, entry);
+
+    // Save or update monthly total calories
+    const monthlyDocumentId = getDocumentIdForToday();
+    if (!monthlyDocumentId?.documentId) {
+      const monthlyCreated = await AppwriteDB.createMonthlyCaloryForDay(selectedDate, entry.calories);
+      updateDocumentIdForToday(monthlyCreated.$id, monthlyCreated.totalCalories);
+    } else {
+      const gramsToRemove = parseInt(getInputById('foodCaloriesToUpdate').value);
+      const totalCalories = monthlyDocumentId?.totalCalories + entry.calories - gramsToRemove;
+      const monthlyUpdated = await AppwriteDB.updateMonthlyCaloryForDay(monthlyDocumentId?.documentId, selectedDate, totalCalories);
+      updateDocumentIdForToday(monthlyUpdated.$id, monthlyUpdated.totalCalories);
+    }
+    delay(1);
     clearEditing();
     selectDate(selectedDate);
   } catch (error) {
@@ -779,6 +802,43 @@ const updateFood = async () => {
       swal('Oh no!', 'Failed to update food entry: ' + error.message, 'error');
   } finally {
       hideLoading();
+  }
+}
+
+const getDocumentIdForToday = (): DailyTotalCalories | null => {
+  const today = selectedDate.getDate();
+  const todayRecord = calendarMonthlyCalories.filter(x => x.day === today);
+  if (todayRecord.length > 0) {
+    return todayRecord[0];
+  }
+  return null;
+}
+
+const getDocumentIdForDay = (day: number): number => {
+  const todayRecord = calendarMonthlyCalories.filter(x => x.day === day);
+  return todayRecord.length > 0 ? todayRecord[0].totalCalories : 0;
+}
+
+const updateDocumentIdForToday = (id: string, totalCalories: number): void => {
+  const today = selectedDate.getDate();
+  updateDocumentIdForDay(id, totalCalories, today);
+}
+
+const updateDocumentIdForDay = (id: string, totalCalories: number, day: number): void => {
+  const record = calendarMonthlyCalories.filter(x => x.day === day);
+  if (record.length === 0) {
+    calendarMonthlyCalories.push({
+      documentId: id,
+      day: day,
+      totalCalories: totalCalories
+    });
+  } else {  
+    calendarMonthlyCalories.forEach((record) => {
+      if (record.day === day) {
+        record.documentId = id;
+        record.totalCalories = totalCalories;
+      }
+    });
   }
 }
 
@@ -827,6 +887,19 @@ const addFood = async () => {
     // Save to Appwrite
     const savedEntry = await AppwriteDB.saveFoodEntry(entry);
 
+    // Save or update monthly total calories
+    const monthlyDocumentId = getDocumentIdForToday();
+    if (!monthlyDocumentId?.documentId) {
+      // create
+      const monthlyCreated = await AppwriteDB.createMonthlyCaloryForDay(selectedDate, entry.calories);
+      updateDocumentIdForToday(monthlyCreated.$id, monthlyCreated.totalCalories);
+    } else {
+      // update
+      const totalCalories = monthlyDocumentId?.totalCalories + entry.calories;
+      const monthlyCreated = await AppwriteDB.updateMonthlyCaloryForDay(monthlyDocumentId?.documentId, selectedDate, totalCalories);
+      updateDocumentIdForToday(monthlyCreated.$id, monthlyCreated.totalCalories);
+    }
+
     // Add to HTML table with Appwrite document ID
     addFoodToTable(entry, savedEntry.$id);
 
@@ -849,14 +922,13 @@ const addFood = async () => {
     carboDiv.textContent = (Math.round(totalCarbs * 10) / 10).toString();
     fiberDiv.textContent = (Math.round(totalFiber * 10) / 10).toString();
 
-    // Update alkaline level
-    const div = getDivById('alkaline-level');
-
     // Reset form
     selectedFood = null;
     getInputById('foodSearchInput').value = '';
     gramAmount.value = '100';
     showFoodPreview(false);
+    await delay(1);
+    renderCalendar();
   } catch (error) {
       console.error('Add food error:', error);
       swal('Oh no!', 'Failed to add food entry: ' + error.message, 'error');
@@ -980,6 +1052,8 @@ async function loadFoodEntries(date: Date) {
   }
 }
 
+const delay = (seconds: number) => new Promise(resolve => setTimeout(resolve, seconds * 1000));
+
 // Handle food deletion
 async function handleDeleteFood(documentId: string) {
   if (!documentId) return;
@@ -1000,6 +1074,24 @@ async function handleDeleteFood(documentId: string) {
   try {
     // Delete from Appwrite
     await AppwriteDB.deleteFoodEntry(documentId);
+
+    // Delete from monthly total
+    const monthlyDocumentId = getDocumentIdForToday();
+    if (monthlyDocumentId?.documentId) {
+      // find calories from document
+      const targetDiv = document.querySelector(`.food-card[data-id="${documentId}"]`);
+      let existingToDelete = 0;
+      if (targetDiv) {
+        const divCalories = targetDiv.querySelectorAll('.calories-display');
+        if (divCalories && divCalories.length > 0) {
+          existingToDelete = parseInt(divCalories[0].innerHTML.replace(' cal', ''));
+        }
+      }
+      const totalCalories = monthlyDocumentId?.totalCalories - existingToDelete;
+      const monthlyCreated = await AppwriteDB.updateMonthlyCaloryForDay(monthlyDocumentId?.documentId, selectedDate, totalCalories);
+      updateDocumentIdForToday(monthlyCreated.$id, monthlyCreated.totalCalories);
+      await delay(1);
+    }
     
     selectDate(selectedDate);
   } catch (error) {
@@ -1172,13 +1264,14 @@ const renderCalendar = async () => {
   
   for (let i = startingDayOfWeek - 1; i >= 0; i--) {
     const day = daysInPrevMonth - i;
-    const dayElement = createDayElement(day, true, year, month - 1);
+    const dayElement = createDayElement(day, true, year, month - 1, 0);
     grid.appendChild(dayElement);
   }
   
   // Add days of current month
   for (let day = 1; day <= daysInMonth; day++) {
-    const dayElement = createDayElement(day, false, year, month);
+    const dayCalories = getDocumentIdForDay(day);
+    const dayElement = createDayElement(day, false, year, month, dayCalories);
     grid.appendChild(dayElement);
   }
   
@@ -1187,12 +1280,12 @@ const renderCalendar = async () => {
   const remainingCells = 42 - totalCells;
   
   for (let day = 1; day <= remainingCells; day++) {
-    const dayElement = createDayElement(day, true, year, month + 1);
+    const dayElement = createDayElement(day, true, year, month + 1, 0);
     grid.appendChild(dayElement);
   }
 }
 
-function createDayElement(day: number, isOtherMonth: boolean, year: number, month: number) {
+function createDayElement(day: number, isOtherMonth: boolean, year: number, month: number, calories: number) {
   const dayElement = document.createElement('div') as HTMLElement;
   dayElement.className = 'calendar-day';
   
@@ -1217,14 +1310,10 @@ function createDayElement(day: number, isOtherMonth: boolean, year: number, mont
   }
   
   // Check if this day has data
-  const dayData = []; // FIXME get from AppWrite
-  if (dayData.length > 0) {
-    dayElement.classList.add('has-data');
-    const totalCalories = 0; // dayData.reduce((sum, entry) => sum + entry.calories, 0);
-    
+  if (calories > 0) {
     dayElement.innerHTML = `
-        <div>${day}</div>
-        <div class="day-calories">${totalCalories} cal</div>
+      ${day}
+      <small class="muted">${calories}</small>
     `;
   } else {
     dayElement.textContent = day.toString();

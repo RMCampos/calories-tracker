@@ -1,5 +1,5 @@
 import { Client, Account, Databases, Query } from 'appwrite';
-import { FoodStorage, UserSettings } from './types';
+import { DailyTotalCalories, FoodStorage, UserSettings } from './types';
 
 // Initialize Appwrite client
 const client = new Client();
@@ -16,6 +16,7 @@ export const databases = new Databases(client);
 export const DATABASE_ID = import.meta.env.VITE_APPWRITE_DBID
 export const FOOD_ENTRIES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_FOODENTRIESID
 export const USER_SETTINGS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_USERSETTINGSID
+export const MONTHLY_CALORIES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_MONTLYCALORIESID
 
 // Auth helper functions
 export class AppwriteAuth {
@@ -156,6 +157,72 @@ export class AppwriteDB {
       return response.documents;
     } catch (error) {
       console.error('Get food entries error:', error);
+      throw error;
+    }
+  }
+
+  // Get all calories for a particular date
+  static async getMonthlyCalories(date: Date) {
+    try {
+      const user = await account.get();
+      const localDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
+
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        MONTHLY_CALORIES_COLLECTION_ID,
+        [
+          Query.equal('userId', user.$id),
+          Query.startsWith('date', localDateTime.substring(0, 7)),
+        ]
+      );
+      console.debug('Food entries retrieved:', response);
+      return response.documents;
+    } catch (error) {
+      console.error('Get all calories for month error:', error);
+      throw error;
+    }
+  }
+
+  static async createMonthlyCaloryForDay(date: Date, totalCalories: number) {
+    try {
+      const localDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
+
+      const response = await databases.createDocument(
+        DATABASE_ID,
+        MONTHLY_CALORIES_COLLECTION_ID ,
+        'unique()',
+        {
+          userId: (await account.get()).$id,
+          date: localDateTime.substring(0, 10),
+          totalCalories: totalCalories
+        }
+      );
+      console.debug('User settings saved:', response);
+      return response;
+    } catch (error) {
+      console.error('Save user settings error:', error);
+      throw error;
+    }
+  }
+
+  static async updateMonthlyCaloryForDay(id: string, date: Date, totalCalories: number) {
+    try {
+      const localDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
+
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        MONTHLY_CALORIES_COLLECTION_ID ,
+        id,
+        {
+          userId: (await account.get()).$id,
+          date: localDateTime.substring(0, 10),
+          totalCalories: totalCalories
+        }
+      );
+      console.debug('User settings saved:', response);
+      return response;
+    } catch (error) {
+      console.error('Save user settings error:', error);
       throw error;
     }
   }

@@ -27,3 +27,9 @@ export type UserSettings = {
   carboGoal: number;
   fiberGoal: number;
 };
+
+export type DailyTotalCalories = {
+  documentId: string;
+  day: number;
+  totalCalories: number;
+};

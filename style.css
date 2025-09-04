@@ -685,6 +685,10 @@ label {
     display: none;
 }
 
+.muted {
+    color: #ccc;
+}
+
 @media (max-width: 768px) {
     .container {
         margin: 0px;
