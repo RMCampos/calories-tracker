@@ -213,7 +213,7 @@ async function handleLogout() {
 }
 
 async function handleSettings() {
-  const showSettings = getButtonById('settingsBtn').textContent === 'Settings' || getButtonById('settingsBtn').textContent === '⚙️ Settings';
+  const showSettings = getButtonById('settingsBtn').textContent.includes('Settings');
 
   if (showSettings) {
     showLoading();
@@ -237,7 +237,8 @@ async function handleSettings() {
         getInputById('fiberGoal').value = '';
       }
       
-      getButtonById('settingsBtn').textContent = 'Back';
+      getButtonById('settingsBtn').textContent = '🔙 Back';
+      getButtonById('settingsBtnMobile').textContent = '🔙 Back';
 
       appContent?.classList.add('hidden');
       settingsContent?.classList.remove('hidden');
@@ -252,6 +253,7 @@ async function handleSettings() {
     appContent?.classList.remove('hidden');
     settingsContent?.classList.add('hidden');
     getButtonById('settingsBtn').textContent = '⚙️ Settings';
+    getButtonById('settingsBtnMobile').textContent = '⚙️ Settings';
   }
 }
 
