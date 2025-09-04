@@ -336,6 +336,7 @@ function clearEditing() {
   searchInput.value = '';
   getInputById('gramAmount').value = '100';
   showFoodPreview(false);
+  getDivById('add-foot-title').innerHTML = 'Add Food Entry';
   getButtonById('add-food-btn').innerHTML = 'Add Food';
   selectedFood = null;
 }
@@ -651,10 +652,20 @@ async function setFoodToEdit(foodId: string) {
     getInputById('gramAmount').value = foodToEdit[0].grams;
     previewCalories(foodData)
 
+    getDivById('add-foot-title').innerHTML = 'Edit Food Entry';
     getButtonById('add-food-btn').innerHTML = 'Save Food';
     getInputById('foodIdToUpdate').value = foodId;
     getInputById('foodTimeToUpdate').value = foodToEdit[0].time;
     getInputById('foodCaloriesToUpdate').value = foodToEdit[0].calories;
+
+    // Scroll to top
+    const titleDiv = getDivById('add-foot-title') as HTMLElement;
+    if (titleDiv) {
+      titleDiv.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
 
     hideLoading();
   } catch (error) {
