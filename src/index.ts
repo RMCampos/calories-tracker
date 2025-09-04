@@ -486,12 +486,13 @@ function displaySearchResults(results: FoodItem[]) {
     searchResults.innerHTML = '<div class="no-results">No foods found. Try a different search term.</div>';
   } else {
     const icons = {
-      'fats': '🥑',
-      'proteins': '🫘',
-      'carbs (high)': '🍞',
-      'leaves': '🥬', 
-      'fruits': '🍊',
-      'carbs (low)': '🍍'
+      'fats': '🥑 🍳 🍟',
+      'proteins': '🫘 🥩 🥚',
+      'carbs (high)': '🍞 🥔 🍠',
+      'leaves': '🥬 🥗 🌿',
+      'fruits': '🍊 🍇 🍎',
+      'carbs (low)': '🥦 🍅 🍓',
+      'dairy': '🧀 🧈 🥛'
     };
 
     searchResults.innerHTML = results.map((food, index) => `
