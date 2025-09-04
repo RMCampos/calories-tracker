@@ -1240,17 +1240,4 @@ function createDayElement(day: number, isOtherMonth: boolean, year: number, mont
   return dayElement;
 }
 
-function toggleCard(id: string) {
-  const card = document.querySelector(`[data-id="${id}"]`);
-  card?.classList.toggle('expanded');
-}
-
-function deleteFood(id: string) {
-  handleDeleteFood(id);
-}
-
-function editFood(id: string) {
-  alert(`Edit functionality for food item ${id} would be implemented here`);
-}
-
 (window as any).selectFood = selectFood;
