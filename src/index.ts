@@ -12,9 +12,6 @@ let searchTimeout: number | null = null;
 let selectedFood: FoodItem | null = null; // review here
 let currentHighlightIndex: number = -1;
 let currentResults: FoodItem[] = [];
-let totalCaloriesToday: number = 0;
-let totalGramsToday: number = 0;
-let totalAlkalineToday: number = 0;
 
 // Authentication state
 let currentUser: any | null = null;
@@ -347,9 +344,6 @@ function clearAppData() {
       </div>
   `;
   selectedFood = null;
-  totalCaloriesToday = 0;
-  totalGramsToday = 0;
-  totalAlkalineToday = 0;
   getButtonById('cancel-food-btn').style.display = 'none';
 }
 
@@ -1058,6 +1052,7 @@ function addFoodToTable(foodData: FoodStorage, documentId: string) {
                 <div class="nutrition-label">Fiber</div>
                 <div class="nutrition-value">${foodData.fiber}g</div>
             </div>
+            <div class="food-is-alkaline hidden">${foodData.alkaline ? 'alkaline' : ''}</div>
           </div>
           <div class="card-actions">
             <button class="btn btn-edit" data-food-id="${documentId}">Edit</button>
@@ -1075,30 +1070,31 @@ function addFoodToTable(foodData: FoodStorage, documentId: string) {
 
 // Update total calories
 function updateTotalCalories(entries: Models.DefaultDocument[]) {
-  let total = totalCaloriesToday;
+  const caloriesDiv = document.querySelectorAll('.calories-display');
+  let total = 0;
 
-  entries.forEach((entry: Models.DefaultDocument) => {
-    total += entry.calories || 0;
+  caloriesDiv.forEach((innerDiv: Element) => {
+    total += parseInt(innerDiv.innerHTML.replace(' cal', '')) || 0;
   });
 
   getDivById('caloriesCounter').textContent = total.toString();
-  totalCaloriesToday = total;
- 
-  // FIX ME: alkaline count
   // Update alkaline level
-  let totalGrams = totalGramsToday;
+  const gramsDivs = document.querySelectorAll('.food-time');
+  let totalGrams = 0;
   let indexMap: {index: number, grams: number}[] = [];
-  entries.forEach((entry: Models.DefaultDocument, key: number) => {
-    totalGrams += entry.grams || 0;
+  gramsDivs.forEach((innerDiv: Element, key: number) => {
+    const totalGramDiv = parseInt(innerDiv.innerHTML.split(' ')[2].replace('g', ''));
+    totalGrams += totalGramDiv || 0;
     indexMap.push({
       index: key,
-      grams: entry.grams || 0
+      grams: totalGramDiv || 0
     });
   });
 
-  let totalAlkaline = totalAlkalineToday;
-  entries.forEach((entry: Models.DefaultDocument, key: number) => {
-    if (entry.alkaline) {
+  const alkalineDivs = document.querySelectorAll('.food-is-alkaline');
+  let totalAlkaline = 0;
+  alkalineDivs.forEach((alkaDiv: Element, key: number) => {
+    if (alkaDiv.innerHTML === 'alkaline') {
       for (let ob of indexMap) {
         if (ob.index === key) {
           totalAlkaline += ob.grams;
@@ -1125,15 +1121,12 @@ const nextMonth = () => {
 
 const selectDate = async (date: Date) => {
   selectedDate = date;
-  totalCaloriesToday = 0;
-  totalGramsToday = 0;
-  totalAlkalineToday = 0;
   updateCurrentDate();
   await loadFoodEntries(date);
   renderCalendar();
 }
 
-const renderCalendar = () => {
+const renderCalendar = async () => {
   const year = currentViewDate.getFullYear();
   const month = currentViewDate.getMonth();
   
