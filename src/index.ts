@@ -1,33 +1,17 @@
 import { foodDatabase } from './foodDatabase.js';
-import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './HtmlUtil.ts';
+import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './DomUtils.ts';
 import { DailyTotalCalories, FoodItem, FoodStorage } from './types.js';
 import { AppwriteAuth, AppwriteDB } from './appwrite.js';
 import swal from 'sweetalert';
-import { Models } from 'appwrite';
+import { closeMobileMenu, delay, getCleanName, getIcon, handleMobileCalendarClick, hideLoading, hideSearchResults, navigateResultsKeyboard, QUICK_DELAY, scrollToCalendarView, showLoading, toggleCardHandler, toggleMobileMenu } from './Utils.ts';
+import { showAuthForms, toggleAuthForms } from './auth.ts';
+import { appState } from "./state";
 
 // App state
 let selectedDate = new Date();
 let currentViewDate = new Date();
-let searchTimeout: number | null = null;
 let selectedFood: FoodItem | null = null; // review here
-let currentHighlightIndex: number = -1;
-let currentResults: FoodItem[] = [];
-let calendarMonthlyCalories: DailyTotalCalories[] = [];
-
-// Authentication state
 let currentUser: any | null = null;
-
-// DOM Elements
-const authSection = document.getElementById('auth-section');
-const userInfo = document.getElementById('user-info');
-const appContent = document.getElementById('app-content');
-const settingsContent = document.getElementById('settings-content');
-const loadingOverlay = getDivById('loading-overlay');
-const loginForm = document.getElementById('login-form');
-const registerForm = document.getElementById('register-form');
-const searchInput = getInputById('foodSearchInput');
-const searchLoading = document.getElementById('searchLoading');
-const searchResults = getDivById('searchResults');
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', async function() {
@@ -36,12 +20,10 @@ document.addEventListener('DOMContentLoaded', async function() {
   setupEventListeners();
 });
 
-// Initialize application
 async function initializeAuth() {
   showLoading();
   
   try {
-    // Check if user is already logged in
     const isLoggedIn = await AppwriteAuth.isLoggedIn();
     
     if (isLoggedIn) {
@@ -59,20 +41,8 @@ async function initializeAuth() {
   }
 }
 
-// Toggle between login and register forms
-function toggleAuthForms() {
-  loginForm?.classList.toggle('hidden');
-  registerForm?.classList.toggle('hidden');
-  
-  // Clear form data
-  const logForm = document.getElementById('loginForm') as HTMLFormElement;
-  logForm.reset();
 
-  const resetForm = document.getElementById('registerForm') as HTMLFormElement;
-  resetForm.reset();
-}
 
-// Handle user registration
 async function handleRegister(e: SubmitEvent) {
   e.preventDefault();
   showLoading();
@@ -100,7 +70,6 @@ async function handleRegister(e: SubmitEvent) {
   }
 }
 
-// Handle user login
 async function handleLogin(e: SubmitEvent) {
   e.preventDefault();
   showLoading();
@@ -141,12 +110,10 @@ async function fetchUserSettings(documentId: string): Promise<any> {
   return AppwriteDB.deleteUserSettings(documentId);
 }
 
-// Main function that processes the response
 async function handleBulkDelete(idsToDelete: string[]): Promise<void> {
   try {
     // This creates and executes all promises concurrently
     const results = await processResponseItems(idsToDelete, fetchUserSettings);
-    
     console.debug('All requests completed:', results);
   } catch (error) {
     console.error('One or more requests failed:', error);
@@ -175,7 +142,6 @@ async function handleSaveSettings(e: SubmitEvent) {
       await handleBulkDelete(documentsToDelete);
     }
 
-    // Save to Appwrite
     await AppwriteDB.saveUserSettings({
       caloriesGoal: parseInt(caloriesGoal),
       proteinGoal: parseInt(proteinGoal),
@@ -185,7 +151,7 @@ async function handleSaveSettings(e: SubmitEvent) {
     });
 
     hideLoading();
-    handleSettings();
+    toggleSettingsView();
     selectDate(selectedDate);
   } catch (error) {
     hideLoading();
@@ -210,14 +176,13 @@ async function handleLogout() {
   }
 }
 
-async function handleSettings() {
+async function toggleSettingsView() {
   const showSettings = getButtonById('settingsBtn').textContent.includes('Settings');
 
   if (showSettings) {
     showLoading();
 
     try {
-      // Fetch goals from settings
       const settings = await AppwriteDB.getUserSettings();
       const hasGoals = Array.isArray(settings) && settings.length > 0;
       if (hasGoals) {
@@ -238,8 +203,8 @@ async function handleSettings() {
       getButtonById('settingsBtn').textContent = '🔙 Back';
       getButtonById('settingsBtnMobile').textContent = '🔙 Back';
 
-      appContent?.classList.add('hidden');
-      settingsContent?.classList.remove('hidden');
+      getDivById('app-content').classList.add('hidden');
+      getDivById('settings-content').classList.remove('hidden');
       hideLoading();
     } catch (error) {
       hideLoading();
@@ -248,73 +213,30 @@ async function handleSettings() {
     }
   }
   else {
-    appContent?.classList.remove('hidden');
-    settingsContent?.classList.add('hidden');
+    getDivById('app-content').classList.remove('hidden');
+    getDivById('settings-content').classList.add('hidden');
     getButtonById('settingsBtn').textContent = '⚙️ Settings';
     getButtonById('settingsBtnMobile').textContent = '⚙️ Settings';
   }
 }
 
-// Handle settings for mobile (same logic but different button)
-async function handleSettingsMobile() {
+async function handleMobileSettingsClick() {
   closeMobileMenu();
-  await handleSettings();
-}
-
-// Handle calendar button - scroll to calendar section
-function handleCalendar() {
-  const calendarSection = document.querySelector('.calendar-section') as HTMLElement;
-  if (calendarSection) {
-    calendarSection.scrollIntoView({ 
-      behavior: 'smooth',
-      block: 'start'
-    });
-  }
-}
-
-// Handle calendar for mobile
-function handleCalendarMobile() {
-  closeMobileMenu();
-  handleCalendar();
-}
-
-// Toggle mobile menu
-function toggleMobileMenu() {
-  const mobileMenu = document.getElementById('mobileMenu');
-  if (mobileMenu) {
-    mobileMenu.classList.toggle('hidden');
-  }
-}
-
-// Close mobile menu
-function closeMobileMenu() {
-  const mobileMenu = document.getElementById('mobileMenu');
-  if (mobileMenu) {
-    mobileMenu.classList.add('hidden');
-  }
-}
-
-// Show authentication forms
-function showAuthForms() {
-  authSection?.classList.remove('hidden');
-  userInfo?.classList.add('hidden');
-  appContent?.classList.add('hidden');
+  await toggleSettingsView();
 }
 
 async function showMainApp() {
-  authSection?.classList.add('hidden');
-  userInfo?.classList.remove('hidden');
-  appContent?.classList.remove('hidden');
+  getDivById('auth-section').classList.add('hidden');
+  getDivById('user-info').classList.remove('hidden');
+  getDivById('app-content').classList.remove('hidden');
     
-  // Update user info display
   if (currentUser) {
     getDivById('userName').textContent = `Welcome, ${currentUser.name}!`;
   }
     
-  // Update date display
   updateCurrentDate();
 
-  // Get entries with total
+  // Get daily entries with total from Appwrite to display in calendar
   const entries = await AppwriteDB.getMonthlyCalories(selectedDate);
   entries.forEach((entry) => {
     const calories = parseInt(entry.totalCalories);
@@ -323,17 +245,8 @@ async function showMainApp() {
   });
 }
 
-// Show/hide loading overlay
-function showLoading() {
-  loadingOverlay.classList.remove('hidden');
-}
-
-function hideLoading() {
-  loadingOverlay.classList.add('hidden');
-}
-
 function clearEditing() {
-  searchInput.value = '';
+  getInputById('foodSearchInput').value = '';
   getInputById('gramAmount').value = '100';
   showFoodPreview(false);
   getDivById('add-foot-title').innerHTML = 'Add Food Entry';
@@ -456,13 +369,13 @@ const setupEventListeners = () => {
   
   // Desktop header buttons
   document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
-  document.getElementById('settingsBtn')?.addEventListener('click', handleSettings);
-  document.getElementById('calendarBtn')?.addEventListener('click', handleCalendar);
+  document.getElementById('settingsBtn')?.addEventListener('click', toggleSettingsView);
+  document.getElementById('calendarBtn')?.addEventListener('click', scrollToCalendarView);
   
   // Mobile header buttons
   document.getElementById('logoutBtnMobile')?.addEventListener('click', handleLogout);
-  document.getElementById('settingsBtnMobile')?.addEventListener('click', handleSettingsMobile);
-  document.getElementById('calendarBtnMobile')?.addEventListener('click', handleCalendarMobile);
+  document.getElementById('settingsBtnMobile')?.addEventListener('click', handleMobileSettingsClick);
+  document.getElementById('calendarBtnMobile')?.addEventListener('click', handleMobileCalendarClick);
   
   // Mobile menu toggle
   document.getElementById('mobileMenuToggle')?.addEventListener('click', toggleMobileMenu);
@@ -471,7 +384,7 @@ const setupEventListeners = () => {
   document.getElementById('settingsForm')?.addEventListener('submit', handleSaveSettings);
 
   // Search functionality
-  searchInput.addEventListener('input', function(e: Event) {
+  getInputById('foodSearchInput').addEventListener('input', function(e: Event) {
     const target = e.target as HTMLInputElement;
     const query = target.value.trim();
     
@@ -481,36 +394,36 @@ const setupEventListeners = () => {
     }
 
     // Show loading
-    searchLoading?.classList.add('show');
+    getDivById('searchLoading').classList.add('show');
     
     // Clear previous timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
+    if (appState.searchTimeout) {
+      clearTimeout(appState.searchTimeout);
     }
     
     // Debounce search
-    searchTimeout = setTimeout(() => {
+    appState.searchTimeout = setTimeout(() => {
       performSearch(query);
     }, 300);
   });
 
   // Keyboard navigation
-  searchInput?.addEventListener('keydown', function(e) {
-    if (!searchResults?.classList.contains('show')) return;
+  getInputById('foodSearchInput').addEventListener('keydown', function(e) {
+    if (!getDivById('searchResults').classList.contains('show')) return;
       
     switch(e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        navigateResults(1);
+        navigateResultsKeyboard(1);
         break;
       case 'ArrowUp':
         e.preventDefault();
-        navigateResults(-1);
+        navigateResultsKeyboard(-1);
         break;
       case 'Enter':
         e.preventDefault();
-        if (currentHighlightIndex >= 0 && currentResults[currentHighlightIndex]) {
-          selectFood(currentResults[currentHighlightIndex]);
+        if (appState.currentHighlightIndex >= 0 && appState.searchResults[appState.currentHighlightIndex]) {
+          selectFood(appState.searchResults[appState.currentHighlightIndex]);
         }
         break;
       case 'Escape':
@@ -522,7 +435,7 @@ const setupEventListeners = () => {
   // Click outside to close search results
   document.addEventListener('click', function(e: Event) {
     const target = e.target as HTMLElement;
-    if (!searchResults.contains(target) && !searchInput.contains(target)) {
+    if (!getDivById('searchResults').contains(target) && !getInputById('foodSearchInput').contains(target)) {
       hideSearchResults();
     }
   });
@@ -541,52 +454,26 @@ const setupEventListeners = () => {
   });
 }
 
-const getCleanName = (foodName: string): string => {
-  const newName = foodName
-    .replace(/á/g, 'a')
-    .replace(/ã/g, 'a')
-    .replace(/â/g, 'a')
-    .replace(/ê/g, 'e')
-    .replace(/é/g, 'e')
-    .replace(/ó/g, 'o')
-    .replace(/ú/g, 'u')
-    .replace(/ç/g, 'c');
-  return newName.toLowerCase();
-}
-
-// Perform search
 function performSearch(query: string) {
-  // Simulate API call - replace with your actual database search
   const results: FoodItem[] = foodDatabase.filter(food => {
     const cleanName = getCleanName(food.name);
     const category = food.info.category.toLowerCase();
     return cleanName.includes(query.toLowerCase()) || category.includes(query.toLowerCase())
   }).slice(0, 5); // Limit to 5 results
 
-  currentResults = results;
+  appState.searchResults = results;
   displaySearchResults(results);
-  searchLoading?.classList.remove('show');
+  getDivById('searchLoading').classList.remove('show');
 }
 
-// Display search results
 function displaySearchResults(results: FoodItem[]) {
   if (results.length === 0) {
-    searchResults.innerHTML = '<div class="no-results">No foods found. Try a different search term.</div>';
+    getDivById('searchResults').innerHTML = '<div class="no-results">No foods found. Try a different search term.</div>';
   } else {
-    const icons = {
-      'fats': '🥑 🍳 🍟',
-      'proteins': '🫘 🥩 🥚',
-      'carbs (high)': '🍞 🥔 🍠',
-      'leaves': '🥬 🥗 🌿',
-      'fruits': '🍊 🍇 🍎',
-      'carbs (low)': '🥦 🍅 🍓',
-      'dairy': '🧀 🧈 🥛'
-    };
-
-    searchResults.innerHTML = results.map((food, index) => `
+    getDivById('searchResults').innerHTML = results.map((food, index) => `
         <div class="search-result-item" data-index="${index}" onclick="selectFood(${JSON.stringify(food).replace(/"/g, '&quot;')})">
             <div class="food-info">
-                <div class="food-name">${icons[food.info.category]} ${food.name}</div>
+                <div class="food-name">${getIcon(food.info.category)} ${food.name}</div>
                 <div class="food-details">${food.info.category} • 100 g</div>
             </div>
             <div class="food-calories">${food.info.calories} cal</div>
@@ -594,42 +481,16 @@ function displaySearchResults(results: FoodItem[]) {
     `).join('');
   }
     
-  searchResults.classList.add('show');
-  currentHighlightIndex = -1;
+  getDivById('searchResults').classList.add('show');
+  appState.currentHighlightIndex = -1;
 }
 
-// Navigate results with keyboard
-function navigateResults(direction: number) {
-  const items = searchResults.querySelectorAll('.search-result-item');
-  if (items.length === 0) return;
-  
-  // Remove current highlight
-  if (currentHighlightIndex >= 0) {
-      items[currentHighlightIndex].classList.remove('highlighted');
-  }
-  
-  // Calculate new index
-  currentHighlightIndex += direction;
-  if (currentHighlightIndex < 0) currentHighlightIndex = items.length - 1;
-  if (currentHighlightIndex >= items.length) currentHighlightIndex = 0;
-  
-  // Add new highlight
-  items[currentHighlightIndex].classList.add('highlighted');
-  items[currentHighlightIndex].scrollIntoView({ block: 'nearest' });
-}
-
-// Select food
 function selectFood(food: FoodItem) {
   selectedFood = food;
   
-  // Clear search and hide results
-  searchInput.value = food.name;
-  hideSearchResults();
-  
-  // Focus on quantity input
+  getInputById('foodSearchInput').value = food.name;
+  hideSearchResults();  
   getInputById('gramAmount').focus();
-  
-  // Update calories
   previewCalories(food);
 }
 
@@ -648,7 +509,7 @@ async function setFoodToEdit(foodId: string) {
     // set the selected food name and quantity
     const foodData: FoodItem = getFoodItemByName(foodToEdit[0].name);
     selectedFood = foodData;
-    searchInput.value = foodToEdit[0].name;
+    getInputById('foodSearchInput').value = foodToEdit[0].name;
     getInputById('gramAmount').value = foodToEdit[0].grams;
     previewCalories(foodData)
 
@@ -676,25 +537,6 @@ async function setFoodToEdit(foodId: string) {
   }
 }
 
-// Hide search results
-function hideSearchResults() {
-  searchResults.classList.remove('show');
-  currentHighlightIndex = -1;
-}
-
-function toggleCardHandler(e: Event) {
-  e.preventDefault();
-  e.stopPropagation();
-  
-  const card = e.currentTarget as HTMLElement;
-  card.classList.toggle('expanded');
-  
-  const cardDetails = card.nextElementSibling as HTMLElement;
-  if (cardDetails && cardDetails.classList.contains('card-details')) {
-    cardDetails.classList.toggle('expanded');
-  }
-}
-
 function deleteCardHandler(e: Event) {
   e.preventDefault();
   e.stopPropagation();
@@ -719,7 +561,7 @@ function editCardHandler(e: Event) {
   }
 }
 
-const addDeleteEvents = () => {
+const setupEditAndDeleteEvents = () => {
   // Setup toggle show cards events
   const cards = getButtonListByClassName('card-header-toggle');
   Array.from(cards).forEach((card: HTMLElement) => {
@@ -742,7 +584,6 @@ const addDeleteEvents = () => {
   });
 }
 
-// Update current date display
 const updateCurrentDate = () => {
   const date = new Date(selectedDate);
   getDivById('currentDate').textContent = date.toLocaleDateString('en-US', {
@@ -805,7 +646,7 @@ const updateFood = async () => {
       const monthlyUpdated = await AppwriteDB.updateMonthlyCaloryForDay(monthlyDocumentId?.documentId, selectedDate, totalCalories);
       updateDocumentIdForToday(monthlyUpdated.$id, monthlyUpdated.totalCalories);
     }
-    delay(1);
+    delay(QUICK_DELAY);
     clearEditing();
     selectDate(selectedDate);
   } catch (error) {
@@ -818,7 +659,7 @@ const updateFood = async () => {
 
 const getDocumentIdForToday = (): DailyTotalCalories | null => {
   const today = selectedDate.getDate();
-  const todayRecord = calendarMonthlyCalories.filter(x => x.day === today);
+  const todayRecord = appState.calendarMonthlyCalories.filter(x => x.day === today);
   if (todayRecord.length > 0) {
     return todayRecord[0];
   }
@@ -826,7 +667,7 @@ const getDocumentIdForToday = (): DailyTotalCalories | null => {
 }
 
 const getDocumentIdForDay = (day: number): number => {
-  const todayRecord = calendarMonthlyCalories.filter(x => x.day === day);
+  const todayRecord = appState.calendarMonthlyCalories.filter(x => x.day === day);
   return todayRecord.length > 0 ? todayRecord[0].totalCalories : 0;
 }
 
@@ -836,15 +677,15 @@ const updateDocumentIdForToday = (id: string, totalCalories: number): void => {
 }
 
 const updateDocumentIdForDay = (id: string, totalCalories: number, day: number): void => {
-  const record = calendarMonthlyCalories.filter(x => x.day === day);
+  const record = appState.calendarMonthlyCalories.filter(x => x.day === day);
   if (record.length === 0) {
-    calendarMonthlyCalories.push({
+    appState.calendarMonthlyCalories.push({
       documentId: id,
       day: day,
       totalCalories: totalCalories
     });
-  } else {  
-    calendarMonthlyCalories.forEach((record) => {
+  } else {
+    appState.calendarMonthlyCalories.forEach((record) => {
       if (record.day === day) {
         record.documentId = id;
         record.totalCalories = totalCalories;
@@ -853,7 +694,6 @@ const updateDocumentIdForDay = (id: string, totalCalories: number, day: number):
   }
 }
 
-// Add food to the log
 const addFood = async () => {
   if (!currentUser) {
     swal('Hey!', 'Please log in to add food entries.', 'info');
@@ -911,11 +751,8 @@ const addFood = async () => {
       updateDocumentIdForToday(monthlyCreated.$id, monthlyCreated.totalCalories);
     }
 
-    // Add to HTML table with Appwrite document ID
-    addFoodToTable(entry, savedEntry.$id);
-
-    // Update totals
-    updateTotalCalories([savedEntry]);
+    addFoodToView(entry, savedEntry.$id);
+    updateTotalCalories();
 
     // Update total macros
     const proteinDiv: HTMLElement = getDivById('proteinValue');
@@ -938,7 +775,7 @@ const addFood = async () => {
     getInputById('foodSearchInput').value = '';
     gramAmount.value = '100';
     showFoodPreview(false);
-    await delay(1);
+    await delay(QUICK_DELAY);
     renderCalendar();
   } catch (error) {
       console.error('Add food error:', error);
@@ -948,7 +785,7 @@ const addFood = async () => {
   }
 }
 
-// Load food entries from Appwrite
+// Load food entries from Appwrite for a given date
 async function loadFoodEntries(date: Date) {
   if (!currentUser) return;
 
@@ -957,7 +794,6 @@ async function loadFoodEntries(date: Date) {
   try {
     const entries = await AppwriteDB.getFoodEntries(date);
     
-    // Clear current table
     getDivById('foodCardsContainer').innerHTML = '';
     
     // Add each entry to table
@@ -975,8 +811,8 @@ async function loadFoodEntries(date: Date) {
         date: entry.date,
         alkaline: entry.alkaline,
       };
-      
-      addFoodToTable(foodData, entry.$id);
+
+      addFoodToView(foodData, entry.$id);
     });
 
     if (entries.length === 0) {
@@ -989,11 +825,8 @@ async function loadFoodEntries(date: Date) {
       `;
     }
 
-    // Setup Delete events
-    addDeleteEvents();
-    
-    // Update total calories
-    updateTotalCalories(entries);
+    setupEditAndDeleteEvents();    
+    updateTotalCalories();
 
     // Update counters
     let totalCalories = 0;
@@ -1063,8 +896,6 @@ async function loadFoodEntries(date: Date) {
   }
 }
 
-const delay = (seconds: number) => new Promise(resolve => setTimeout(resolve, seconds * 1000));
-
 // Handle food deletion
 async function handleDeleteFood(documentId: string) {
   if (!documentId) return;
@@ -1101,7 +932,7 @@ async function handleDeleteFood(documentId: string) {
       const totalCalories = monthlyDocumentId?.totalCalories - existingToDelete;
       const monthlyCreated = await AppwriteDB.updateMonthlyCaloryForDay(monthlyDocumentId?.documentId, selectedDate, totalCalories);
       updateDocumentIdForToday(monthlyCreated.$id, monthlyCreated.totalCalories);
-      await delay(1);
+      await delay(QUICK_DELAY);
     }
     
     selectDate(selectedDate);
@@ -1113,8 +944,7 @@ async function handleDeleteFood(documentId: string) {
   }
 }
 
-// Add food to table (existing function - update to use document ID)
-function addFoodToTable(foodData: FoodStorage, documentId: string) {
+function addFoodToView(foodData: FoodStorage, documentId: string) {
   // New Food card
   const container = getDivById('foodCardsContainer');
   const card = document.createElement('div');
@@ -1124,6 +954,8 @@ function addFoodToTable(foodData: FoodStorage, documentId: string) {
   if (container.innerHTML.includes('empty-state')) {
     container.innerHTML = '';
   }
+
+  const foodFromDatabase = getFoodItemByName(foodData.name);
 
   card.innerHTML = `
     <div class="card-header card-header-toggle">
@@ -1158,8 +990,11 @@ function addFoodToTable(foodData: FoodStorage, documentId: string) {
             <div class="food-is-alkaline hidden">${foodData.alkaline ? 'alkaline' : ''}</div>
           </div>
           <div class="card-actions">
-            <button class="btn btn-edit" data-food-id="${documentId}">Edit</button>
-            <button class="btn btn-delete" data-food-id="${documentId}">Delete</button>
+            <span class="muted">${getIcon(foodFromDatabase.info.category)} ${foodFromDatabase.info.category}</span>
+            <div>
+              <button class="btn btn-edit" data-food-id="${documentId}">Edit</button>
+              <button class="btn btn-delete" data-food-id="${documentId}">Delete</button>
+            </div>
           </div>
       </div>
     </div>
@@ -1167,12 +1002,12 @@ function addFoodToTable(foodData: FoodStorage, documentId: string) {
 
   container?.appendChild(card);
 
-  // Setup Delete events
-  addDeleteEvents();
+  setupEditAndDeleteEvents();
 }
 
-// Update total calories
-function updateTotalCalories(entries: Models.DefaultDocument[]) {
+// Update total calories and display it in the counter
+// Also updates alkaline level percentage
+function updateTotalCalories() {
   const caloriesDiv = document.querySelectorAll('.calories-display');
   let total = 0;
 
