@@ -99,10 +99,10 @@ export function getIcon(category: string) {
   const icons = {
     'fats': '🥑 🍳 🍟',
     'proteins': '🫘 🥩 🥚',
-    'carbs (high)': '🍞 🥔 🍠',
+    'carbs': '🍞 🥔 🍠',
     'leaves': '🥬 🥗 🌿',
     'fruits': '🍊 🍇 🍎',
-    'carbs (low)': '🥦 🍅 🍓',
+    'low carb': '🥦 🍅 🍓',
     'dairy': '🧀 🧈 🥛'
   };
 
