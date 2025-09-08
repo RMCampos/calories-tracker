@@ -92,7 +92,7 @@ export function toggleCardHandler(e: Event) {
 }
 
 export function delay(seconds: number) {
-  return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+  return new Promise(resolve => setTimeout(resolve, seconds));
 }
 
 export function getIcon(category: string) {
