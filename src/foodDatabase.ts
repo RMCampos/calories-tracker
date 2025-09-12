@@ -3,15 +3,15 @@ import { FoodItem } from "./types";
 export const foodDatabase: FoodItem[] = [
   // Gorduras - Fats
   { name: 'Abacate', info: { calories: 96, protein: 1.2, fat: 8.4, carbs: 6, fiber: 6.3, category: 'fats', alkaline: true } },
-  { name: 'Amêndoas', info: { calories: 581, protein: 18.6, fat: 47.3, carbs: 29.5, fiber: 11.6, category: 'fats', alkaline: true } },
+  { name: 'Amêndoas', info: { calories: 581, protein: 18.6, fat: 47.3, carbs: 29.5, fiber: 11.6, category: 'fats', alkaline: false } },
   { name: 'Amendoin natural', info: { calories: 611, protein: 26, fat: 49, carbs: 16, fiber: 8.5, category: 'fats', alkaline: true } },
   { name: 'Azeite de Oliva EV', info: { calories: 844, protein: 0, fat: 100, carbs: 0, fiber: 0, category: 'fats', alkaline: false } },
-  { name: 'Castanha de Caju', info: { calories: 570, protein: 18.5, fat: 46.3, carbs: 29.1, fiber: 3.7, category: 'fats', alkaline: true } },
-  { name: 'Castanha do Pará', info: { calories: 643, protein: 14.5, fat: 63.5, carbs: 15.1, fiber: 7.9, category: 'fats', alkaline: true } },
+  { name: 'Castanha de Caju', info: { calories: 570, protein: 18.5, fat: 46.3, carbs: 29.1, fiber: 3.7, category: 'fats', alkaline: false } },
+  { name: 'Castanha do Pará', info: { calories: 643, protein: 14.5, fat: 63.5, carbs: 15.1, fiber: 7.9, category: 'fats', alkaline: false } },
   { name: 'Semente de Chia', info: { calories: 490, protein: 15.6, fat: 30.7, carbs: 43.8, fiber: 37.7, category: 'fats', alkaline: true } },
   { name: 'Semente de Linhaça', info: { calories: 495, protein: 14.1, fat: 32.3, carbs: 43.3, fiber: 33.5, category: 'fats', alkaline: true } },
   { name: 'Semente de Gergelim', info: { calories: 584, protein: 21.2, fat: 50.4, carbs: 21.6, fiber: 11.9, category: 'fats', alkaline: true } },
-  { name: 'Pasta de Amendoim Growth', info: { calories: 544, protein: 27, fat: 33, carbs: 20, fiber: 8, category: 'fats', alkaline: true } },
+  { name: 'Pasta de Amendoim Growth', info: { calories: 544, protein: 27, fat: 33, carbs: 20, fiber: 8, category: 'fats', alkaline: false } },
   { name: 'Semente de Abóbora', info: { calories: 446, protein: 18.55, fat: 19.4, carbs: 53.75, fiber: 6, category: 'fats', alkaline: true } },
 
   // Proteínas - Proteins
