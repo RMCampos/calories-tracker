@@ -251,6 +251,13 @@ function clearEditing() {
   showFoodPreview(false);
   getDivById('add-foot-title').innerHTML = 'Add Food Entry';
   getButtonById('add-food-btn').innerHTML = 'Add Food';
+  getButtonById('cancel-food-btn').style.display = 'none';
+  
+  // Clear edit-specific hidden inputs
+  getInputById('foodIdToUpdate').value = '';
+  getInputById('foodTimeToUpdate').value = '';
+  getInputById('foodCaloriesToUpdate').value = '';
+  
   selectedFood = null;
 }
 
@@ -515,6 +522,7 @@ async function setFoodToEdit(foodId: string) {
 
     getDivById('add-foot-title').innerHTML = 'Edit Food Entry';
     getButtonById('add-food-btn').innerHTML = 'Save Food';
+    getButtonById('cancel-food-btn').style.display = 'inline-block';
     getInputById('foodIdToUpdate').value = foodId;
     getInputById('foodTimeToUpdate').value = foodToEdit[0].time;
     getInputById('foodCaloriesToUpdate').value = foodToEdit[0].calories;
@@ -531,6 +539,53 @@ async function setFoodToEdit(foodId: string) {
     hideLoading();
   } catch (error) {
     console.error('Set food to edit error:', error);
+    swal('Oh no!', 'Failed to load food entry: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function setFoodToCopy(foodId: string) {
+  showLoading();
+
+  try {
+    // get food item
+    const entries = await AppwriteDB.getFoodEntries(selectedDate);
+    const foodToCopy = entries.filter(entry => entry.$id === foodId);
+    if (foodToCopy.length === 0) {
+      swal('Hey!', 'Unable to get food entry from server', 'error');
+      return;
+    }
+
+    // set the selected food name and quantity (same as original)
+    const foodData: FoodItem = getFoodItemByName(foodToCopy[0].name);
+    selectedFood = foodData;
+    getInputById('foodSearchInput').value = foodToCopy[0].name;
+    getInputById('gramAmount').value = foodToCopy[0].grams;
+    previewCalories(foodData)
+
+    // Set UI to copy mode (not edit mode)
+    getDivById('add-foot-title').innerHTML = 'Copy Food Entry';
+    getButtonById('add-food-btn').innerHTML = 'Add Food';
+    getButtonById('cancel-food-btn').style.display = 'inline-block';
+    
+    // Clear edit-specific hidden inputs to ensure we're in add mode
+    getInputById('foodIdToUpdate').value = '';
+    getInputById('foodTimeToUpdate').value = '';
+    getInputById('foodCaloriesToUpdate').value = '';
+
+    // Scroll to top
+    const titleDiv = getDivById('add-foot-title') as HTMLElement;
+    if (titleDiv) {
+      titleDiv.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+
+    hideLoading();
+  } catch (error) {
+    console.error('Set food to copy error:', error);
     swal('Oh no!', 'Failed to load food entry: ' + error.message, 'error');
   } finally {
     hideLoading();
@@ -561,12 +616,31 @@ function editCardHandler(e: Event) {
   }
 }
 
+function copyCardHandler(e: Event) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const card = e.currentTarget as HTMLElement;
+  const foodId = card.getAttribute('data-food-id');
+
+  if (foodId) {
+    setFoodToCopy(foodId);
+  }
+}
+
 const setupEditAndDeleteEvents = () => {
   // Setup toggle show cards events
   const cards = getButtonListByClassName('card-header-toggle');
   Array.from(cards).forEach((card: HTMLElement) => {
     card.removeEventListener('click', toggleCardHandler);
     card.addEventListener('click', toggleCardHandler);
+  });
+
+  // Setup copy card events
+  const copyCards = getButtonListByClassName('btn-copy');
+  Array.from(copyCards).forEach((card: HTMLElement) => {
+    card.removeEventListener('click', copyCardHandler);
+    card.addEventListener('click', copyCardHandler);
   });
 
   // Setup delete card events
@@ -992,6 +1066,7 @@ function addFoodToView(foodData: FoodStorage, documentId: string) {
           <div class="card-actions">
             <span class="muted">${getIcon(foodFromDatabase.info.category)} ${foodFromDatabase.info.category}</span>
             <div>
+              <button class="btn btn-copy" data-food-id="${documentId}">Copy</button>
               <button class="btn btn-edit" data-food-id="${documentId}">Edit</button>
               <button class="btn btn-delete" data-food-id="${documentId}">Delete</button>
             </div>
