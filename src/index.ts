@@ -1064,7 +1064,7 @@ function addFoodToView(foodData: FoodStorage, documentId: string) {
             <div class="food-is-alkaline hidden">${foodData.alkaline ? 'alkaline' : ''}</div>
           </div>
           <div class="card-actions">
-            <span class="muted">${getIcon(foodFromDatabase.info.category)} ${foodFromDatabase.info.category}</span>
+            <span class="muted">${foodFromDatabase.info.category}</span>
             <div>
               <button class="btn btn-copy" data-food-id="${documentId}">Copy</button>
               <button class="btn btn-edit" data-food-id="${documentId}">Edit</button>
