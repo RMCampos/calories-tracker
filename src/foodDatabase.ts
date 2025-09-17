@@ -122,4 +122,5 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Chuchu, cozido', info: { calories: 19, protein: 0.4, fat: 0, carbs: 4.9, fiber: 1.0, category: 'low carb', alkaline: true } },
   { name: 'Cogumelo Paris, in natura', info: { calories: 17, protein: 4.9, fat: 0, carbs: 1, fiber: 1.7, category: 'low carb', alkaline: true } },
   { name: 'Milho, verde, enlatado, drenado', info: { calories: 98, protein: 3.2, fat: 2.4, carbs: 17.1, fiber: 4.6, category: 'low carb', alkaline: true } },
+  { name: 'Broto de Feijão', info: { calories: 23, protein: 2.8, fat: 0, carbs: 2.8, fiber: 0.7, category: 'low carb', alkaline: true } },
 ];
