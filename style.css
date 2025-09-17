@@ -338,6 +338,15 @@ h1 {
     background: #4834d4;
 }
 
+.btn-copy {
+    background: #2ed573;
+    color: white;
+}
+
+.btn-copy:hover {
+    background: #1dd1a1;
+}
+
 .empty-state {
     text-align: center;
     padding: 60px 20px;
