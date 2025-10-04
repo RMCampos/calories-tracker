@@ -74,6 +74,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Paçoca, amendoim', info: { calories: 487, protein: 16, fat: 26.1, carbs: 52.4, fiber: 7.3, category: 'carbs', alkaline: false } },
   { name: 'Tortelete de mousse chocolate zero Quiero Café', info: { calories: 250, protein: 2.3, fat: 8.9, carbs: 40, fiber: 5, category: 'carbs', alkaline: false } },
   { name: 'Pão de beijo com chia e pequi Empório Veggie', info: { calories: 316, protein: 0.6, fat: 14, carbs: 47, fiber: 1, category: 'carbs', alkaline: false } },
+  { name: 'Bananinha Paraibuna zero', info: { calories: 296, protein: 4.8, fat: 0, carbs: 70, fiber: 4.3, category: 'carbs', alkaline: true } },
 
   // Folhas e verduras - Leaves
   { name: 'Agrião', info: { calories: 17, protein: 2.7, fat: 0.2, carbs: 2.3, fiber: 2.1, category: 'leaves', alkaline: true } },
