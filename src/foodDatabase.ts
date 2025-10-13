@@ -9,7 +9,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Castanha de Caju', info: { calories: 570, protein: 18.5, fat: 46.3, carbs: 29.1, fiber: 3.7, category: 'fats', alkaline: false } },
   { name: 'Castanha do Pará', info: { calories: 643, protein: 14.5, fat: 63.5, carbs: 15.1, fiber: 7.9, category: 'fats', alkaline: false } },
   { name: 'Semente de Chia', info: { calories: 490, protein: 15.6, fat: 30.7, carbs: 43.8, fiber: 37.7, category: 'fats', alkaline: true } },
-  { name: 'Semente de Linhaça', info: { calories: 495, protein: 14.1, fat: 32.3, carbs: 43.3, fiber: 33.5, category: 'fats', alkaline: true } },
+  { name: 'Semente de Linhaça Dourada', info: { calories: 515, protein: 20, fat: 35, carbs: 30, fiber: 26, category: 'fats', alkaline: true } },
   { name: 'Semente de Gergelim', info: { calories: 584, protein: 21.2, fat: 50.4, carbs: 21.6, fiber: 11.9, category: 'fats', alkaline: true } },
   { name: 'Pasta de Amendoim Growth', info: { calories: 544, protein: 27, fat: 33, carbs: 20, fiber: 8, category: 'fats', alkaline: false } },
   { name: 'Semente de Abóbora', info: { calories: 446, protein: 18.55, fat: 19.4, carbs: 53.75, fiber: 6, category: 'fats', alkaline: true } },
