@@ -118,6 +118,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Beterraba, cozida', info: { calories: 32, protein: 1.3, fat: 0.1, carbs: 7.2, fiber: 1.9, category: 'low carb', alkaline: true } },
   { name: 'Beterraba, crua', info: { calories: 49, protein: 1.9, fat: 0.1, carbs: 11.1, fiber: 3.4, category: 'low carb', alkaline: true } },
   { name: 'Brócolis, cozido', info: { calories: 25, protein: 2.1, fat: 0.5, carbs: 4.4, fiber: 3.4, category: 'low carb', alkaline: true } },
+  { name: 'Brócolis, cru', info: { calories: 25, protein: 3.6, fat: 0.3, carbs: 4, fiber: 2.9, category: 'low carb', alkaline: true } },
   { name: 'Couve flor, cozida', info: { calories: 19, protein: 1.2, fat: 0.3, carbs: 3.9, fiber: 2.1, category: 'low carb', alkaline: true } },
   { name: 'Pepino', info: { calories: 10, protein: 0.9, fat: 0, carbs: 2, fiber: 1.1, category: 'low carb', alkaline: true } },
   { name: 'Chuchu, cozido', info: { calories: 19, protein: 0.4, fat: 0, carbs: 4.9, fiber: 1.0, category: 'low carb', alkaline: true } },
