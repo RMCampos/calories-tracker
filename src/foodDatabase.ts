@@ -55,7 +55,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Polenta, cozida', info: { calories: 192, protein: 4.8, fat: 1.2, carbs: 40, fiber: 3.8, category: 'carbs', alkaline: false } },
   { name: 'Arroz, tipo 1 (branco), cozido', info: { calories: 128, protein: 2.5, fat: 0.2, carbs: 28.1, fiber: 1.6, category: 'carbs', alkaline: false } },
   { name: 'Arroz, integral, cozido', info: { calories: 124, protein: 2.6, fat: 1.0, carbs: 25.8, fiber: 2.7, category: 'carbs', alkaline: false } },
-  { name: 'Aveia', info: { calories: 394, protein: 13.9, fat: 8.5, carbs: 66.6, fiber: 9.1, category: 'carbs', alkaline: false } },
+  { name: 'Aveia em flocos finos s/glúten (Vitalin)', info: { calories: 338, protein: 15, fat: 6, carbs: 56, fiber: 10, category: 'carbs', alkaline: false } },
   { name: 'Ervilha seca, cozida', info: { calories: 88, protein: 7.5, fat: 0.5, carbs: 14.2, fiber: 9.7, category: 'carbs', alkaline: true } },
   { name: 'Ervilha congelada, cozida', info: { calories: 57, protein: 5, fat: 1, carbs: 7, fiber: 8, category: 'carbs', alkaline: true } },
   { name: 'Pão, trigo, forma, integral', info: { calories: 253, protein: 9.4, fat: 3.7, carbs: 49.9, fiber: 6.9, category: 'carbs', alkaline: false } },
@@ -75,6 +75,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Tortelete de mousse chocolate zero Quiero Café', info: { calories: 250, protein: 2.3, fat: 8.9, carbs: 40, fiber: 5, category: 'carbs', alkaline: false } },
   { name: 'Pão de beijo com chia e pequi Empório Veggie', info: { calories: 316, protein: 0.6, fat: 14, carbs: 47, fiber: 1, category: 'carbs', alkaline: false } },
   { name: 'Bananinha Paraibuna zero', info: { calories: 296, protein: 4.8, fat: 0, carbs: 70, fiber: 4.3, category: 'carbs', alkaline: true } },
+  { name: 'Farinha de castanha de caju (Zaya)', info: { calories: 500, protein: 20, fat: 53.3, carbs: 20, fiber: 13.3, category: 'carbs', alkaline: false } },
 
   // Folhas e verduras - Leaves
   { name: 'Agrião', info: { calories: 17, protein: 2.7, fat: 0.2, carbs: 2.3, fiber: 2.1, category: 'leaves', alkaline: true } },
