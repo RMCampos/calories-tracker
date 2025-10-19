@@ -46,10 +46,8 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Mamão', info: { calories: 40, protein: 0.5, fat: 0.1, carbs: 10.4, fiber: 1, category: 'carbs', alkaline: true } },
   { name: 'Batata doce, assada', info: { calories: 90, protein: 2.0, fat: 0.1, carbs: 20.7, fiber: 3.3, category: 'carbs', alkaline: true } },
   { name: 'Batata doce, cozida', info: { calories: 77, protein: 0.6, fat: 0.1, carbs: 18.4, fiber: 2.2, category: 'carbs', alkaline: true } },
-  { name: 'Batata doce, crua', info: { calories: 118, protein: 1.3, fat: 0.1, carbs: 28.2, fiber: 2.6, category: 'carbs', alkaline: true } },
   { name: 'Batata inglesa, assada', info: { calories: 94, protein: 2.1, fat: 0.1, carbs: 21.8, fiber: 2.1, category: 'carbs', alkaline: true } },
   { name: 'Batata inglesa, cozida', info: { calories: 52, protein: 1.2, fat: 0, carbs: 11.9, fiber: 1.3, category: 'carbs', alkaline: true } },
-  { name: 'Batata inglesa, crua', info: { calories: 64, protein: 1.8, fat: 0, carbs: 14.7, fiber: 1.2, category: 'carbs', alkaline: true } },
   { name: 'Mandioca, cozida', info: { calories: 125, protein: 0.6, fat: 0.3, carbs: 30.1, fiber: 1.6, category: 'carbs', alkaline: false } },
   { name: 'Pão, trigo, francês', info: { calories: 300, protein: 8, fat: 3.1, carbs: 58.6, fiber: 2.3, category: 'carbs', alkaline: false } },
   { name: 'Polenta, cozida', info: { calories: 192, protein: 4.8, fat: 1.2, carbs: 40, fiber: 3.8, category: 'carbs', alkaline: false } },
@@ -76,6 +74,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Pão de beijo com chia e pequi Empório Veggie', info: { calories: 316, protein: 0.6, fat: 14, carbs: 47, fiber: 1, category: 'carbs', alkaline: false } },
   { name: 'Bananinha Paraibuna zero', info: { calories: 296, protein: 4.8, fat: 0, carbs: 70, fiber: 4.3, category: 'carbs', alkaline: true } },
   { name: 'Farinha de castanha de caju (Zaya)', info: { calories: 500, protein: 20, fat: 53.3, carbs: 20, fiber: 13.3, category: 'carbs', alkaline: false } },
+  { name: 'Batata baroa, cozida', info: { calories: 80, protein: 0.9, fat: 0.2, carbs: 18.9, fiber: 1.8, category: 'carbs', alkaline: true } },
 
   // Folhas e verduras - Leaves
   { name: 'Agrião', info: { calories: 17, protein: 2.7, fat: 0.2, carbs: 2.3, fiber: 2.1, category: 'leaves', alkaline: true } },
