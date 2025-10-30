@@ -251,8 +251,8 @@ async function showMainApp() {
   entries.forEach((entry) => {
     const calories = parseInt(entry.totalCalories);
     let day = parseInt(entry.date.substring(8));
-    // New rule starting in October 30th, 2025
-    if (selectedDate >= new Date('2025-10-30')) {
+    // New rule starting in October 31st, 2025
+    if (selectedDate >= new Date('2025-10-31')) {
       day = parseInt(entry.date.substring(8)) + parseInt(entry.date.substring(5,7)) + parseInt(entry.date.substring(0,4));
     }
     updateDocumentIdForDay(entry.$id, calories, day);
@@ -752,7 +752,12 @@ const updateFood = async () => {
 }
 
 const getDocumentIdForToday = (): DailyTotalCalories | null => {
-  const today = selectedDate.getDate();
+  let today = selectedDate.getDate();
+  // New rule: today number will be the sum of the day, month, and year
+  if (selectedDate >= new Date('2025-10-31')) {
+    // New rule: today number will be the sum of the day, month, and year
+    today = selectedDate.getDate() + selectedDate.getMonth() + 1 + selectedDate.getFullYear();
+  }
   const todayRecord = appState.calendarMonthlyCalories.filter(x => x.day === today);
   if (todayRecord.length > 0) {
     return todayRecord[0];
@@ -760,6 +765,13 @@ const getDocumentIdForToday = (): DailyTotalCalories | null => {
   return null;
 }
 
+/**
+ * Get the document ID for a specific day.
+ * The day parameter is the day of the month (1-31) or the sum of day, month, and year for dates after October 30th, 2025.
+ *
+ * @param day - The day of the month (1-31) or the sum of day, month, and year for dates after October 30th, 2025.
+ * @returns The document ID for the day or 0 if not found.
+ */
 const getDocumentIdForDay = (day: number): number => {
   const todayRecord = appState.calendarMonthlyCalories.filter(x => x.day === day);
   return todayRecord.length > 0 ? todayRecord[0].totalCalories : 0;
@@ -767,8 +779,8 @@ const getDocumentIdForDay = (day: number): number => {
 
 const updateDocumentIdForToday = (id: string, totalCalories: number): void => {
   let today = selectedDate.getDate();
-  // Adopt new rule starting in October 30th, 2025
-  if (selectedDate >= new Date('2025-10-30')) {
+  // Adopt new rule starting in October 31st, 2025
+  if (selectedDate >= new Date('2025-10-31')) {
     // New rule: today number will be the sum of the day, month, and year
     today = selectedDate.getDate() + selectedDate.getMonth() + 1 + selectedDate.getFullYear();
   }
@@ -1230,9 +1242,9 @@ const renderCalendar = async () => {
   
   // Add days of current month
   for (let day = 1; day <= daysInMonth; day++) {
-    // New rule starting October 30th, 2025
+    // New rule starting October 31st, 2025
     let adjustedDay = day;
-    if (currentViewDate >= new Date('2025-10-30')) {
+    if (currentViewDate >= new Date('2025-10-31')) {
       adjustedDay = day + (month + 1) + year;
     }
     const dayCalories = getDocumentIdForDay(adjustedDay);
