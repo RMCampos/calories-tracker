@@ -64,7 +64,9 @@ async function handleRegister(e: SubmitEvent) {
     swal('Registration successful! Welcome to Food Tracker.');
   } catch (error) {
     console.error('Registration error:', error);
-    swal('Oh no!', 'Registration failed: ' + error.message, 'error');
+    if (error instanceof Error) {
+      swal('Oh no!', 'Registration failed: ' + error.message, 'error');
+    }
   } finally {
     hideLoading();
   }
@@ -86,7 +88,9 @@ async function handleLogin(e: SubmitEvent) {
       
   } catch (error) {
     console.error('Login error:', error);
-    swal('Oh no!', 'Login failed: ' + error.message, 'error');
+    if (error instanceof Error) {
+      swal('Oh no!', 'Login failed: ' + error.message, 'error');
+    }
   } finally {
     hideLoading();
   }
@@ -156,7 +160,9 @@ async function handleSaveSettings(e: SubmitEvent) {
   } catch (error) {
     hideLoading();
     console.error('Saving error:', error);
-    swal('Oh no!', 'Saving failed: ' + error.message, 'error');
+    if (error instanceof Error) {
+      swal('Oh no!', 'Saving failed: ' + error.message, 'error');
+    }
   }
 }
 
@@ -172,7 +178,9 @@ async function handleLogout() {
   } catch (error) {
     hideLoading();
     console.error('Logout error:', error);
-    swal('Oh no!', 'Logout failed: ' + error.message, 'error');
+    if (error instanceof Error) {
+      swal('Oh no!', 'Logout failed: ' + error.message, 'error');
+    }
   }
 }
 
@@ -209,7 +217,9 @@ async function toggleSettingsView() {
     } catch (error) {
       hideLoading();
       console.error('Fetching settings failed:', error);
-      swal('Oh no!', 'Fetching settings failed: ' + error.message, 'error');
+      if (error instanceof Error) {
+        swal('Oh no!', 'Fetching settings failed: ' + error.message, 'error');
+      }
     }
   }
   else {
@@ -240,7 +250,11 @@ async function showMainApp() {
   const entries = await AppwriteDB.getMonthlyCalories(selectedDate);
   entries.forEach((entry) => {
     const calories = parseInt(entry.totalCalories);
-    const day = parseInt(entry.date.substring(8));
+    let day = parseInt(entry.date.substring(8));
+    // New rule starting in October 30th, 2025
+    if (selectedDate >= new Date('2025-10-30')) {
+      day = parseInt(entry.date.substring(8)) + parseInt(entry.date.substring(5,7)) + parseInt(entry.date.substring(0,4));
+    }
     updateDocumentIdForDay(entry.$id, calories, day);
   });
 }
@@ -539,7 +553,9 @@ async function setFoodToEdit(foodId: string) {
     hideLoading();
   } catch (error) {
     console.error('Set food to edit error:', error);
-    swal('Oh no!', 'Failed to load food entry: ' + error.message, 'error');
+    if (error instanceof Error) {
+      swal('Oh no!', 'Failed to load food entry: ' + error.message, 'error');
+    }
   } finally {
     hideLoading();
   }
@@ -586,7 +602,9 @@ async function setFoodToCopy(foodId: string) {
     hideLoading();
   } catch (error) {
     console.error('Set food to copy error:', error);
-    swal('Oh no!', 'Failed to load food entry: ' + error.message, 'error');
+    if (error instanceof Error) {
+      swal('Oh no!', 'Failed to load food entry: ' + error.message, 'error');
+    }
   } finally {
     hideLoading();
   }
@@ -725,7 +743,9 @@ const updateFood = async () => {
     selectDate(selectedDate);
   } catch (error) {
       console.error('Update food error:', error);
-      swal('Oh no!', 'Failed to update food entry: ' + error.message, 'error');
+      if (error instanceof Error) {
+        swal('Oh no!', 'Failed to update food entry: ' + error.message, 'error');
+      }
   } finally {
       hideLoading();
   }
@@ -746,10 +766,23 @@ const getDocumentIdForDay = (day: number): number => {
 }
 
 const updateDocumentIdForToday = (id: string, totalCalories: number): void => {
-  const today = selectedDate.getDate();
+  let today = selectedDate.getDate();
+  // Adopt new rule starting in October 30th, 2025
+  if (selectedDate >= new Date('2025-10-30')) {
+    // New rule: today number will be the sum of the day, month, and year
+    today = selectedDate.getDate() + selectedDate.getMonth() + 1 + selectedDate.getFullYear();
+  }
   updateDocumentIdForDay(id, totalCalories, today);
 }
 
+/**
+ * Update or add the document ID for a specific day in the app state. The day is based on the date selected.
+ * The day parameter is the day of the month (1-31) or the sum of day, month, and year for dates after October 30th, 2025.
+ *
+ * @param {string} id - The document ID to set.
+ * @param {number} totalCalories - The total calories for the day.
+ * @param {number} day - The day of the month (1-31) or the sum of day, month, and year.
+ */
 const updateDocumentIdForDay = (id: string, totalCalories: number, day: number): void => {
   const record = appState.calendarMonthlyCalories.filter(x => x.day === day);
   if (record.length === 0) {
@@ -853,7 +886,9 @@ const addFood = async () => {
     renderCalendar();
   } catch (error) {
       console.error('Add food error:', error);
-      swal('Oh no!', 'Failed to add food entry: ' + error.message, 'error');
+      if (error instanceof Error) {
+        swal('Oh no!', 'Failed to add food entry: ' + error.message, 'error');
+      }
   } finally {
       hideLoading();
   }
@@ -964,7 +999,9 @@ async function loadFoodEntries(date: Date) {
     }
   } catch (error) {
       console.error('Load food entries error:', error);
-      swal('Oh no!', 'Failed to load food entries: ' + error.message, 'error');
+      if (error instanceof Error) {
+        swal('Oh no!', 'Failed to load food entries: ' + error.message, 'error');
+      }
   } finally {
       hideLoading();
   }
@@ -1012,7 +1049,9 @@ async function handleDeleteFood(documentId: string) {
     selectDate(selectedDate);
   } catch (error) {
     console.error('Delete food error:', error);
-    swal('Oh no!', 'Failed to delete food entry: ' + error.message, 'error');
+    if (error instanceof Error) {
+      swal('Oh no!', 'Failed to delete food entry: ' + error.message, 'error');
+    }
   } finally {
     hideLoading();
   }
@@ -1191,7 +1230,12 @@ const renderCalendar = async () => {
   
   // Add days of current month
   for (let day = 1; day <= daysInMonth; day++) {
-    const dayCalories = getDocumentIdForDay(day);
+    // New rule starting October 30th, 2025
+    let adjustedDay = day;
+    if (currentViewDate >= new Date('2025-10-30')) {
+      adjustedDay = day + (month + 1) + year;
+    }
+    const dayCalories = getDocumentIdForDay(adjustedDay);
     const dayElement = createDayElement(day, false, year, month, dayCalories);
     grid.appendChild(dayElement);
   }
