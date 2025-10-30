@@ -151,6 +151,7 @@ export class AppwriteDB {
         [
           Query.equal('userId', user.$id),
           Query.equal('date', localDateTime.split('T')[0]),
+          Query.limit(50)
         ]
       );
       console.debug('Food entries retrieved:', response);
@@ -173,6 +174,7 @@ export class AppwriteDB {
         [
           Query.equal('userId', user.$id),
           Query.startsWith('date', localDateTime.substring(0, 7)),
+          Query.limit(40)
         ]
       );
       console.debug('Food entries retrieved:', response);
@@ -272,22 +274,6 @@ export class AppwriteDB {
       console.debug('Food entry deleted:', documentId);
     } catch (error) {
       console.error('Delete food entry error:', error);
-      throw error;
-    }
-  }
-
-  // Get all food entries for a user (for calendar view)
-  static async getAllUserEntries() {
-    try {
-      const user = await account.get();
-      const response = await databases.listDocuments(
-          DATABASE_ID,
-          FOOD_ENTRIES_COLLECTION_ID,
-          [Query.equal('userId', user.$id)]
-      );
-      return response.documents;
-    } catch (error) {
-      console.error('Get all entries error:', error);
       throw error;
     }
   }
