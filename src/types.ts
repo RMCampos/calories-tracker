@@ -33,3 +33,13 @@ export type DailyTotalCalories = {
   day: number;
   totalCalories: number;
 };
+
+export type SharedDay = {
+  id?: string;
+  shareId: string;
+  userId: string;
+  userName: string;
+  date: string;
+  foodEntries: string; // JSON stringified FoodStorage[]
+  createdAt: string;
+};

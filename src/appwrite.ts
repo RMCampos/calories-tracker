@@ -1,5 +1,5 @@
-import { Client, Account, Databases, Query } from 'appwrite';
-import { DailyTotalCalories, FoodStorage, UserSettings } from './types';
+import { Client, Account, Databases, Query, ID } from 'appwrite';
+import { DailyTotalCalories, FoodStorage, UserSettings, SharedDay } from './types';
 
 // Initialize Appwrite client
 const client = new Client();
@@ -17,6 +17,7 @@ export const DATABASE_ID = import.meta.env.VITE_APPWRITE_DBID
 export const FOOD_ENTRIES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_FOODENTRIESID
 export const USER_SETTINGS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_USERSETTINGSID
 export const MONTHLY_CALORIES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_MONTLYCALORIESID
+export const SHARED_DAYS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_SHAREDDAYSID
 
 // Auth helper functions
 export class AppwriteAuth {
@@ -274,6 +275,58 @@ export class AppwriteDB {
       console.debug('Food entry deleted:', documentId);
     } catch (error) {
       console.error('Delete food entry error:', error);
+      throw error;
+    }
+  }
+
+  // Create shared day snapshot
+  static async createSharedDay(date: Date, foodEntries: FoodStorage[]) {
+    try {
+      const user = await account.get();
+      const shareId = ID.unique();
+      const localDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
+
+      const response = await databases.createDocument(
+        DATABASE_ID,
+        SHARED_DAYS_COLLECTION_ID,
+        'unique()',
+        {
+          shareId: shareId,
+          userId: user.$id,
+          userName: user.name,
+          date: localDateTime.split('T')[0],
+          foodEntries: JSON.stringify(foodEntries),
+          createdAt: new Date().toISOString()
+        }
+      );
+      console.debug('Shared day created:', response);
+      return response;
+    } catch (error) {
+      console.error('Create shared day error:', error);
+      throw error;
+    }
+  }
+
+  // Get shared day by share ID
+  static async getSharedDay(shareId: string) {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        SHARED_DAYS_COLLECTION_ID,
+        [
+          Query.equal('shareId', shareId),
+          Query.limit(1)
+        ]
+      );
+
+      if (response.documents.length === 0) {
+        throw new Error('Shared day not found');
+      }
+
+      console.debug('Shared day retrieved:', response.documents[0]);
+      return response.documents[0];
+    } catch (error) {
+      console.error('Get shared day error:', error);
       throw error;
     }
   }

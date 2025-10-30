@@ -21,11 +21,20 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 async function initializeAuth() {
+  // Check if this is a shared view first
+  const urlParams = new URLSearchParams(window.location.search);
+  const shareId = urlParams.get('share');
+
+  if (shareId) {
+    await checkSharedView();
+    return;
+  }
+
   showLoading();
-  
+
   try {
     const isLoggedIn = await AppwriteAuth.isLoggedIn();
-    
+
     if (isLoggedIn) {
       currentUser = await AppwriteAuth.getCurrentUser();
       await showMainApp();
@@ -403,6 +412,12 @@ const setupEventListeners = () => {
   
   // Settings form
   document.getElementById('settingsForm')?.addEventListener('submit', handleSaveSettings);
+
+  // Share button event listeners
+  document.getElementById('shareBtn')?.addEventListener('click', handleShareClick);
+  document.getElementById('shareBtnMobile')?.addEventListener('click', handleShareClick);
+  document.getElementById('close-share-modal')?.addEventListener('click', closeShareModal);
+  document.getElementById('copy-share-link')?.addEventListener('click', copyShareLink);
 
   // Search functionality
   getInputById('foodSearchInput').addEventListener('input', function(e: Event) {
@@ -1298,6 +1313,209 @@ function createDayElement(day: number, isOtherMonth: boolean, year: number, mont
   }
   
   return dayElement;
+}
+
+// Share functionality
+async function handleShareClick() {
+  if (!currentUser) {
+    swal('Hey!', 'Please log in to share your food log.', 'info');
+    return;
+  }
+
+  if (appState.isSharedView) {
+    swal('Info', 'You cannot share a shared view.', 'info');
+    return;
+  }
+
+  closeMobileMenu();
+  showLoading();
+
+  try {
+    // Get current day's food entries
+    const entries = await AppwriteDB.getFoodEntries(selectedDate);
+
+    if (entries.length === 0) {
+      hideLoading();
+      swal('Info', 'No food entries to share for this day.', 'info');
+      return;
+    }
+
+    // Convert entries to FoodStorage format
+    const foodEntries: FoodStorage[] = entries.map(entry => ({
+      name: entry.name,
+      grams: entry.grams,
+      calories: entry.calories,
+      protein: entry.protein,
+      fat: entry.fat,
+      carbs: entry.carbs,
+      fiber: entry.fiber,
+      time: entry.time,
+      date: entry.date,
+      alkaline: entry.alkaline,
+    }));
+
+    // Create shared day snapshot
+    const sharedDay = await AppwriteDB.createSharedDay(selectedDate, foodEntries);
+
+    // Generate share URL
+    const shareUrl = `${window.location.origin}${window.location.pathname}?share=${sharedDay.shareId}`;
+
+    // Show modal with link
+    getInputById('share-link-input').value = shareUrl;
+    getDivById('share-modal').classList.remove('hidden');
+
+    hideLoading();
+  } catch (error) {
+    hideLoading();
+    console.error('Share error:', error);
+    if (error instanceof Error) {
+      swal('Oh no!', 'Failed to create share link: ' + error.message, 'error');
+    }
+  }
+}
+
+function closeShareModal() {
+  getDivById('share-modal').classList.add('hidden');
+}
+
+async function copyShareLink() {
+  const shareInput = getInputById('share-link-input');
+
+  try {
+    await navigator.clipboard.writeText(shareInput.value);
+    const copyBtn = document.getElementById('copy-share-link');
+    if (copyBtn) {
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => {
+        copyBtn.textContent = originalText;
+      }, 2000);
+    }
+  } catch (error) {
+    console.error('Copy error:', error);
+    swal('Oh no!', 'Failed to copy link to clipboard', 'error');
+  }
+}
+
+// Check for share parameter on page load
+async function checkSharedView() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const shareId = urlParams.get('share');
+
+  if (shareId) {
+    showLoading();
+
+    try {
+      const sharedDay = await AppwriteDB.getSharedDay(shareId);
+
+      // Set shared view mode
+      appState.isSharedView = true;
+      appState.sharedData = {
+        shareId: sharedDay.shareId,
+        userId: sharedDay.userId,
+        userName: sharedDay.userName,
+        date: sharedDay.date,
+        foodEntries: sharedDay.foodEntries,
+        createdAt: sharedDay.createdAt
+      };
+
+      // Parse the date and set as selected date (as local date, not UTC)
+      const [year, month, day] = sharedDay.date.split('-').map(Number);
+      selectedDate = new Date(year, month - 1, day);
+      currentViewDate = new Date(year, month - 1, day);
+
+      // Show shared view banner
+      const banner = getDivById('shared-view-banner');
+      banner.classList.remove('hidden');
+      getDivById('shared-user-name').textContent = sharedDay.userName;
+      getDivById('shared-date').textContent = selectedDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      // Hide auth section and show app content
+      getDivById('auth-section').classList.add('hidden');
+      getDivById('user-info').classList.add('hidden');
+      getDivById('app-content').classList.remove('hidden');
+
+      // Render shared day view
+      renderSharedDayView();
+
+      // Apply read-only mode
+      applyReadOnlyMode();
+
+      hideLoading();
+    } catch (error) {
+      hideLoading();
+      console.error('Load shared day error:', error);
+      swal('Oh no!', 'Failed to load shared day: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
+    }
+  }
+}
+
+function renderSharedDayView() {
+  if (!appState.sharedData) return;
+
+  updateCurrentDate();
+
+  // Parse food entries
+  const foodEntries: FoodStorage[] = JSON.parse(appState.sharedData.foodEntries);
+
+  // Clear container
+  getDivById('foodCardsContainer').innerHTML = '';
+
+  // Add each entry to view
+  foodEntries.forEach((entry, index) => {
+    addFoodToView(entry, `shared-${index}`);
+  });
+
+  // Calculate and display totals
+  let totalCalories = 0;
+  let totalProtein = 0;
+  let totalFat = 0;
+  let totalCarbs = 0;
+  let totalFiber = 0;
+
+  foodEntries.forEach(entry => {
+    totalCalories += entry.calories;
+    totalProtein += entry.protein;
+    totalFat += entry.fat;
+    totalCarbs += entry.carbs;
+    totalFiber += entry.fiber;
+  });
+
+  getDivById('caloriesCounter').textContent = totalCalories.toString();
+  getDivById('proteinValue').textContent = (Math.round(totalProtein * 10) / 10).toString();
+  getDivById('fatValue').textContent = (Math.round(totalFat * 10) / 10).toString();
+  getDivById('carboValue').textContent = (Math.round(totalCarbs * 10) / 10).toString();
+  getDivById('fiberValue').textContent = (Math.round(totalFiber * 10) / 10).toString();
+
+  // Update alkaline level
+  updateTotalCalories();
+
+  renderCalendar();
+}
+
+function applyReadOnlyMode() {
+  // Hide add food section
+  const addFoodSection = document.querySelector('.add-food-section');
+  if (addFoodSection) {
+    addFoodSection.classList.add('read-only-disabled');
+  }
+
+  // Hide edit/delete/copy buttons
+  const actionButtons = document.querySelectorAll('.card-actions button');
+  actionButtons.forEach(button => {
+    (button as HTMLElement).style.display = 'none';
+  });
+
+  // Hide calendar navigation
+  const calendarSection = document.querySelector('.calendar-section');
+  if (calendarSection) {
+    calendarSection.classList.add('read-only-disabled');
+  }
 }
 
 (window as any).selectFood = selectFood;

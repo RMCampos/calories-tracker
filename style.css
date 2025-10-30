@@ -774,3 +774,130 @@ label {
         padding: 16px;
     }
 }
+
+/* Share Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    color: #e0e0e0;
+}
+
+.modal-content h2 {
+    margin-bottom: 15px;
+    color: #b0b0b0;
+    font-size: 1.5rem;
+}
+
+.modal-content p {
+    margin-bottom: 20px;
+    color: #999;
+}
+
+.share-link-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.share-link-input {
+    flex: 1;
+    padding: 12px 15px;
+    background: #1a1a1a;
+    border: 2px solid #404040;
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-family: monospace;
+    font-size: 14px;
+    outline: none;
+}
+
+.copy-btn {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+.copy-btn:active {
+    transform: translateY(0);
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    background: #404040;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-btn:hover {
+    background: #505050;
+}
+
+/* Shared View Banner */
+.shared-view-banner {
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+    color: white;
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.shared-view-banner.hidden {
+    display: none;
+}
+
+.shared-view-banner strong {
+    font-weight: 700;
+}
+
+/* Disabled state for read-only mode */
+.read-only-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed !important;
+}

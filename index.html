@@ -80,6 +80,7 @@
                 <div class="user-details">
                     <span id="userName">Welcome, User!</span>
                     <div class="header-buttons">
+                        <button id="shareBtn" class="header-btn">🔗 Share</button>
                         <button id="calendarBtn" class="header-btn">📅 Calendar</button>
                         <button id="settingsBtn" class="header-btn">⚙️ Settings</button>
                         <button id="logoutBtn" class="header-btn logout">🚪 Logout</button>
@@ -89,6 +90,7 @@
                 <button id="mobileMenuToggle" class="mobile-menu-toggle hidden">☰</button>
                 <!-- Mobile dropdown menu -->
                 <div id="mobileMenu" class="mobile-menu hidden">
+                    <button id="shareBtnMobile" class="mobile-menu-item">🔗 Share</button>
                     <button id="calendarBtnMobile" class="mobile-menu-item">📅 Calendar</button>
                     <button id="settingsBtnMobile" class="mobile-menu-item">⚙️ Settings</button>
                     <button id="logoutBtnMobile" class="mobile-menu-item logout">🚪 Logout</button>
@@ -101,6 +103,32 @@
     <div id="loading-overlay" class="loading-overlay hidden">
         <div class="loading-spinner"></div>
         <p>Loading...</p>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>🔗 Share This Day</h2>
+            <p>Share your food log for this day with others!</p>
+            <div class="share-link-container">
+                <input
+                    type="text"
+                    id="share-link-input"
+                    class="share-link-input"
+                    readonly
+                    placeholder="Generating share link..."
+                >
+                <button id="copy-share-link" class="copy-btn">Copy</button>
+            </div>
+            <div class="modal-buttons">
+                <button id="close-share-modal" class="modal-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared View Banner -->
+    <div id="shared-view-banner" class="shared-view-banner hidden">
+        <span id="shared-view-text">👁️ Viewing shared day from <strong id="shared-user-name"></strong> on <strong id="shared-date"></strong></span>
     </div>
 
     <!-- Main App Content -->
