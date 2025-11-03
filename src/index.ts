@@ -256,6 +256,10 @@ async function showMainApp() {
   updateCurrentDate();
 
   // Get daily entries with total from Appwrite to display in calendar
+  fetchCaloriesCurrentMonth();
+}
+
+async function fetchCaloriesCurrentMonth() {
   const entries = await AppwriteDB.getMonthlyCalories(selectedDate);
   entries.forEach((entry) => {
     const calories = parseInt(entry.totalCalories);
@@ -1203,6 +1207,7 @@ const selectDate = async (date: Date) => {
   selectedDate = date;
   updateCurrentDate();
   await loadFoodEntries(date);
+  await fetchCaloriesCurrentMonth();
   renderCalendar();
 }
 
