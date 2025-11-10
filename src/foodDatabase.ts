@@ -24,7 +24,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Carne, bovina, patinho, sem gordura, grelhado', info: { calories: 219, protein: 35.9, fat: 7.3, carbs: 0, fiber: 0, category: 'proteins', alkaline: false } },
   { name: 'Soja em Pó Growth', info: { calories: 400, protein: 86.7, fat: 5, carbs: 3.3, fiber: 0, category: 'proteins', alkaline: false } },
   { name: 'Sobrecoxa s/pele, cozida', info: { calories: 245, protein: 24.9, fat: 15.4, carbs: 0, fiber: 0, category: 'proteins', alkaline: false } },
-  { name: 'Soja, queijo (tofu)', info: { calories: 64, protein: 6.6, fat: 4, carbs: 2.1, fiber: 0.8, category: 'proteins', alkaline: false } },
+  { name: 'Soja, queijo (tofu)', info: { calories: 64, protein: 6.5, fat: 2, carbs: 4, fiber: 0.8, category: 'proteins', alkaline: false } },
   { name: 'Feijão preto, cozido', info: { calories: 77, protein: 4.5, fat: 0.5, carbs: 14, fiber: 8.4, category: 'proteins', alkaline: false } },
   { name: 'Lentilha, cozida', info: { calories: 116, protein: 9.4, fat: 0.2, carbs: 19.4, fiber: 5.5, category: 'proteins', alkaline: false } },
   { name: 'Frango, peito, sem pele, cozido', info: { calories: 163, protein: 31.5, fat: 3.2, carbs: 0, fiber: 0, category: 'proteins', alkaline: false } },
