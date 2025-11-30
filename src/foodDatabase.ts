@@ -107,6 +107,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Leite, de vaca, desnatado, UTH (Tirol)', info: { calories: 30.5, protein: 3.15, fat: 0, carbs: 4.5, fiber: 0, category: 'dairy', alkaline: true } },
   { name: 'Leite, de vaca, integral, UTH (Tirol)', info: { calories: 57.5, protein: 3.15, fat: 3, carbs: 4.5, fiber: 0, category: 'dairy', alkaline: true } },
   { name: 'Leite, de vaca, integral, pó', info: { calories: 496, protein: 26, fat: 26.4, carbs: 38.4, fiber: 0, category: 'dairy', alkaline: true } },
+  { name: 'Leite Caju+côco A Tal da Castanha', info: { calories: 46, protein: 1.3, fat: 3.4, carbs: 2.6, fiber: 0, category: 'dairy', alkaline: true } },
   
   // Low carb
   { name: 'Abóbrinha, italinaa, cozida', info: { calories: 15, protein: 1.1, fat: 0.2, carbs: 3.0, fiber: 1.6, category: 'low carb', alkaline: true } },
