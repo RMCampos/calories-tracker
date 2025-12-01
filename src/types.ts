@@ -43,3 +43,27 @@ export type SharedDay = {
   foodEntries: string; // JSON stringified FoodStorage[]
   createdAt: string;
 };
+
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snacks';
+
+export type MealPlanTemplate = {
+  id?: string;
+  name: string;
+  userId: string;
+  isActive: boolean;
+  createdAt: string;
+};
+
+export type PlannedFoodItem = {
+  id?: string;
+  templateId: string;
+  mealType: MealType;
+  name: string;
+  grams: number;
+  calories: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+  fiber: number;
+  alkaline: boolean | null;
+};

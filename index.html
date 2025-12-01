@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="auth.css">
     <link rel="stylesheet" href="settings.css">
+    <link rel="stylesheet" href="mealPlanner.css">
     <link rel="apple-touch-icon" sizes="57x57" href="/assets/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/assets/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/assets/apple-icon-72x72.png">
@@ -82,6 +83,7 @@
                     <div class="header-buttons">
                         <button id="shareBtn" class="header-btn">🔗 Share</button>
                         <button id="calendarBtn" class="header-btn">📅 Calendar</button>
+                        <button id="mealPlannerBtn" class="header-btn">📋 Meal Planner</button>
                         <button id="settingsBtn" class="header-btn">⚙️ Settings</button>
                         <button id="logoutBtn" class="header-btn logout">🚪 Logout</button>
                     </div>
@@ -92,6 +94,7 @@
                 <div id="mobileMenu" class="mobile-menu hidden">
                     <button id="shareBtnMobile" class="mobile-menu-item">🔗 Share</button>
                     <button id="calendarBtnMobile" class="mobile-menu-item">📅 Calendar</button>
+                    <button id="mealPlannerBtnMobile" class="mobile-menu-item">📋 Meal Planner</button>
                     <button id="settingsBtnMobile" class="mobile-menu-item">⚙️ Settings</button>
                     <button id="logoutBtnMobile" class="mobile-menu-item logout">🚪 Logout</button>
                 </div>
@@ -163,6 +166,14 @@
                     <div class="nutrition-label">Fiber (g)</div>
                     <div class="nutrition-value" id="fiberValue">0</div>
                     <div class="nutrition-label hidden" id="fiberGoalText">of 190</div>
+                </div>
+            </div>
+
+            <!-- Quick Add from Meal Plan -->
+            <div class="quick-add-section hidden" id="quickAddSection">
+                <h2 class="section-title">📋 Quick Add from Meal Plan</h2>
+                <div class="quick-add-items" id="quickAddItemsContainer">
+                    <!-- Quick add items will be populated here -->
                 </div>
             </div>
 
@@ -248,9 +259,9 @@
     <section id="settings-content" class="hidden">
         <div class="container">
             <h1>⚙️ Settings</h1>
-            
+
             <div class="date-display">Define your daily macros goal</div>
-            
+
             <form id="settingsForm" class="settings-form">
                 <div class="form-group">
                     <label for="caloriesGoal">Daily calorie goal</label>
@@ -274,6 +285,169 @@
                 </div>
                 <button type="submit" class="settings-btn">Save</button>
             </form>
+        </div>
+    </section>
+
+    <!-- Meal Planner -->
+    <section id="meal-planner-content" class="hidden">
+        <div class="container">
+            <h1>📋 Meal Planner</h1>
+
+            <div class="date-display">Plan your meals and compare with your goals</div>
+
+            <!-- Template Management -->
+            <div class="template-management">
+                <div class="template-selector-container">
+                    <label for="templateSelector">Current Plan:</label>
+                    <select id="templateSelector" class="template-selector">
+                        <option value="">-- Select a plan --</option>
+                    </select>
+                    <button id="newTemplateBtn" class="template-btn">+ New Plan</button>
+                    <button id="deleteTemplateBtn" class="template-btn delete-btn">Delete Plan</button>
+                </div>
+            </div>
+
+            <!-- Plan Progress Summary -->
+            <div class="plan-progress-container">
+                <div class="calories-banner">
+                    <div class="calories-number" id="planCaloriesTotal">0</div>
+                    <div class="calories-text">Total Calories</div>
+                    <div class="calories-text-goal" id="planCaloriesGoalText">of 0</div>
+                </div>
+
+                <div class="nutrition-summary" id="planNutritionSummary">
+                    <div class="nutrition-item">
+                        <div class="nutrition-label">Protein (g)</div>
+                        <div class="nutrition-value" id="planProteinValue">0</div>
+                        <div class="nutrition-progress-bar">
+                            <div class="nutrition-progress-fill" id="planProteinProgress"></div>
+                        </div>
+                        <div class="nutrition-label" id="planProteinGoalText">of 0</div>
+                    </div>
+                    <div class="nutrition-item">
+                        <div class="nutrition-label">Fat (g)</div>
+                        <div class="nutrition-value" id="planFatValue">0</div>
+                        <div class="nutrition-progress-bar">
+                            <div class="nutrition-progress-fill" id="planFatProgress"></div>
+                        </div>
+                        <div class="nutrition-label" id="planFatGoalText">of 0</div>
+                    </div>
+                    <div class="nutrition-item">
+                        <div class="nutrition-label">Carbs (g)</div>
+                        <div class="nutrition-value" id="planCarboValue">0</div>
+                        <div class="nutrition-progress-bar">
+                            <div class="nutrition-progress-fill" id="planCarboProgress"></div>
+                        </div>
+                        <div class="nutrition-label" id="planCarboGoalText">of 0</div>
+                    </div>
+                    <div class="nutrition-item">
+                        <div class="nutrition-label">Fiber (g)</div>
+                        <div class="nutrition-value" id="planFiberValue">0</div>
+                        <div class="nutrition-progress-bar">
+                            <div class="nutrition-progress-fill" id="planFiberProgress"></div>
+                        </div>
+                        <div class="nutrition-label" id="planFiberGoalText">of 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meal Sections -->
+            <div class="meals-container">
+                <!-- Breakfast -->
+                <div class="meal-section" data-meal-type="breakfast">
+                    <h2 class="meal-section-title">🌅 Breakfast</h2>
+                    <button class="add-meal-item-btn" data-meal-type="breakfast">+ Add Food</button>
+                    <div class="meal-items-container" id="breakfastItemsContainer">
+                        <!-- Planned items will be added here -->
+                    </div>
+                </div>
+
+                <!-- Lunch -->
+                <div class="meal-section" data-meal-type="lunch">
+                    <h2 class="meal-section-title">☀️ Lunch</h2>
+                    <button class="add-meal-item-btn" data-meal-type="lunch">+ Add Food</button>
+                    <div class="meal-items-container" id="lunchItemsContainer">
+                        <!-- Planned items will be added here -->
+                    </div>
+                </div>
+
+                <!-- Dinner -->
+                <div class="meal-section" data-meal-type="dinner">
+                    <h2 class="meal-section-title">🌙 Dinner</h2>
+                    <button class="add-meal-item-btn" data-meal-type="dinner">+ Add Food</button>
+                    <div class="meal-items-container" id="dinnerItemsContainer">
+                        <!-- Planned items will be added here -->
+                    </div>
+                </div>
+
+                <!-- Snacks -->
+                <div class="meal-section" data-meal-type="snacks">
+                    <h2 class="meal-section-title">🍿 Snacks</h2>
+                    <button class="add-meal-item-btn" data-meal-type="snacks">+ Add Food</button>
+                    <div class="meal-items-container" id="snacksItemsContainer">
+                        <!-- Planned items will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Food to Plan Form (initially hidden) -->
+            <div class="add-food-to-plan-section hidden" id="addFoodToPlanSection">
+                <h2 class="add-food-title" id="addFoodToPlanTitle">Add Food to <span id="currentMealType"></span></h2>
+                <div class="add-food-form">
+                    <div class="form-group">
+                        <label for="planFoodSearchInput">Food Item</label>
+                        <div class="food-search-container">
+                            <input
+                                type="text"
+                                class="food-search-input"
+                                id="planFoodSearchInput"
+                                placeholder="Search food (e.g., apple, chicken breast, rice...)"
+                                autocomplete="off"
+                            >
+                            <div class="search-loading" id="planSearchLoading"></div>
+
+                            <!-- Search Results Overlay -->
+                            <div class="search-results" id="planSearchResults">
+                                <!-- Results will be populated here -->
+                            </div>
+
+                            <!-- Hidden input for current meal type -->
+                            <input type="hidden" id="currentMealTypeInput">
+                            <input type="hidden" id="planItemIdToUpdate">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="planGramAmount">Amount (grams)</label>
+                        <input type="number" id="planGramAmount" min="1" step="1" value="100">
+                    </div>
+                    <button class="add-btn" id="addFoodToPlanBtn">Add Food</button>
+                    <button class="cancel-btn" id="cancelFoodToPlanBtn">Cancel</button>
+                </div>
+                <div class="display-none" id="plan-food-preview">
+                    <div class="nutrition-summary">
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" id="planCalorieValuePreview">0</div>
+                            <div class="nutrition-label">Calories</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" id="planProteinValuePreview">0</div>
+                            <div class="nutrition-label">Protein (g)</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" id="planFatValuePreview">0</div>
+                            <div class="nutrition-label">Fat (g)</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" id="planCarboValuePreview">0</div>
+                            <div class="nutrition-label">Carbs (g)</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" id="planFiberValuePreview">0</div>
+                            <div class="nutrition-label">Fiber (g)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 

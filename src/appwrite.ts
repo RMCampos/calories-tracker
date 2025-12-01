@@ -1,5 +1,5 @@
 import { Client, Account, Databases, Query, ID } from 'appwrite';
-import { DailyTotalCalories, FoodStorage, UserSettings, SharedDay } from './types';
+import { DailyTotalCalories, FoodStorage, UserSettings, SharedDay, MealPlanTemplate, PlannedFoodItem, MealType } from './types';
 
 // Initialize Appwrite client
 const client = new Client();
@@ -18,6 +18,8 @@ export const FOOD_ENTRIES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_FOODENTR
 export const USER_SETTINGS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_USERSETTINGSID
 export const MONTHLY_CALORIES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_MONTLYCALORIESID
 export const SHARED_DAYS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_SHAREDDAYSID
+export const MEAL_PLAN_TEMPLATES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_MEALPLANTEMPLATESID
+export const PLANNED_FOOD_ITEMS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PLANNEDFOODITEMSID
 
 // Auth helper functions
 export class AppwriteAuth {
@@ -327,6 +329,217 @@ export class AppwriteDB {
       return response.documents[0];
     } catch (error) {
       console.error('Get shared day error:', error);
+      throw error;
+    }
+  }
+
+  // Meal Plan Template methods
+
+  // Create meal plan template
+  static async createMealPlanTemplate(name: string) {
+    try {
+      const user = await account.get();
+      const response = await databases.createDocument(
+        DATABASE_ID,
+        MEAL_PLAN_TEMPLATES_COLLECTION_ID,
+        'unique()',
+        {
+          name: name,
+          userId: user.$id,
+          isActive: false,
+          createdAt: new Date().toISOString()
+        }
+      );
+      console.debug('Meal plan template created:', response);
+      return response;
+    } catch (error) {
+      console.error('Create meal plan template error:', error);
+      throw error;
+    }
+  }
+
+  // Get all meal plan templates for user
+  static async getMealPlanTemplates() {
+    try {
+      const user = await account.get();
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        MEAL_PLAN_TEMPLATES_COLLECTION_ID,
+        [
+          Query.equal('userId', user.$id),
+          Query.limit(50)
+        ]
+      );
+      console.debug('Meal plan templates retrieved:', response);
+      return response.documents;
+    } catch (error) {
+      console.error('Get meal plan templates error:', error);
+      throw error;
+    }
+  }
+
+  // Get active meal plan template
+  static async getActiveMealPlanTemplate() {
+    try {
+      const user = await account.get();
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        MEAL_PLAN_TEMPLATES_COLLECTION_ID,
+        [
+          Query.equal('userId', user.$id),
+          Query.equal('isActive', true),
+          Query.limit(1)
+        ]
+      );
+      console.debug('Active meal plan template retrieved:', response);
+      return response.documents.length > 0 ? response.documents[0] : null;
+    } catch (error) {
+      console.error('Get active meal plan template error:', error);
+      throw error;
+    }
+  }
+
+  // Set active meal plan template
+  static async setActiveMealPlanTemplate(templateId: string) {
+    try {
+      const user = await account.get();
+
+      // First, deactivate all templates
+      const allTemplates = await this.getMealPlanTemplates();
+      const deactivatePromises = allTemplates.map(template =>
+        databases.updateDocument(
+          DATABASE_ID,
+          MEAL_PLAN_TEMPLATES_COLLECTION_ID,
+          template.$id,
+          { isActive: false }
+        )
+      );
+      await Promise.all(deactivatePromises);
+
+      // Then activate the selected template
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        MEAL_PLAN_TEMPLATES_COLLECTION_ID,
+        templateId,
+        { isActive: true }
+      );
+      console.debug('Meal plan template set as active:', response);
+      return response;
+    } catch (error) {
+      console.error('Set active meal plan template error:', error);
+      throw error;
+    }
+  }
+
+  // Delete meal plan template
+  static async deleteMealPlanTemplate(templateId: string) {
+    try {
+      // First delete all planned items for this template
+      const plannedItems = await this.getPlannedItemsByTemplate(templateId);
+      const deletePromises = plannedItems.map(item =>
+        this.deletePlannedFoodItem(item.$id)
+      );
+      await Promise.all(deletePromises);
+
+      // Then delete the template
+      await databases.deleteDocument(
+        DATABASE_ID,
+        MEAL_PLAN_TEMPLATES_COLLECTION_ID,
+        templateId
+      );
+      console.debug('Meal plan template deleted:', templateId);
+    } catch (error) {
+      console.error('Delete meal plan template error:', error);
+      throw error;
+    }
+  }
+
+  // Planned Food Item methods
+
+  // Create planned food item
+  static async createPlannedFoodItem(item: Omit<PlannedFoodItem, 'id'>) {
+    try {
+      const response = await databases.createDocument(
+        DATABASE_ID,
+        PLANNED_FOOD_ITEMS_COLLECTION_ID,
+        'unique()',
+        item
+      );
+      console.debug('Planned food item created:', response);
+      return response;
+    } catch (error) {
+      console.error('Create planned food item error:', error);
+      throw error;
+    }
+  }
+
+  // Get all planned items for a template
+  static async getPlannedItemsByTemplate(templateId: string) {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        PLANNED_FOOD_ITEMS_COLLECTION_ID,
+        [
+          Query.equal('templateId', templateId),
+          Query.limit(100)
+        ]
+      );
+      console.debug('Planned items retrieved for template:', response);
+      return response.documents;
+    } catch (error) {
+      console.error('Get planned items by template error:', error);
+      throw error;
+    }
+  }
+
+  // Get planned items by template and meal type
+  static async getPlannedItemsByMealType(templateId: string, mealType: MealType) {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        PLANNED_FOOD_ITEMS_COLLECTION_ID,
+        [
+          Query.equal('templateId', templateId),
+          Query.equal('mealType', mealType),
+          Query.limit(50)
+        ]
+      );
+      console.debug('Planned items retrieved for meal type:', response);
+      return response.documents;
+    } catch (error) {
+      console.error('Get planned items by meal type error:', error);
+      throw error;
+    }
+  }
+
+  // Update planned food item
+  static async updatePlannedFoodItem(itemId: string, updates: Partial<PlannedFoodItem>) {
+    try {
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        PLANNED_FOOD_ITEMS_COLLECTION_ID,
+        itemId,
+        updates
+      );
+      console.debug('Planned food item updated:', response);
+      return response;
+    } catch (error) {
+      console.error('Update planned food item error:', error);
+      throw error;
+    }
+  }
+
+  // Delete planned food item
+  static async deletePlannedFoodItem(itemId: string) {
+    try {
+      await databases.deleteDocument(
+        DATABASE_ID,
+        PLANNED_FOOD_ITEMS_COLLECTION_ID,
+        itemId
+      );
+      console.debug('Planned food item deleted:', itemId);
+    } catch (error) {
+      console.error('Delete planned food item error:', error);
       throw error;
     }
   }

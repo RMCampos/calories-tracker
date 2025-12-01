@@ -6,6 +6,7 @@ import swal from 'sweetalert';
 import { closeMobileMenu, delay, getCleanName, getIcon, handleMobileCalendarClick, hideLoading, hideSearchResults, navigateResultsKeyboard, QUICK_DELAY, scrollToCalendarView, showLoading, toggleCardHandler, toggleMobileMenu } from './Utils.ts';
 import { showAuthForms, toggleAuthForms } from './auth.ts';
 import { appState } from "./state";
+import { setupMealPlannerEventListeners, displayQuickAddItems } from './mealPlanner.js';
 
 // App state
 let selectedDate = new Date();
@@ -485,12 +486,20 @@ const setupEventListeners = () => {
     const target = e.target as HTMLElement;
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-    
-    if (mobileMenu && mobileMenuToggle && 
-        !mobileMenu.contains(target) && 
+
+    if (mobileMenu && mobileMenuToggle &&
+        !mobileMenu.contains(target) &&
         !mobileMenuToggle.contains(target)) {
       closeMobileMenu();
     }
+  });
+
+  // Setup meal planner event listeners
+  setupMealPlannerEventListeners();
+
+  // Listen for food added event from quick add
+  window.addEventListener('foodAdded', () => {
+    loadFoodEntries(selectedDate);
   });
 }
 
@@ -1028,6 +1037,9 @@ async function loadFoodEntries(date: Date) {
       getDivById('carboGoalText').classList.add('hidden');
       getDivById('fiberGoalText').classList.add('hidden');
     }
+
+    // Load quick add items from meal plan
+    await displayQuickAddItems();
   } catch (error) {
       console.error('Load food entries error:', error);
       if (error instanceof Error) {
