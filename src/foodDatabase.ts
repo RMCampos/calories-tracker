@@ -13,6 +13,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Semente de Gergelim', info: { calories: 584, protein: 21.2, fat: 50.4, carbs: 21.6, fiber: 11.9, category: 'fats', alkaline: true } },
   { name: 'Pasta de Amendoim Growth', info: { calories: 544, protein: 27, fat: 33, carbs: 20, fiber: 8, category: 'fats', alkaline: false } },
   { name: 'Semente de Abóbora', info: { calories: 446, protein: 18.55, fat: 19.4, carbs: 53.75, fiber: 6, category: 'fats', alkaline: true } },
+  { name: 'Semente de Girassol', info: { calories: 570, protein: 22.8, fat: 49.6, carbs: 18.7, fiber: 10.6, category: 'fats', alkaline: true } },
 
   // Proteínas - Proteins
   { name: 'Atum, conserva em óleo', info: { calories: 166, protein: 26.2, fat: 6, carbs: 0, fiber: 0, category: 'proteins', alkaline: false } },
