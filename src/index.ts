@@ -497,8 +497,9 @@ const setupEventListeners = () => {
 function performSearch(query: string) {
   const results: FoodItem[] = foodDatabase.filter(food => {
     const cleanName = getCleanName(food.name);
+    const cleanNameEn = getCleanName(food.nameEn);
     const category = food.info.category.toLowerCase();
-    return cleanName.includes(query.toLowerCase()) || category.includes(query.toLowerCase())
+    return cleanName.includes(query.toLowerCase()) || cleanNameEn.includes(query.toLowerCase()) || category.includes(query.toLowerCase())
   }).slice(0, 5); // Limit to 5 results
 
   appState.searchResults = results;

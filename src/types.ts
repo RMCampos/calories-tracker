@@ -2,6 +2,7 @@ type FoodCategory = 'fats' | 'proteins' | 'carbs' | 'leaves' | 'fruits' | 'low c
 
 export type FoodItem = {
   name: string;
+  nameEn: string;
   info: { calories: number, protein: number, fat: number, carbs: number, fiber: number, category: FoodCategory, alkaline: boolean }
 }
 
