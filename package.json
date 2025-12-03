@@ -16,6 +16,7 @@
     "vite": "^7.2.6"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.0",
     "appwrite": "^21.5.0",
     "sweetalert": "^2.1.2"
   }

@@ -290,6 +290,54 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- AI Nutrition Info Card -->
+                <div class="display-none" id="ai-nutrition-card">
+                    <div class="ai-nutrition-container">
+                        <h3 class="ai-nutrition-title">
+                            <span class="ai-badge">AI</span>
+                            Detailed Nutrition Information
+                        </h3>
+
+                        <!-- Loading State -->
+                        <div id="ai-nutrition-loading" class="ai-loading">
+                            <div class="ai-spinner"></div>
+                            <p>Analyzing nutritional content...</p>
+                        </div>
+
+                        <!-- Error State -->
+                        <div id="ai-nutrition-error" class="ai-error hidden">
+                            <p>Unable to load detailed nutrition info. Please try again.</p>
+                        </div>
+
+                        <!-- Content -->
+                        <div id="ai-nutrition-content" class="ai-nutrition-content hidden">
+                            <!-- Vitamins Section -->
+                            <div class="ai-nutrition-section">
+                                <h4 class="ai-section-title">Vitamins</h4>
+                                <ul id="ai-vitamins-list" class="ai-list"></ul>
+                            </div>
+
+                            <!-- Minerals Section -->
+                            <div class="ai-nutrition-section">
+                                <h4 class="ai-section-title">Minerals</h4>
+                                <ul id="ai-minerals-list" class="ai-list"></ul>
+                            </div>
+
+                            <!-- Benefits Section -->
+                            <div class="ai-nutrition-section">
+                                <h4 class="ai-section-title">Health Benefits</h4>
+                                <ul id="ai-benefits-list" class="ai-list"></ul>
+                            </div>
+
+                            <!-- Notes Section -->
+                            <div class="ai-nutrition-section" id="ai-notes-section">
+                                <h4 class="ai-section-title">Notes</h4>
+                                <p id="ai-notes-text" class="ai-notes"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
            <div class="section-title">Food Log</div>

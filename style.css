@@ -490,6 +490,7 @@ label {
     font-weight: 600;
     transition: all 0.3s ease;
     height: fit-content;
+    display: none; /* Hidden by default, shown when editing */
 }
 
 .cancel-btn:hover {
@@ -900,4 +901,143 @@ label {
     opacity: 0.5;
     pointer-events: none;
     cursor: not-allowed !important;
+}
+
+/* AI Nutrition Info Card */
+#ai-nutrition-card {
+    margin-top: 20px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.ai-nutrition-container {
+    background: rgba(40, 40, 40, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(107, 141, 214, 0.3);
+    border-radius: 12px;
+    padding: 25px;
+}
+
+.ai-nutrition-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-badge {
+    background: linear-gradient(135deg, #6B8DD6 0%, #9B7BC6 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Loading State */
+.ai-loading {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.ai-spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 15px;
+    border: 3px solid rgba(107, 141, 214, 0.3);
+    border-top: 3px solid #6B8DD6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.ai-loading p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+}
+
+/* Error State */
+.ai-error {
+    text-align: center;
+    padding: 20px;
+    color: rgba(255, 107, 107, 0.9);
+    font-size: 0.95rem;
+}
+
+/* Content */
+.ai-nutrition-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ai-nutrition-section {
+    background: rgba(30, 30, 30, 0.4);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.ai-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #6B8DD6;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(107, 141, 214, 0.2);
+}
+
+.ai-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ai-list li {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding-left: 20px;
+    position: relative;
+}
+
+.ai-list li:before {
+    content: "•";
+    position: absolute;
+    left: 8px;
+    color: #6B8DD6;
+    font-weight: bold;
+}
+
+.ai-notes {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ai-nutrition-container {
+        padding: 20px;
+    }
+
+    .ai-nutrition-title {
+        font-size: 1.1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .ai-list li {
+        font-size: 0.85rem;
+    }
+
+    .ai-notes {
+        font-size: 0.85rem;
+    }
 }

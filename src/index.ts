@@ -6,6 +6,7 @@ import swal from 'sweetalert';
 import { closeMobileMenu, delay, getCleanName, getIcon, handleMobileCalendarClick, hideLoading, hideSearchResults, navigateResultsKeyboard, QUICK_DELAY, scrollToCalendarView, showLoading, toggleCardHandler, toggleMobileMenu } from './Utils.ts';
 import { showAuthForms, toggleAuthForms, showRegisterForm, showLoginForm, hideAuthForms, closeAuthModal } from './auth.ts';
 import { appState } from "./state";
+import { getNutritionInfo, NutritionInfo } from './claudeService';
 
 // App state
 let selectedDate = new Date();
@@ -278,15 +279,16 @@ function clearEditing() {
   getInputById('foodSearchInput').value = '';
   getInputById('gramAmount').value = '100';
   showFoodPreview(false);
+  hideAINutritionCard();
   getDivById('add-foot-title').innerHTML = 'Add Food Entry';
   getButtonById('add-food-btn').innerHTML = 'Add Food';
   getButtonById('cancel-food-btn').style.display = 'none';
-  
+
   // Clear edit-specific hidden inputs
   getInputById('foodIdToUpdate').value = '';
   getInputById('foodTimeToUpdate').value = '';
   getInputById('foodCaloriesToUpdate').value = '';
-  
+
   selectedFood = null;
 }
 
@@ -361,11 +363,17 @@ const setupEventListeners = () => {
     const target = e.target as HTMLInputElement;
     if (target.value === ''){
       showFoodPreview(false);
+      hideAINutritionCard();
     }
   });
 
   getInputById('gramAmount').addEventListener('change', () => {
     previewCalories();
+    // Reload AI nutrition info with new amount if food is selected
+    if (selectedFood) {
+      const grams = parseFloat(getInputById('gramAmount').value) || 100;
+      loadAINutritionInfo(selectedFood.name, grams);
+    }
   });
 
   getButtonById('add-food-btn').addEventListener('click', () => {
@@ -556,13 +564,92 @@ function displaySearchResults(results: FoodItem[]) {
   appState.currentHighlightIndex = -1;
 }
 
+// AI Nutrition Card Functions
+function showAINutritionCard() {
+  const card = getDivById('ai-nutrition-card');
+  card.classList.remove('display-none');
+  card.classList.add('display-block');
+}
+
+function hideAINutritionCard() {
+  const card = getDivById('ai-nutrition-card');
+  card.classList.add('display-none');
+  card.classList.remove('display-block');
+}
+
+function showAILoading() {
+  getDivById('ai-nutrition-loading').classList.remove('hidden');
+  getDivById('ai-nutrition-error').classList.add('hidden');
+  getDivById('ai-nutrition-content').classList.add('hidden');
+}
+
+function showAIError() {
+  getDivById('ai-nutrition-loading').classList.add('hidden');
+  getDivById('ai-nutrition-error').classList.remove('hidden');
+  getDivById('ai-nutrition-content').classList.add('hidden');
+}
+
+function showAIContent(nutritionInfo: NutritionInfo) {
+  getDivById('ai-nutrition-loading').classList.add('hidden');
+  getDivById('ai-nutrition-error').classList.add('hidden');
+  getDivById('ai-nutrition-content').classList.remove('hidden');
+
+  // Populate vitamins
+  const vitaminsList = document.getElementById('ai-vitamins-list');
+  if (vitaminsList) {
+    vitaminsList.innerHTML = nutritionInfo.vitamins.map(v => `<li>${v}</li>`).join('');
+  }
+
+  // Populate minerals
+  const mineralsList = document.getElementById('ai-minerals-list');
+  if (mineralsList) {
+    mineralsList.innerHTML = nutritionInfo.minerals.map(m => `<li>${m}</li>`).join('');
+  }
+
+  // Populate benefits
+  const benefitsList = document.getElementById('ai-benefits-list');
+  if (benefitsList) {
+    benefitsList.innerHTML = nutritionInfo.benefits.map(b => `<li>${b}</li>`).join('');
+  }
+
+  // Populate notes
+  const notesText = document.getElementById('ai-notes-text');
+  const notesSection = document.getElementById('ai-notes-section');
+  if (notesText && notesSection && nutritionInfo.notes) {
+    notesText.textContent = nutritionInfo.notes;
+    notesSection.classList.remove('hidden');
+  } else if (notesSection) {
+    notesSection.classList.add('hidden');
+  }
+}
+
+async function loadAINutritionInfo(foodName: string, grams: number) {
+  showAINutritionCard();
+  showAILoading();
+
+  try {
+    const nutritionInfo = await getNutritionInfo(foodName, grams);
+    showAIContent(nutritionInfo);
+  } catch (error) {
+    console.error('Error loading AI nutrition info:', error);
+    showAIError();
+  }
+}
+
 function selectFood(food: FoodItem) {
   selectedFood = food;
-  
+
   getInputById('foodSearchInput').value = food.name;
-  hideSearchResults();  
+  hideSearchResults();
   getInputById('gramAmount').focus();
   previewCalories(food);
+
+  // Show cancel button so user can clear selection
+  getButtonById('cancel-food-btn').style.display = 'inline-block';
+
+  // Load AI nutrition info for the selected food
+  const grams = parseFloat(getInputById('gramAmount').value) || 100;
+  loadAINutritionInfo(food.name, grams);
 }
 
 async function setFoodToEdit(foodId: string) {
