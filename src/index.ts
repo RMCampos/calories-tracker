@@ -4,7 +4,7 @@ import { DailyTotalCalories, FoodItem, FoodStorage } from './types.js';
 import { AppwriteAuth, AppwriteDB } from './appwrite.js';
 import swal from 'sweetalert';
 import { closeMobileMenu, delay, getCleanName, getIcon, handleMobileCalendarClick, hideLoading, hideSearchResults, navigateResultsKeyboard, QUICK_DELAY, scrollToCalendarView, showLoading, toggleCardHandler, toggleMobileMenu } from './Utils.ts';
-import { showAuthForms, toggleAuthForms } from './auth.ts';
+import { showAuthForms, toggleAuthForms, showRegisterForm, showLoginForm, hideAuthForms, closeAuthModal } from './auth.ts';
 import { appState } from "./state";
 
 // App state
@@ -62,14 +62,15 @@ async function handleRegister(e: SubmitEvent) {
 
   try {
     await AppwriteAuth.register(email, password, name);
-    
+
     // Auto login after registration
     await AppwriteAuth.login(email, password);
     currentUser = await AppwriteAuth.getCurrentUser();
-    
+
+    closeAuthModal();
     await showMainApp();
     selectDate(selectedDate);
-    
+
     swal('Registration successful! Welcome to Food Tracker.');
   } catch (error) {
     console.error('Registration error:', error);
@@ -91,10 +92,11 @@ async function handleLogin(e: SubmitEvent) {
   try {
     await AppwriteAuth.login(email, password);
     currentUser = await AppwriteAuth.getCurrentUser();
-    
+
+    closeAuthModal();
     await showMainApp();
     selectDate(selectedDate);
-      
+
   } catch (error) {
     console.error('Login error:', error);
     if (error instanceof Error) {
@@ -245,14 +247,14 @@ async function handleMobileSettingsClick() {
 }
 
 async function showMainApp() {
-  getDivById('auth-section').classList.add('hidden');
+  hideAuthForms();
   getDivById('user-info').classList.remove('hidden');
   getDivById('app-content').classList.remove('hidden');
-    
+
   if (currentUser) {
     getDivById('userName').textContent = `Welcome, ${currentUser.name}!`;
   }
-    
+
   updateCurrentDate();
 
   // Get daily entries with total from Appwrite to display in calendar
@@ -422,6 +424,34 @@ const setupEventListeners = () => {
   document.getElementById('shareBtnMobile')?.addEventListener('click', handleShareClick);
   document.getElementById('close-share-modal')?.addEventListener('click', closeShareModal);
   document.getElementById('copy-share-link')?.addEventListener('click', copyShareLink);
+
+  // Landing page CTA button event listeners
+  document.getElementById('cta-register-btn')?.addEventListener('click', () => {
+    showRegisterForm();
+  });
+  document.getElementById('cta-login-btn')?.addEventListener('click', () => {
+    showLoginForm();
+  });
+
+  // Header auth button event listeners
+  document.getElementById('open-login-btn')?.addEventListener('click', () => {
+    showLoginForm();
+  });
+  document.getElementById('open-register-btn')?.addEventListener('click', () => {
+    showRegisterForm();
+  });
+
+  // Close auth modal
+  document.getElementById('close-auth-modal')?.addEventListener('click', () => {
+    closeAuthModal();
+  });
+
+  // Close modal when clicking outside
+  document.getElementById('auth-modal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('auth-modal')) {
+      closeAuthModal();
+    }
+  });
 
   // Search functionality
   getInputById('foodSearchInput').addEventListener('input', function(e: Event) {
@@ -1442,7 +1472,7 @@ async function checkSharedView() {
       });
 
       // Hide auth section and show app content
-      getDivById('auth-section').classList.add('hidden');
+      getDivById('auth-buttons').classList.add('hidden');
       getDivById('user-info').classList.add('hidden');
       getDivById('app-content').classList.remove('hidden');
 

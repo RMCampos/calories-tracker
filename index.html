@@ -30,49 +30,13 @@
     <header class="auth-header">
         <div class="auth-container">
             <div class="logo">
-                <h2>🍎 Food Tracker</h2>
+                <h1>🍎 Food Tracker</h1>
             </div>
-            
-            <!-- Authentication Forms -->
-            <div id="auth-section" class="auth-section">
-                <!-- Login Form -->
-                <div id="login-form" class="auth-form">
-                    <h3>Login</h3>
-                    <form id="loginForm">
-                        <div class="form-group">
-                            <input type="email" id="loginEmail" placeholder="Email" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="password" id="loginPassword" placeholder="Password" required>
-                        </div>
-                        <button type="submit" class="auth-btn">Login</button>
-                        <p class="auth-switch">
-                            Don't have an account? 
-                            <a href="#" id="showRegister">Register here</a>
-                        </p>
-                    </form>
-                </div>
 
-                <!-- Register Form -->
-                <div id="register-form" class="auth-form hidden">
-                    <h3>Register</h3>
-                    <form id="registerForm">
-                        <div class="form-group">
-                            <input type="text" id="registerName" placeholder="Name" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="email" id="registerEmail" placeholder="Email" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="password" id="registerPassword" placeholder="Password" required minlength="8">
-                        </div>
-                        <button type="submit" class="auth-btn">Register</button>
-                        <p class="auth-switch">
-                            Already have an account? 
-                            <a href="#" id="showLogin">Login here</a>
-                        </p>
-                    </form>
-                </div>
+            <!-- Authentication Buttons (shown when not logged in) -->
+            <div id="auth-buttons" class="auth-buttons">
+                <button id="open-login-btn" class="header-btn">Login</button>
+                <button id="open-register-btn" class="header-btn primary">Get Started</button>
             </div>
 
             <!-- User Info (shown when logged in) -->
@@ -98,6 +62,109 @@
             </div>
         </div>
     </header>
+
+    <!-- Authentication Modal -->
+    <div id="auth-modal" class="auth-modal hidden">
+        <div class="auth-modal-content">
+            <button id="close-auth-modal" class="close-modal-btn">×</button>
+
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form">
+                <h3>Welcome Back</h3>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <input type="email" id="loginEmail" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="loginPassword" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="auth-btn">Login</button>
+                    <p class="auth-switch">
+                        Don't have an account?
+                        <a href="#" id="showRegister">Register here</a>
+                    </p>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" class="auth-form hidden">
+                <h3>Create Your Account</h3>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <input type="text" id="registerName" placeholder="Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="registerEmail" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="registerPassword" placeholder="Password" required minlength="8">
+                    </div>
+                    <button type="submit" class="auth-btn">Register</button>
+                    <p class="auth-switch">
+                        Already have an account?
+                        <a href="#" id="showLogin">Login here</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Landing Page Content (shown when not logged in) -->
+    <section id="landing-page" class="landing-page hidden">
+        <div class="landing-container">
+            <div class="landing-hero">
+                <h1 class="landing-title">Track Your Nutrition, Transform Your Health</h1>
+                <p class="landing-subtitle">Take control of your diet with our comprehensive calorie and nutrition tracker. Perfect for anyone who wants to maintain a balanced diet and achieve their health goals.</p>
+            </div>
+
+            <div class="landing-features">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Detailed Tracking</h3>
+                    <p>Monitor calories, protein, fat, carbs, and fiber for every meal. Get a complete picture of your daily nutrition.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Set Goals</h3>
+                    <p>Define your daily macros targets and track your progress. Stay motivated and on track with your health journey.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3>Calendar View</h3>
+                    <p>Visualize your nutrition history with an intuitive calendar. See patterns and maintain consistency over time.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🥗</div>
+                    <h3>Alkaline Balance</h3>
+                    <p>Track your alkaline food intake to maintain a healthy pH balance and support overall wellness.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Smart Search</h3>
+                    <p>Quickly find and log foods from our comprehensive database. Make tracking effortless and accurate.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3>Share Progress</h3>
+                    <p>Share your daily food log with friends, trainers, or nutritionists. Get support and accountability.</p>
+                </div>
+            </div>
+
+            <div class="landing-cta">
+                <h2>Ready to Start Your Health Journey?</h2>
+                <p>Join today and take the first step towards a healthier, more balanced lifestyle.</p>
+                <div class="cta-buttons">
+                    <button id="cta-register-btn" class="cta-btn primary">Get Started Free</button>
+                    <button id="cta-login-btn" class="cta-btn secondary">Already Have an Account?</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay hidden">
