@@ -47,19 +47,17 @@ function cacheNutrition(foodName: string, grams: number, info: NutritionInfo): v
  * Get detailed nutritional information for a food item using Claude AI
  * Uses in-memory cache to avoid repeated API calls for the same food/amount
  * @param foodName - The name of the food item
- * @param grams - Amount in grams
  * @returns Promise with nutritional information
  */
-export async function getNutritionInfo(foodName: string, grams: number): Promise<NutritionInfo> {
+export async function getNutritionInfo(foodName: string): Promise<NutritionInfo> {
   // Check cache first
-  const cached = getCachedNutrition(foodName, grams);
+  const cached = getCachedNutrition(foodName, 100);
   if (cached) {
-    console.log(`Using cached nutrition info for: ${foodName} (${grams}g)`);
+    console.log(`Using cached nutrition info for: ${foodName} (100g)`);
     return cached;
   }
 
-  console.log(`Fetching nutrition info from AI for: ${foodName} (${grams}g)`);
-
+  console.log(`Fetching nutrition info from AI for: ${foodName} (100g)`);
   try {
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -67,7 +65,7 @@ export async function getNutritionInfo(foodName: string, grams: number): Promise
       messages: [
         {
           role: 'user',
-          content: `Provide detailed nutritional information for ${grams}g of ${foodName}.
+          content: `Provide detailed nutritional information for 100g of ${foodName}.
 
 IMPORTANT: Respond in Brazilian Portuguese (pt-BR).
 
@@ -108,7 +106,7 @@ Be concise but informative. Only include significant amounts of vitamins and min
     const nutritionInfo: NutritionInfo = JSON.parse(jsonMatch[0]);
 
     // Cache the result for future use
-    cacheNutrition(foodName, grams, nutritionInfo);
+    cacheNutrition(foodName, 100, nutritionInfo);
 
     return nutritionInfo;
 

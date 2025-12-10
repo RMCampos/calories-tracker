@@ -367,15 +367,6 @@ const setupEventListeners = () => {
     }
   });
 
-  getInputById('gramAmount').addEventListener('change', () => {
-    previewCalories();
-    // Reload AI nutrition info with new amount if food is selected
-    if (selectedFood) {
-      const grams = parseFloat(getInputById('gramAmount').value) || 100;
-      loadAINutritionInfo(selectedFood.name, grams);
-    }
-  });
-
   getButtonById('add-food-btn').addEventListener('click', () => {
     if (getButtonById('add-food-btn').innerHTML === 'Add Food') {
       addFood();
@@ -623,12 +614,12 @@ function showAIContent(nutritionInfo: NutritionInfo) {
   }
 }
 
-async function loadAINutritionInfo(foodName: string, grams: number) {
+async function loadAINutritionInfo(foodName: string) {
   showAINutritionCard();
   showAILoading();
 
   try {
-    const nutritionInfo = await getNutritionInfo(foodName, grams);
+    const nutritionInfo = await getNutritionInfo(foodName);
     showAIContent(nutritionInfo);
   } catch (error) {
     console.error('Error loading AI nutrition info:', error);
@@ -648,8 +639,7 @@ function selectFood(food: FoodItem) {
   getButtonById('cancel-food-btn').style.display = 'inline-block';
 
   // Load AI nutrition info for the selected food
-  const grams = parseFloat(getInputById('gramAmount').value) || 100;
-  loadAINutritionInfo(food.name, grams);
+  loadAINutritionInfo(food.name);
 }
 
 async function setFoodToEdit(foodId: string) {
