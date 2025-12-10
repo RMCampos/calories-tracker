@@ -23,6 +23,12 @@ export default defineConfig({
 
         icons: [
           {
+            src: '/calories-tracker/assets/apple-icon-180x180.png',
+            sizes: '180x180',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
             src: '/calories-tracker/assets/android-icon-192x192.png',
             sizes: '192x192',
             type: 'image/png',
