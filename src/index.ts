@@ -6,7 +6,7 @@ import swal from 'sweetalert';
 import { closeMobileMenu, delay, getCleanName, getIcon, handleMobileCalendarClick, hideLoading, hideSearchResults, navigateResultsKeyboard, QUICK_DELAY, scrollToCalendarView, showLoading, toggleCardHandler, toggleMobileMenu } from './Utils.ts';
 import { showAuthForms, toggleAuthForms, showRegisterForm, showLoginForm, hideAuthForms, closeAuthModal } from './auth.ts';
 import { appState } from "./state";
-import { getNutritionInfo, NutritionInfo } from './claudeService';
+import { getNutritionInfo, NutritionInfo, clearNutritionCache, getCacheStats } from './claudeService';
 
 // App state
 let selectedDate = new Date();
@@ -178,6 +178,45 @@ async function handleSaveSettings(e: SubmitEvent) {
   }
 }
 
+function updateCacheStats() {
+  try {
+    const stats = getCacheStats();
+    const cacheItemCountEl = document.getElementById('cacheItemCount');
+    const cacheSizeEl = document.getElementById('cacheSize');
+
+    if (cacheItemCountEl) {
+      cacheItemCountEl.textContent = stats.size.toString();
+    }
+
+    if (cacheSizeEl) {
+      cacheSizeEl.textContent = `${stats.sizeInKB} KB`;
+    }
+  } catch (error) {
+    console.error('Error updating cache stats:', error);
+  }
+}
+
+async function handleClearCache() {
+  try {
+    const result = await swal({
+      title: 'Clear Cache?',
+      text: 'This will remove all cached nutrition data. You may need to fetch this data again from the AI.',
+      icon: 'warning',
+      buttons: ['Cancel', 'Clear Cache'],
+      dangerMode: true,
+    });
+
+    if (result) {
+      clearNutritionCache();
+      updateCacheStats();
+      swal('Success', 'Cache cleared successfully!', 'success');
+    }
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+    swal('Error', 'Failed to clear cache', 'error');
+  }
+}
+
 async function handleLogout() {
   showLoading();
   
@@ -225,6 +264,10 @@ async function toggleSettingsView() {
 
       getDivById('app-content').classList.add('hidden');
       getDivById('settings-content').classList.remove('hidden');
+
+      // Update cache statistics display
+      updateCacheStats();
+
       hideLoading();
     } catch (error) {
       hideLoading();
@@ -407,14 +450,14 @@ const setupEventListeners = () => {
   document.getElementById('registerForm')?.addEventListener('submit', handleRegister);
   
   // Desktop header buttons
-  document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
-  document.getElementById('settingsBtn')?.addEventListener('click', toggleSettingsView);
-  document.getElementById('calendarBtn')?.addEventListener('click', scrollToCalendarView);
+  getButtonById('logoutBtn').addEventListener('click', handleLogout);
+  getButtonById('settingsBtn').addEventListener('click', toggleSettingsView);
+  getButtonById('calendarBtn').addEventListener('click', scrollToCalendarView);
   
   // Mobile header buttons
-  document.getElementById('logoutBtnMobile')?.addEventListener('click', handleLogout);
-  document.getElementById('settingsBtnMobile')?.addEventListener('click', handleMobileSettingsClick);
-  document.getElementById('calendarBtnMobile')?.addEventListener('click', handleMobileCalendarClick);
+  getButtonById('logoutBtnMobile').addEventListener('click', handleLogout);
+  getButtonById('settingsBtnMobile').addEventListener('click', handleMobileSettingsClick);
+  getButtonById('calendarBtnMobile').addEventListener('click', handleMobileCalendarClick);
   
   // Mobile menu toggle
   document.getElementById('mobileMenuToggle')?.addEventListener('click', toggleMobileMenu);
@@ -422,10 +465,13 @@ const setupEventListeners = () => {
   // Settings form
   document.getElementById('settingsForm')?.addEventListener('submit', handleSaveSettings);
 
+  // Clear cache button
+  getButtonById('clearCacheBtn')?.addEventListener('click', handleClearCache);
+
   // Share button event listeners
-  document.getElementById('shareBtn')?.addEventListener('click', handleShareClick);
-  document.getElementById('shareBtnMobile')?.addEventListener('click', handleShareClick);
-  document.getElementById('close-share-modal')?.addEventListener('click', closeShareModal);
+  getButtonById('shareBtn').addEventListener('click', handleShareClick);
+  getButtonById('shareBtnMobile').addEventListener('click', handleShareClick);
+  getButtonById('close-share-modal').addEventListener('click', closeShareModal);
   document.getElementById('copy-share-link')?.addEventListener('click', copyShareLink);
 
   // Landing page CTA button event listeners
@@ -1025,6 +1071,7 @@ const addFood = async () => {
     getInputById('foodSearchInput').value = '';
     gramAmount.value = '100';
     showFoodPreview(false);
+    hideAINutritionCard();
     await delay(QUICK_DELAY);
     renderCalendar();
   } catch (error) {

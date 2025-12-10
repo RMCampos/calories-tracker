@@ -363,9 +363,9 @@
     <section id="settings-content" class="hidden">
         <div class="container">
             <h1>⚙️ Settings</h1>
-            
+
             <div class="date-display">Define your daily macros goal</div>
-            
+
             <form id="settingsForm" class="settings-form">
                 <div class="form-group">
                     <label for="caloriesGoal">Daily calorie goal</label>
@@ -389,6 +389,22 @@
                 </div>
                 <button type="submit" class="settings-btn">Save</button>
             </form>
+
+            <div class="date-display" style="margin-top: 40px;">AI Nutrition Cache</div>
+
+            <div class="cache-info-section">
+                <div class="cache-stats">
+                    <div class="cache-stat-item">
+                        <span class="cache-stat-label">Cached Items:</span>
+                        <span class="cache-stat-value" id="cacheItemCount">0</span>
+                    </div>
+                    <div class="cache-stat-item">
+                        <span class="cache-stat-label">Cache Size:</span>
+                        <span class="cache-stat-value" id="cacheSize">0 KB</span>
+                    </div>
+                </div>
+                <button type="button" id="clearCacheBtn" class="settings-btn clear-cache-btn">Clear Cache</button>
+            </div>
         </div>
     </section>
 

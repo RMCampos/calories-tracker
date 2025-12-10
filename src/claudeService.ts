@@ -15,37 +15,56 @@ export interface NutritionInfo {
   notes: string;
 }
 
-// In-memory cache for nutrition info
-// Key format: "foodName_grams" (e.g., "apple_100", "chicken breast_150")
-const nutritionCache = new Map<string, NutritionInfo>();
+// localStorage-based cache for nutrition info
+// Key format: "nutrition_cache_foodName_grams" (e.g., "nutrition_cache_apple_100")
+const CACHE_PREFIX = 'nutrition_cache_';
 
 /**
  * Generate cache key from food name and grams
  */
 function getCacheKey(foodName: string, grams: number): string {
-  return `${foodName.toLowerCase().trim()}_${grams}`;
+  return `${CACHE_PREFIX}${foodName.toLowerCase().trim()}_${grams}`;
 }
 
 /**
  * Get cached nutrition info if available
  */
 function getCachedNutrition(foodName: string, grams: number): NutritionInfo | null {
-  const key = getCacheKey(foodName, grams);
-  return nutritionCache.get(key) || null;
+  try {
+    const key = getCacheKey(foodName, grams);
+    const cached = localStorage.getItem(key);
+    if (cached) {
+      return JSON.parse(cached) as NutritionInfo;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error reading from cache:', error);
+    return null;
+  }
 }
 
 /**
  * Store nutrition info in cache
  */
 function cacheNutrition(foodName: string, grams: number, info: NutritionInfo): void {
-  const key = getCacheKey(foodName, grams);
-  nutritionCache.set(key, info);
-  console.log(`Cached nutrition info for: ${key} (total cached: ${nutritionCache.size})`);
+  try {
+    const key = getCacheKey(foodName, grams);
+    localStorage.setItem(key, JSON.stringify(info));
+    const stats = getCacheStats();
+    console.log(`Cached nutrition info for: ${key} (total cached: ${stats.size})`);
+  } catch (error) {
+    console.error('Error writing to cache:', error);
+    // If localStorage is full, try to clear some space
+    if (error instanceof Error && error.name === 'QuotaExceededError') {
+      console.warn('localStorage quota exceeded, clearing old cache entries');
+      clearNutritionCache();
+    }
+  }
 }
 
 /**
  * Get detailed nutritional information for a food item using Claude AI
- * Uses in-memory cache to avoid repeated API calls for the same food/amount
+ * Uses localStorage cache to avoid repeated API calls for the same food/amount
  * @param foodName - The name of the food item
  * @returns Promise with nutritional information
  */
@@ -117,21 +136,44 @@ Be concise but informative. Only include significant amounts of vitamins and min
 }
 
 /**
- * Clear the nutrition info cache (optional utility function)
- * Useful for testing or if you want to force fresh API calls
+ * Clear the nutrition info cache
+ * Removes all cached nutrition data from localStorage
  */
 export function clearNutritionCache(): void {
-  const size = nutritionCache.size;
-  nutritionCache.clear();
-  console.log(`Cleared nutrition cache (${size} entries removed)`);
+  try {
+    const keys = Object.keys(localStorage).filter(key => key.startsWith(CACHE_PREFIX));
+    keys.forEach(key => localStorage.removeItem(key));
+    console.log(`Cleared nutrition cache (${keys.length} entries removed)`);
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+  }
 }
 
 /**
- * Get cache statistics
+ * Get cache statistics including size and storage usage
  */
-export function getCacheStats(): { size: number; keys: string[] } {
-  return {
-    size: nutritionCache.size,
-    keys: Array.from(nutritionCache.keys())
-  };
+export function getCacheStats(): { size: number; keys: string[]; sizeInBytes: number; sizeInKB: number } {
+  try {
+    const keys = Object.keys(localStorage).filter(key => key.startsWith(CACHE_PREFIX));
+
+    // Calculate total size in bytes
+    let totalBytes = 0;
+    keys.forEach(key => {
+      const value = localStorage.getItem(key);
+      if (value) {
+        // Each character in localStorage is stored as UTF-16, which is 2 bytes per character
+        totalBytes += (key.length + value.length) * 2;
+      }
+    });
+
+    return {
+      size: keys.length,
+      keys: keys.map(k => k.replace(CACHE_PREFIX, '')),
+      sizeInBytes: totalBytes,
+      sizeInKB: Math.round(totalBytes / 1024 * 100) / 100
+    };
+  } catch (error) {
+    console.error('Error getting cache stats:', error);
+    return { size: 0, keys: [], sizeInBytes: 0, sizeInKB: 0 };
+  }
 }
