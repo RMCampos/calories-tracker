@@ -367,6 +367,10 @@ const setupEventListeners = () => {
     }
   });
 
+  getInputById('gramAmount').addEventListener('change', () => {
+    previewCalories();
+  });
+
   getButtonById('add-food-btn').addEventListener('click', () => {
     if (getButtonById('add-food-btn').innerHTML === 'Add Food') {
       addFood();
