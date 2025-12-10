@@ -217,6 +217,20 @@ async function handleClearCache() {
   }
 }
 
+function handleAICheckboxChange(e: Event) {
+  const checkbox = e.target as HTMLInputElement;
+
+  if (checkbox.checked) {
+    // If a food is already selected, load its AI nutrition info
+    if (selectedFood) {
+      loadAINutritionInfo(selectedFood.name);
+    }
+  } else {
+    // Hide the AI nutrition card
+    hideAINutritionCard();
+  }
+}
+
 async function handleLogout() {
   showLoading();
   
@@ -468,6 +482,9 @@ const setupEventListeners = () => {
   // Clear cache button
   getButtonById('clearCacheBtn')?.addEventListener('click', handleClearCache);
 
+  // AI nutrition checkbox
+  document.getElementById('enableAINutrition')?.addEventListener('change', handleAICheckboxChange);
+
   // Share button event listeners
   getButtonById('shareBtn').addEventListener('click', handleShareClick);
   getButtonById('shareBtnMobile').addEventListener('click', handleShareClick);
@@ -688,8 +705,13 @@ function selectFood(food: FoodItem) {
   // Show cancel button so user can clear selection
   getButtonById('cancel-food-btn').style.display = 'inline-block';
 
-  // Load AI nutrition info for the selected food
-  loadAINutritionInfo(food.name);
+  // Load AI nutrition info only if checkbox is checked
+  const aiCheckbox = document.getElementById('enableAINutrition') as HTMLInputElement;
+  if (aiCheckbox && aiCheckbox.checked) {
+    loadAINutritionInfo(food.name);
+  } else {
+    hideAINutritionCard();
+  }
 }
 
 async function setFoodToEdit(foodId: string) {
