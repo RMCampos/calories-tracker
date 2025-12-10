@@ -8,6 +8,30 @@ import { showAuthForms, toggleAuthForms, showRegisterForm, showLoginForm, hideAu
 import { appState } from "./state";
 import { getNutritionInfo, NutritionInfo, clearNutritionCache, getCacheStats } from './claudeService';
 
+// PWA Service Worker Registration
+import { registerSW } from 'virtual:pwa-register'
+
+const updateSW = registerSW({
+  onNeedRefresh() {
+    swal({
+      title: 'Update Available',
+      text: 'New content is available. Reload to update?',
+      icon: 'info',
+      buttons: {
+        cancel: 'Later',
+        confirm: 'Update Now'
+      }
+    }).then((willUpdate) => {
+      if (willUpdate) {
+        updateSW(true)
+      }
+    })
+  },
+  onOfflineReady() {
+    console.log('App ready to work offline')
+  },
+})
+
 // App state
 let selectedDate = new Date();
 let currentViewDate = new Date();

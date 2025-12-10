@@ -3,3 +3,8 @@ dist/
 .env
 senha.txt
 .vscode/
+
+# PWA
+dist/sw.js
+dist/workbox-*.js
+dev-dist/
