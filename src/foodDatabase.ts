@@ -39,6 +39,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Apresuntado', nameEn: 'Cooked Ham', info: { calories: 129, protein: 13.5, fat: 6.7, carbs: 2.9, fiber: 0, category: 'proteins', alkaline: false } },
   { name: 'Presunto, com capa de gordura', nameEn: 'Ham, with fat layer', info: { calories: 128, protein: 14.4, fat: 6.8, carbs: 1.4, fiber: 0, category: 'proteins', alkaline: false } },
   { name: 'Presunto, sem capa de gordura', nameEn: 'Ham, without fat layer', info: { calories: 94, protein: 14.3, fat: 2.7, carbs: 2.1, fiber: 0, category: 'proteins', alkaline: false } },
+  { name: 'Proteína da Ervilha em pó, Growth', nameEn: 'Pea Protein Powder, Growth', info: { calories: 437, protein: 83.3, fat: 9.7, carbs: 2.3, fiber: 2.7, category: 'proteins', alkaline: false } },
   
   // Carboidratos, amiláceos - Carbs
   { name: 'Grão de Bico, cozido', nameEn: 'Chickpeas, cooked', info: { calories: 180, protein: 9.5, fat: 3, carbs: 30, fiber: 8.6, category: 'carbs', alkaline: false } },
@@ -108,7 +109,9 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Leite, de vaca, desnatado, UTH (Tirol)', nameEn: 'Skimmed Cow Milk, UHT (Tirol)', info: { calories: 30.5, protein: 3.15, fat: 0, carbs: 4.5, fiber: 0, category: 'dairy', alkaline: true } },
   { name: 'Leite, de vaca, integral, UTH (Tirol)', nameEn: 'Whole Cow Milk, UHT (Tirol)', info: { calories: 57.5, protein: 3.15, fat: 3, carbs: 4.5, fiber: 0, category: 'dairy', alkaline: true } },
   { name: 'Leite, de vaca, integral, pó', nameEn: 'Whole Cow Milk, Powdered', info: { calories: 496, protein: 26, fat: 26.4, carbs: 38.4, fiber: 0, category: 'dairy', alkaline: true } },
-  { name: 'Leite Caju+côco A Tal da Castanha', nameEn: 'Cashew+Coconut Milk A Tal da Castanha', info: { calories: 46, protein: 1.3, fat: 3.4, carbs: 2.6, fiber: 0, category: 'dairy', alkaline: true } },
+  { name: 'Leite Caju+côco A Tal da Castanha', nameEn: 'Cashew+Coconut Milk A Tal da Castanha', info: { calories: 51, protein: 2, fat: 3.4, carbs: 2.6, fiber: 0, category: 'dairy', alkaline: false } },
+  { name: 'Leite Caju Original A Tal da Castanha', nameEn: 'Original Cashew Milk A Tal da Castanha', info: { calories: 48, protein: 1.5, fat: 4, carbs: 1.5, fiber: 0.7, category: 'dairy', alkaline: false } },
+
   
   // Low carb
   { name: 'Abóbrinha, italinaa, cozida', nameEn: 'Italian Zucchini, cooked', info: { calories: 15, protein: 1.1, fat: 0.2, carbs: 3.0, fiber: 1.6, category: 'low carb', alkaline: true } },
