@@ -349,6 +349,133 @@ h1 {
     background: #1dd1a1;
 }
 
+/* Meal Group Styles */
+.meal-group {
+    margin-bottom: 20px;
+}
+
+.meal-group-header {
+    background: linear-gradient(135deg, #3A4D6A 0%, #4A2E5A 100%);
+    padding: 16px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.meal-group-header:hover {
+    background: linear-gradient(135deg, #2E3F58 0%, #3E2448 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.meal-group-header.collapsed {
+    border-radius: 8px;
+    margin-bottom: 0;
+}
+
+.meal-group-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.meal-group-label {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.meal-group-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.meal-summary-item {
+    font-weight: 500;
+}
+
+.meal-summary-divider {
+    opacity: 0.5;
+}
+
+.meal-group-toggle {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+    color: rgba(255, 255, 255, 0.8);
+    margin-left: 12px;
+}
+
+.meal-group-header .meal-group-toggle.rotated {
+    transform: rotate(180deg);
+}
+
+.meal-group-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+    padding-left: 8px;
+    border-left: 3px solid rgba(107, 141, 214, 0.3);
+    transition: all 0.3s ease;
+    max-height: 5000px;
+    overflow: hidden;
+}
+
+.meal-group-items.collapsed {
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Adjust food card styles within meal groups */
+.meal-group-items .food-card {
+    margin-left: 12px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .meal-group-header {
+        padding: 14px 16px;
+    }
+
+    .meal-group-label {
+        font-size: 16px;
+    }
+
+    .meal-group-summary {
+        font-size: 13px;
+        gap: 6px;
+    }
+
+    .meal-summary-item {
+        font-size: 12px;
+    }
+}
+
+/* Stack summary items on very small screens */
+@media (max-width: 480px) {
+    .meal-group-summary {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .meal-summary-divider {
+        display: none;
+    }
+}
+
 .empty-state {
     text-align: center;
     padding: 60px 20px;

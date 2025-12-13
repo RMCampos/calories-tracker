@@ -44,3 +44,16 @@ export type SharedDay = {
   foodEntries: string; // JSON stringified FoodStorage[]
   createdAt: string;
 };
+
+export type MealPeriod = 'pre-workout' | 'breakfast' | 'second-breakfast' | 'lunch' | 'snacks' | 'dinner' | 'night-snacks';
+
+export type MealGroup = {
+  period: MealPeriod;
+  label: string;
+  entries: FoodStorage[];
+  totalCalories: number;
+  totalProtein: number;
+  totalFat: number;
+  totalCarbs: number;
+  isExpanded: boolean;
+};

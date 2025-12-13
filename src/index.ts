@@ -1,6 +1,6 @@
 import { foodDatabase } from './foodDatabase.js';
 import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './DomUtils.ts';
-import { DailyTotalCalories, FoodItem, FoodStorage } from './types.js';
+import { DailyTotalCalories, FoodItem, FoodStorage, MealGroup, MealPeriod } from './types.js';
 import { AppwriteAuth, AppwriteDB } from './appwrite.js';
 import swal from 'sweetalert';
 import { closeMobileMenu, delay, getCleanName, getIcon, handleMobileCalendarClick, hideLoading, hideSearchResults, navigateResultsKeyboard, QUICK_DELAY, scrollToCalendarView, showLoading, toggleCardHandler, toggleMobileMenu } from './Utils.ts';
@@ -1093,24 +1093,8 @@ const addFood = async () => {
       updateDocumentIdForToday(monthlyCreated.$id, monthlyCreated.totalCalories);
     }
 
-    addFoodToView(entry, savedEntry.$id);
-    updateTotalCalories();
-
-    // Update total macros
-    const proteinDiv: HTMLElement = getDivById('proteinValue');
-    const fatDiv: HTMLElement = getDivById('fatValue');
-    const carboDiv: HTMLElement = getDivById('carboValue');
-    const fiberDiv: HTMLElement = getDivById('fiberValue');
-
-    const totalProtein: number = parseInt(proteinDiv.textContent ?? '0') + proportion.info.protein;
-    const totalFat: number = parseInt(fatDiv.textContent ?? '0') + proportion.info.fat;
-    const totalCarbs: number = parseInt(carboDiv.textContent ?? '0') + proportion.info.carbs;
-    const totalFiber: number = parseInt(fiberDiv.textContent ?? '0') + proportion.info.fiber;
-
-    proteinDiv.textContent = (Math.round(totalProtein * 10) / 10).toString();
-    fatDiv.textContent = (Math.round(totalFat * 10) / 10).toString();
-    carboDiv.textContent = (Math.round(totalCarbs * 10) / 10).toString();
-    fiberDiv.textContent = (Math.round(totalFiber * 10) / 10).toString();
+    // Reload all entries to properly group them (this also updates totals and macros)
+    await loadFoodEntries(selectedDate);
 
     // Reset form
     selectedFood = null;
@@ -1130,6 +1114,142 @@ const addFood = async () => {
   }
 }
 
+// Meal grouping utility functions
+function getMealPeriod(time: string): MealPeriod {
+  // Parse HH:MM format (24-hour time)
+  const [hours, minutes] = time.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes;
+
+  // Before 7 AM (0:00 - 6:59) = 0 - 419 minutes
+  if (totalMinutes < 420) return 'pre-workout';
+
+  // 7 AM - 9 AM (7:00 - 8:59) = 420 - 539 minutes
+  if (totalMinutes < 540) return 'breakfast';
+
+  // 9 AM - 12 PM (9:00 - 11:59) = 540 - 719 minutes
+  if (totalMinutes < 720) return 'second-breakfast';
+
+  // 12 PM - 3 PM (12:00 - 14:59) = 720 - 899 minutes
+  if (totalMinutes < 900) return 'lunch';
+
+  // 3 PM - 6 PM (15:00 - 17:59) = 900 - 1079 minutes
+  if (totalMinutes < 1080) return 'snacks';
+
+  // 6 PM - 8 PM (18:00 - 19:59) = 1080 - 1199 minutes
+  if (totalMinutes < 1200) return 'dinner';
+
+  // After 8 PM (20:00 - 23:59) = 1200+ minutes
+  return 'night-snacks';
+}
+
+function getMealLabel(period: MealPeriod): string {
+  const labels: Record<MealPeriod, string> = {
+    'pre-workout': '🏋️ Pre-Workout',
+    'breakfast': '🌅 Breakfast',
+    'second-breakfast': '☕ Second Breakfast',
+    'lunch': '🍽️ Lunch',
+    'snacks': '🍪 Snacks',
+    'dinner': '🌙 Dinner',
+    'night-snacks': '🌃 Night Snacks'
+  };
+  return labels[period];
+}
+
+function groupFoodEntriesByMeal(entries: FoodStorage[]): MealGroup[] {
+  // Initialize all meal groups
+  const groups: Record<MealPeriod, MealGroup> = {
+    'pre-workout': {
+      period: 'pre-workout',
+      label: getMealLabel('pre-workout'),
+      entries: [],
+      totalCalories: 0,
+      totalProtein: 0,
+      totalFat: 0,
+      totalCarbs: 0,
+      isExpanded: true
+    },
+    'breakfast': {
+      period: 'breakfast',
+      label: getMealLabel('breakfast'),
+      entries: [],
+      totalCalories: 0,
+      totalProtein: 0,
+      totalFat: 0,
+      totalCarbs: 0,
+      isExpanded: true
+    },
+    'second-breakfast': {
+      period: 'second-breakfast',
+      label: getMealLabel('second-breakfast'),
+      entries: [],
+      totalCalories: 0,
+      totalProtein: 0,
+      totalFat: 0,
+      totalCarbs: 0,
+      isExpanded: true
+    },
+    'lunch': {
+      period: 'lunch',
+      label: getMealLabel('lunch'),
+      entries: [],
+      totalCalories: 0,
+      totalProtein: 0,
+      totalFat: 0,
+      totalCarbs: 0,
+      isExpanded: true
+    },
+    'snacks': {
+      period: 'snacks',
+      label: getMealLabel('snacks'),
+      entries: [],
+      totalCalories: 0,
+      totalProtein: 0,
+      totalFat: 0,
+      totalCarbs: 0,
+      isExpanded: true
+    },
+    'dinner': {
+      period: 'dinner',
+      label: getMealLabel('dinner'),
+      entries: [],
+      totalCalories: 0,
+      totalProtein: 0,
+      totalFat: 0,
+      totalCarbs: 0,
+      isExpanded: true
+    },
+    'night-snacks': {
+      period: 'night-snacks',
+      label: getMealLabel('night-snacks'),
+      entries: [],
+      totalCalories: 0,
+      totalProtein: 0,
+      totalFat: 0,
+      totalCarbs: 0,
+      isExpanded: true
+    }
+  };
+
+  // Group entries and calculate totals
+  entries.forEach(entry => {
+    const period = getMealPeriod(entry.time);
+    groups[period].entries.push(entry);
+    groups[period].totalCalories += entry.calories;
+    groups[period].totalProtein += entry.protein;
+    groups[period].totalFat += entry.fat;
+    groups[period].totalCarbs += entry.carbs;
+  });
+
+  // Return only groups that have entries, in chronological order
+  const orderedPeriods: MealPeriod[] = [
+    'breakfast', 'second-breakfast', 'lunch', 'snacks', 'dinner', 'night-snacks'
+  ];
+
+  return orderedPeriods
+    .map(period => groups[period])
+    .filter(group => group.entries.length > 0);
+}
+
 // Load food entries from Appwrite for a given date
 async function loadFoodEntries(date: Date) {
   if (!currentUser) return;
@@ -1138,12 +1258,21 @@ async function loadFoodEntries(date: Date) {
 
   try {
     const entries = await AppwriteDB.getFoodEntries(date);
-    
-    getDivById('foodCardsContainer').innerHTML = '';
-    
-    // Add each entry to table
-    entries.forEach(entry => {
-      const foodData: FoodStorage = {
+
+    const container = getDivById('foodCardsContainer');
+    container.innerHTML = '';
+
+    if (entries.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🍽️</div>
+          <div>No food items logged yet.</div>
+          <div style="margin-top: 8px; font-size: 14px; opacity: 0.7;">Add your first item to get started!</div>
+        </div>
+      `;
+    } else {
+      // Convert entries to FoodStorage format
+      const foodEntries: FoodStorage[] = entries.map(entry => ({
         id: entry.$id,
         name: entry.name,
         grams: entry.grams,
@@ -1155,23 +1284,19 @@ async function loadFoodEntries(date: Date) {
         time: entry.time,
         date: entry.date,
         alkaline: entry.alkaline,
-      };
+      }));
 
-      addFoodToView(foodData, entry.$id);
-    });
+      // Group by meal period
+      const mealGroups = groupFoodEntriesByMeal(foodEntries);
 
-    if (entries.length === 0) {
-      getDivById('foodCardsContainer').innerHTML = `
-          <div class="empty-state">
-              <div class="empty-state-icon">🍽️</div>
-              <div>No food items logged yet.</div>
-              <div style="margin-top: 8px; font-size: 14px; opacity: 0.7;">Add your first item to get started!</div>
-          </div>
-      `;
+      // Render each meal group
+      mealGroups.forEach(group => {
+        renderMealGroup(group);
+      });
+
+      setupEditAndDeleteEvents();
+      updateTotalCalories();
     }
-
-    setupEditAndDeleteEvents();    
-    updateTotalCalories();
 
     // Update counters
     let totalCalories = 0;
@@ -1293,16 +1418,11 @@ async function handleDeleteFood(documentId: string) {
   }
 }
 
-function addFoodToView(foodData: FoodStorage, documentId: string) {
-  // New Food card
-  const container = getDivById('foodCardsContainer');
+// Create a food card element (without appending it to the DOM)
+function createFoodCard(foodData: FoodStorage): HTMLElement {
   const card = document.createElement('div');
   card.className = 'food-card';
-  card.setAttribute('data-id', documentId);
-
-  if (container.innerHTML.includes('empty-state')) {
-    container.innerHTML = '';
-  }
+  card.setAttribute('data-id', foodData.id || '');
 
   const foodFromDatabase = getFoodItemByName(foodData.name);
   const isAlkalineStr = foodFromDatabase.info.alkaline ? ' (Alk)' : ' (Not Alk)';
@@ -1342,18 +1462,81 @@ function addFoodToView(foodData: FoodStorage, documentId: string) {
           <div class="card-actions">
             <span class="muted">${foodFromDatabase.info.category} ${isAlkalineStr}</span>
             <div>
-              <button class="btn btn-copy" data-food-id="${documentId}">Copy</button>
-              <button class="btn btn-edit" data-food-id="${documentId}">Edit</button>
-              <button class="btn btn-delete" data-food-id="${documentId}">Delete</button>
+              <button class="btn btn-copy" data-food-id="${foodData.id}">Copy</button>
+              <button class="btn btn-edit" data-food-id="${foodData.id}">Edit</button>
+              <button class="btn btn-delete" data-food-id="${foodData.id}">Delete</button>
             </div>
           </div>
       </div>
     </div>
   `;
 
-  container?.appendChild(card);
+  return card;
+}
 
-  setupEditAndDeleteEvents();
+// Render a meal group with header and food items
+function renderMealGroup(group: MealGroup) {
+  const container = getDivById('foodCardsContainer');
+
+  // Create meal group container
+  const groupDiv = document.createElement('div');
+  groupDiv.className = 'meal-group';
+  groupDiv.setAttribute('data-meal-period', group.period);
+
+  // Create meal group header (collapsible)
+  const headerDiv = document.createElement('div');
+  headerDiv.className = 'meal-group-header';
+
+  // Round nutritional values to 1 decimal place
+  const roundedProtein = Math.round(group.totalProtein * 10) / 10;
+  const roundedFat = Math.round(group.totalFat * 10) / 10;
+  const roundedCarbs = Math.round(group.totalCarbs * 10) / 10;
+
+  headerDiv.innerHTML = `
+    <div class="meal-group-info">
+      <div class="meal-group-label">${group.label}</div>
+      <div class="meal-group-summary">
+        <span class="meal-summary-item">${group.totalCalories} cal</span>
+        <span class="meal-summary-divider">•</span>
+        <span class="meal-summary-item">${roundedProtein}g protein</span>
+        <span class="meal-summary-divider">•</span>
+        <span class="meal-summary-item">${roundedFat}g fat</span>
+        <span class="meal-summary-divider">•</span>
+        <span class="meal-summary-item">${roundedCarbs}g carbs</span>
+      </div>
+    </div>
+    <div class="meal-group-toggle">▼</div>
+  `;
+
+  // Create food items container (collapsible)
+  const itemsDiv = document.createElement('div');
+  itemsDiv.className = 'meal-group-items';
+  if (!group.isExpanded) {
+    itemsDiv.classList.add('collapsed');
+    headerDiv.classList.add('collapsed');
+  }
+
+  // Add each food entry to the group
+  group.entries.forEach(entry => {
+    const card = createFoodCard(entry);
+    itemsDiv.appendChild(card);
+  });
+
+  // Add click handler for collapsing/expanding
+  headerDiv.addEventListener('click', () => {
+    itemsDiv.classList.toggle('collapsed');
+    headerDiv.classList.toggle('collapsed');
+
+    // Rotate the toggle icon
+    const toggleIcon = headerDiv.querySelector('.meal-group-toggle');
+    if (toggleIcon) {
+      toggleIcon.classList.toggle('rotated');
+    }
+  });
+
+  groupDiv.appendChild(headerDiv);
+  groupDiv.appendChild(itemsDiv);
+  container.appendChild(groupDiv);
 }
 
 // Update total calories and display it in the counter
@@ -1674,12 +1857,28 @@ function renderSharedDayView() {
   const foodEntries: FoodStorage[] = JSON.parse(appState.sharedData.foodEntries);
 
   // Clear container
-  getDivById('foodCardsContainer').innerHTML = '';
+  const container = getDivById('foodCardsContainer');
+  container.innerHTML = '';
 
-  // Add each entry to view
-  foodEntries.forEach((entry, index) => {
-    addFoodToView(entry, `shared-${index}`);
-  });
+  if (foodEntries.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🍽️</div>
+        <div>No food items logged yet.</div>
+      </div>
+    `;
+  } else {
+    // Group by meal period
+    const mealGroups = groupFoodEntriesByMeal(foodEntries);
+
+    // Render each meal group
+    mealGroups.forEach(group => {
+      renderMealGroup(group);
+    });
+
+    setupEditAndDeleteEvents();
+    updateTotalCalories();
+  }
 
   // Calculate and display totals
   let totalCalories = 0;
