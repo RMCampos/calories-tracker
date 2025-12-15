@@ -1242,6 +1242,7 @@ function groupFoodEntriesByMeal(entries: FoodStorage[]): MealGroup[] {
 
   // Return only groups that have entries, in chronological order
   const orderedPeriods: MealPeriod[] = [
+    'pre-workout',
     'breakfast', 'second-breakfast', 'lunch', 'snacks', 'dinner', 'night-snacks'
   ];
 
