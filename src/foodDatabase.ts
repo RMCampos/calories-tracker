@@ -14,6 +14,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Pasta de Amendoim Growth', nameEn: 'Growth Peanut Butter', info: { calories: 544, protein: 27, fat: 33, carbs: 20, fiber: 8, category: 'fats', alkaline: false } },
   { name: 'Semente de Abóbora', nameEn: 'Pumpkin Seed', info: { calories: 446, protein: 18.55, fat: 19.4, carbs: 53.75, fiber: 6, category: 'fats', alkaline: true } },
   { name: 'Semente de Girassol', nameEn: 'Sunflower Seed', info: { calories: 570, protein: 22.8, fat: 49.6, carbs: 18.7, fiber: 10.6, category: 'fats', alkaline: true } },
+  { name: 'Pasta de Castanha (A Tal da Castanha)', nameEn: 'Cashew Butter (A Tal da Castanha)', info: { calories: 564, protein: 17, fat: 40, carbs: 34, fiber: 4.7, category: 'fats', alkaline: false } },
 
   // Proteínas - Proteins
   { name: 'Atum, conserva em óleo', nameEn: 'Tuna, canned in oil', info: { calories: 166, protein: 26.2, fat: 6, carbs: 0, fiber: 0, category: 'proteins', alkaline: false } },
