@@ -13,13 +13,13 @@
   "description": "",
   "devDependencies": {
     "typescript": "^5.9.3",
-    "vite": "^7.2.7",
+    "vite": "^7.3.1",
     "vite-plugin-pwa": "^1.2.0",
     "workbox-window": "^7.4.0"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.71.2",
-    "appwrite": "^21.5.0",
+    "@anthropic-ai/sdk": "^0.74.0",
+    "appwrite": "^22.0.0",
     "sweetalert": "^2.1.2"
   }
 }
