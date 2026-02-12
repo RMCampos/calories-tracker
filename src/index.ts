@@ -1483,7 +1483,7 @@ function createFoodCard(foodData: FoodStorage): HTMLElement {
   card.setAttribute('data-id', foodData.id || '');
 
   const foodFromDatabase = getFoodItemByName(foodData.name);
-  const isAlkalineStr = foodFromDatabase.info.alkaline ? ' (Alk)' : ' (Not Alk)';
+  const isAlkalineStr = foodFromDatabase.info.alkaline ? '-A' : '';
 
   card.innerHTML = `
     <div class="card-header card-header-toggle">
