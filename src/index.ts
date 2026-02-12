@@ -9,7 +9,7 @@ import { appState } from "./state";
 import { getNutritionInfo, NutritionInfo, clearNutritionCache, getCacheStats } from './claudeService';
 
 // PWA Service Worker Registration
-import { registerSW } from 'virtual:pwa-register'
+import { registerSW } from 'virtual:pwa-register';
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -160,11 +160,41 @@ async function handleBulkDelete(idsToDelete: string[]): Promise<void> {
   }
 }
 
+function setupBMICalculator() {
+  const bodyWeight = getInputById('bodyWeight').value;
+  const height = getInputById('height').value;
+  
+  if (!bodyWeight || !height || parseFloat(height) === 0) {
+    return;
+  }
+
+  const bmi = (parseFloat(bodyWeight) / ((parseFloat(height) / 100) ** 2)).toFixed(1);
+  getInputById('bmi').value = bmi;
+  const bmiResult = getInputById('bmiResult');
+  if (bmiResult) {
+    // BMI ranges
+    const bmiValue = parseFloat(bmi);
+    if (bmiValue < 18.5) {
+      bmiResult.value = 'Underweight';
+    } else if (bmiValue >= 18.5 && bmiValue < 24.9) {
+      bmiResult.value = 'Normal weight';
+    } else if (bmiValue >= 25 && bmiValue < 29.9) {
+      bmiResult.value = 'Overweight';
+    } else {
+      bmiResult.value = 'Obesity';
+    }
+  }
+}
+
 async function handleSaveSettings(e: SubmitEvent) {
   e.preventDefault();
   showLoading();
 
   try {
+    const bodyWeight = getInputById('bodyWeight').value;
+    const height = getInputById('height').value;
+    const bmi = getInputById('bmi').value;
+    const bmiResult = getInputById('bmiResult');
     const caloriesGoal = getInputById('caloriesGoal').value;
     const proteinGoal = getInputById('proteinGoal').value;
     const fatGoal = getInputById('fatGoal').value;
@@ -188,6 +218,10 @@ async function handleSaveSettings(e: SubmitEvent) {
       fatGoal: parseInt(fatGoal),
       carboGoal: parseInt(carboGoal),
       fiberGoal: parseInt(fiberGoal),
+      bodyWeight: bodyWeight ? parseFloat(bodyWeight) : undefined,
+      height: height ? parseFloat(height) : undefined,
+      bmi: bmi ? parseFloat(bmi) : undefined,
+      bmiResult: bmiResult ? bmiResult.value : undefined,
     });
 
     hideLoading();
@@ -289,6 +323,10 @@ async function toggleSettingsView() {
         getInputById('fatGoal').value = settings[index].fatGoal;
         getInputById('carboGoal').value = settings[index].carboGoal;
         getInputById('fiberGoal').value = settings[index].fiberGoal;
+        getInputById('bodyWeight').value = settings[index].bodyWeight ?? 0;
+        getInputById('height').value = settings[index].height ?? 0;
+        getInputById('bmi').value = settings[index].bmi ?? 0;
+        getInputById('bmiResult').value = settings[index].bmiResult ?? '';
       } else {
         getInputById('caloriesGoal').value = '';
         getInputById('proteinGoal').value = '';
@@ -502,6 +540,14 @@ const setupEventListeners = () => {
   
   // Settings form
   document.getElementById('settingsForm')?.addEventListener('submit', handleSaveSettings);
+
+  // BMI calculator - recalculate on input change
+  getInputById('bodyWeight').addEventListener('change', () => {
+    setupBMICalculator();
+  });
+  getInputById('height').addEventListener('change', () => {
+    setupBMICalculator();
+  });
 
   // Clear cache button
   getButtonById('clearCacheBtn')?.addEventListener('click', handleClearCache);
@@ -1324,6 +1370,7 @@ async function loadFoodEntries(date: Date) {
     const hasGoals = Array.isArray(settings) && settings.length > 0;
     if (hasGoals) {
       const index = settings.length - 1;
+      const bodyWeight = parseInt(settings[index].bodyWeight);
       getDivById('caloriesGoalText').classList.add('hidden');
       if (parseInt(settings[index].caloriesGoal) > 0) {
         getDivById('caloriesGoalText').textContent = `of ${settings[index].caloriesGoal}`;
@@ -1332,7 +1379,12 @@ async function loadFoodEntries(date: Date) {
 
       getDivById('proteinGoalText').classList.add('hidden');
       if (parseInt(settings[index].proteinGoal) > 0) {
-        getDivById('proteinGoalText').textContent = `of ${settings[index].proteinGoal}`;
+        let percent = '';
+        if (bodyWeight > 0) {
+          const proteinPerKg = Math.round((parseInt(settings[index].proteinGoal) / bodyWeight) * 10) / 10;
+          percent = ` (${proteinPerKg} g/kg)`;
+        }
+        getDivById('proteinGoalText').textContent = `of ${settings[index].proteinGoal}${percent}`;
         getDivById('proteinGoalText').classList.remove('hidden');
       }
 
@@ -1344,7 +1396,12 @@ async function loadFoodEntries(date: Date) {
 
       getDivById('carboGoalText').classList.add('hidden');
       if (parseInt(settings[index].carboGoal) > 0) {
-        getDivById('carboGoalText').textContent = `of ${settings[index].carboGoal}`;
+        let percent = '';
+        if (bodyWeight > 0) {
+          const carboPerKg = Math.round((parseInt(settings[index].carboGoal) / bodyWeight) * 10) / 10;
+          percent = ` (${carboPerKg} g/kg)`;
+        }
+        getDivById('carboGoalText').textContent = `of ${settings[index].carboGoal}${percent}`;
         getDivById('carboGoalText').classList.remove('hidden');
       }
 

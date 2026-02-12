@@ -1,5 +1,5 @@
 import { Client, Account, Databases, Query, ID } from 'appwrite';
-import { DailyTotalCalories, FoodStorage, UserSettings, SharedDay } from './types';
+import { FoodStorage, UserSettings } from './types';
 
 // Initialize Appwrite client
 const client = new Client();

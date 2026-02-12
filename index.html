@@ -377,6 +377,24 @@
             <div class="date-display">Define your daily macros goal</div>
 
             <form id="settingsForm" class="settings-form">
+                <!-- new - start -->
+                <div class="form-group">
+                    <label for="bodyWeight">Body Weight (kg)</label>
+                    <input type="text" id="bodyWeight" placeholder="Body Weight" required>
+                </div>
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" placeholder="Height" required>
+                </div>
+                <div class="form-group">
+                    <label for="bmi">Body Mass Index (BMI)</label>
+                    <input type="number" id="bmi" placeholder="BMI" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="bmiResult">Body Mass Index (BMI) Result</label>
+                    <input type="text" id="bmiResult" placeholder="BMI Result" readonly>
+                </div>
+                <!-- new - end -->
                 <div class="form-group">
                     <label for="caloriesGoal">Daily calorie goal</label>
                     <input type="number" id="caloriesGoal" placeholder="Calories" required>

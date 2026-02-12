@@ -27,6 +27,10 @@ export type UserSettings = {
   fatGoal: number;
   carboGoal: number;
   fiberGoal: number;
+  bodyWeight?: number;
+  height?: number;
+  bmi?: number;
+  bmiResult?: string;
 };
 
 export type DailyTotalCalories = {
