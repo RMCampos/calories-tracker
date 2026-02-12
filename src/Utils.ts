@@ -95,16 +95,16 @@ export function delay(seconds: number) {
   return new Promise(resolve => setTimeout(resolve, seconds));
 }
 
-export function getIcon(category: string) {
-  const icons = {
-    'fats': '🥑 🍳 🍟',
-    'proteins': '🫘 🥩 🥚',
-    'carbs': '🍞 🥔 🍠',
-    'leaves': '🥬 🥗 🌿',
-    'fruits': '🍊 🍇 🍎',
-    'low carb': '🥦 🍅 🍓',
-    'dairy': '🧀 🧈 🥛'
-  };
+const icons = {
+  'fats': '🥑 🍳 🍟',
+  'proteins': '🫘 🥩 🥚',
+  'carbs': '🍞 🥔 🍠',
+  'leaves': '🥬 🥗 🌿',
+  'fruits': '🍊 🍇 🍎',
+  'low carb': '🥦 🍅 🍓',
+  'dairy': '🧀 🧈 🥛'
+};
 
+export function getIcon(category: keyof typeof icons) {
   return icons[category];
 }

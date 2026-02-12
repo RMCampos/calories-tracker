@@ -1,10 +1,10 @@
 import { foodDatabase } from './foodDatabase.js';
-import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './DomUtils.ts';
+import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './DomUtils';
 import { DailyTotalCalories, FoodItem, FoodStorage, MealGroup, MealPeriod } from './types.js';
 import { AppwriteAuth, AppwriteDB } from './appwrite.js';
 import swal from 'sweetalert';
-import { closeMobileMenu, delay, getCleanName, getIcon, handleMobileCalendarClick, hideLoading, hideSearchResults, navigateResultsKeyboard, QUICK_DELAY, scrollToCalendarView, showLoading, toggleCardHandler, toggleMobileMenu } from './Utils.ts';
-import { showAuthForms, toggleAuthForms, showRegisterForm, showLoginForm, hideAuthForms, closeAuthModal } from './auth.ts';
+import { closeMobileMenu, delay, getCleanName, getIcon, handleMobileCalendarClick, hideLoading, hideSearchResults, navigateResultsKeyboard, QUICK_DELAY, scrollToCalendarView, showLoading, toggleCardHandler, toggleMobileMenu } from './Utils';
+import { showAuthForms, toggleAuthForms, showRegisterForm, showLoginForm, hideAuthForms, closeAuthModal } from './auth';
 import { appState } from "./state";
 import { getNutritionInfo, NutritionInfo, clearNutritionCache, getCacheStats } from './claudeService';
 
@@ -17,10 +17,7 @@ const updateSW = registerSW({
       title: 'Update Available',
       text: 'New content is available. Reload to update?',
       icon: 'info',
-      buttons: {
-        cancel: 'Later',
-        confirm: 'Update Now'
-      }
+      buttons: ['Later', 'Update Now']
     }).then((willUpdate) => {
       if (willUpdate) {
         updateSW(true)
