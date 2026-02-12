@@ -98,3 +98,98 @@
   background: #c45a5a;
   border: 1px solid #c45a5a;
 }
+
+.no-goals-msg {
+  color: #888;
+  padding: 15px 0;
+  font-size: 0.95rem;
+}
+
+.goal-card {
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 15px 20px;
+  background: rgba(40, 40, 40, 0.9);
+  border: 1px solid rgba(100, 100, 100, 0.3);
+  margin-bottom: 12px;
+}
+
+.goal-card-active {
+  border-color: #6B8DD6;
+}
+
+.goal-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.goal-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.goal-active-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6B8DD6;
+  background: rgba(107, 141, 214, 0.15);
+  border: 1px solid #6B8DD6;
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+.goal-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #b0b0b0;
+  font-size: 0.88rem;
+}
+
+.goal-summary span {
+  background: rgba(60, 60, 60, 0.5);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.goal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.goal-actions .btn {
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: 1px solid #555;
+  background: #333;
+  color: #e0e0e0;
+  transition: background 0.2s;
+}
+
+.goal-actions .btn:hover {
+  background: #444;
+}
+
+.goal-actions .goal-delete-btn {
+  border-color: #d66b6b;
+  color: #d66b6b;
+}
+
+.goal-actions .goal-delete-btn:hover {
+  background: rgba(214, 107, 107, 0.15);
+}
+
+.goal-actions .goal-select-btn {
+  border-color: #6B8DD6;
+  color: #6B8DD6;
+}
+
+.goal-actions .goal-select-btn:hover {
+  background: rgba(107, 141, 214, 0.15);
+}

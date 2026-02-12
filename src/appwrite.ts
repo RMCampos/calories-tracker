@@ -264,6 +264,97 @@ export class AppwriteDB {
     }
   }
 
+  static async updateUserSettings(documentId: string, settings: Partial<UserSettings>) {
+    try {
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        USER_SETTINGS_COLLECTION_ID,
+        documentId,
+        {
+          ...settings,
+          userId: (await account.get()).$id,
+        }
+      );
+      console.debug('User settings updated:', response);
+      return response;
+    } catch (error) {
+      console.error('Update user settings error:', error);
+      throw error;
+    }
+  }
+
+  static async saveUserGoal(goal: UserSettings) {
+    try {
+      const response = await databases.createDocument(
+        DATABASE_ID,
+        USER_SETTINGS_COLLECTION_ID,
+        'unique()',
+        {
+          ...goal,
+          userId: (await account.get()).$id,
+        }
+      );
+      console.debug('User goal saved:', response);
+      return response;
+    } catch (error) {
+      console.error('Save user goal error:', error);
+      throw error;
+    }
+  }
+
+  static async updateUserGoal(documentId: string, goal: UserSettings) {
+    try {
+      const response = await databases.updateDocument(
+        DATABASE_ID,
+        USER_SETTINGS_COLLECTION_ID,
+        documentId,
+        {
+          ...goal,
+          userId: (await account.get()).$id,
+        }
+      );
+      console.debug('User goal updated:', response);
+      return response;
+    } catch (error) {
+      console.error('Update user goal error:', error);
+      throw error;
+    }
+  }
+
+  static async deleteUserGoal(documentId: string) {
+    try {
+      await databases.deleteDocument(
+        DATABASE_ID,
+        USER_SETTINGS_COLLECTION_ID,
+        documentId
+      );
+      console.debug('User goal deleted:', documentId);
+    } catch (error) {
+      console.error('Delete user goal error:', error);
+      throw error;
+    }
+  }
+
+  static async setActiveGoal(goalId: string, allGoals: UserSettings[]) {
+    try {
+      const updates = allGoals
+        .filter(goal => goal.id)
+        .map(goal =>
+          databases.updateDocument(
+            DATABASE_ID,
+            USER_SETTINGS_COLLECTION_ID,
+            goal.id!,
+            { isActive: goal.id === goalId }
+          )
+        );
+      await Promise.all(updates);
+      console.debug('Active goal set:', goalId);
+    } catch (error) {
+      console.error('Set active goal error:', error);
+      throw error;
+    }
+  }
+
   // Delete food entry
   static async deleteFoodEntry(documentId: string) {
     try {

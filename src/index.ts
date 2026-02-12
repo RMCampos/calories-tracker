@@ -1,6 +1,6 @@
 import { foodDatabase } from './foodDatabase.js';
 import { getButtonById, getButtonListByClassName, getDivById, getInputById, showFoodPreview } from './DomUtils';
-import { DailyTotalCalories, FoodItem, FoodStorage, MealGroup, MealPeriod } from './types.js';
+import { DailyTotalCalories, FoodItem, FoodStorage, MealGroup, MealPeriod, UserSettings } from './types.js';
 import { AppwriteAuth, AppwriteDB } from './appwrite.js';
 import swal from 'sweetalert';
 import { closeMobileMenu, delay, getCleanName, getIcon, handleMobileCalendarClick, hideLoading, hideSearchResults, navigateResultsKeyboard, QUICK_DELAY, scrollToCalendarView, showLoading, toggleCardHandler, toggleMobileMenu } from './Utils';
@@ -192,34 +192,23 @@ async function handleSaveSettings(e: SubmitEvent) {
     const height = getInputById('height').value;
     const bmi = getInputById('bmi').value;
     const bmiResult = getInputById('bmiResult');
-    const caloriesGoal = getInputById('caloriesGoal').value;
-    const proteinGoal = getInputById('proteinGoal').value;
-    const fatGoal = getInputById('fatGoal').value;
-    const carboGoal = getInputById('carboGoal').value;
-    const fiberGoal = getInputById('fiberGoal').value;
 
-    // Delete existing settings - keep only the new one
-    const documents = await AppwriteDB.getUserSettings();
-    const documentsToDelete: string[] = [];
-    for (let i=0; i<documents.length; i++) {
-      documentsToDelete.push(documents[i].$id);
-    }
-
-    if (documentsToDelete) {
-      await handleBulkDelete(documentsToDelete);
-    }
-
-    await AppwriteDB.saveUserSettings({
-      caloriesGoal: parseInt(caloriesGoal),
-      proteinGoal: parseInt(proteinGoal),
-      fatGoal: parseInt(fatGoal),
-      carboGoal: parseInt(carboGoal),
-      fiberGoal: parseInt(fiberGoal),
+    const metricsData = {
       bodyWeight: bodyWeight ? parseFloat(bodyWeight) : undefined,
       height: height ? parseFloat(height) : undefined,
       bmi: bmi ? parseFloat(bmi) : undefined,
       bmiResult: bmiResult ? bmiResult.value : undefined,
-    });
+    };
+
+    // Find existing global settings doc (no goalName) and update it, or create new one
+    const allDocs = await AppwriteDB.getUserSettings();
+    const globalDoc = allDocs.find((d: any) => !d.goalName);
+
+    if (globalDoc) {
+      await AppwriteDB.updateUserSettings(globalDoc.$id, metricsData);
+    } else {
+      await AppwriteDB.saveUserSettings(metricsData);
+    }
 
     hideLoading();
     toggleSettingsView();
@@ -311,27 +300,39 @@ async function toggleSettingsView() {
     showLoading();
 
     try {
-      const settings = await AppwriteDB.getUserSettings();
-      const hasGoals = Array.isArray(settings) && settings.length > 0;
-      if (hasGoals) {
-        const index = settings.length - 1;
-        getInputById('caloriesGoal').value = settings[index].caloriesGoal;
-        getInputById('proteinGoal').value = settings[index].proteinGoal;
-        getInputById('fatGoal').value = settings[index].fatGoal;
-        getInputById('carboGoal').value = settings[index].carboGoal;
-        getInputById('fiberGoal').value = settings[index].fiberGoal;
-        getInputById('bodyWeight').value = settings[index].bodyWeight ?? 0;
-        getInputById('height').value = settings[index].height ?? 0;
-        getInputById('bmi').value = settings[index].bmi ?? 0;
-        getInputById('bmiResult').value = settings[index].bmiResult ?? '';
+      const allDocs = await AppwriteDB.getUserSettings();
+      const globalSettings = allDocs.find((d: any) => !d.goalName);
+
+      if (globalSettings) {
+        getInputById('bodyWeight').value = globalSettings.bodyWeight ?? '';
+        getInputById('height').value = globalSettings.height ?? '';
+        getInputById('bmi').value = globalSettings.bmi ?? '';
+        getInputById('bmiResult').value = globalSettings.bmiResult ?? '';
       } else {
-        getInputById('caloriesGoal').value = '';
-        getInputById('proteinGoal').value = '';
-        getInputById('fatGoal').value = '';
-        getInputById('carboGoal').value = '';
-        getInputById('fiberGoal').value = '';
+        getInputById('bodyWeight').value = '';
+        getInputById('height').value = '';
+        getInputById('bmi').value = '';
+        getInputById('bmiResult').value = '';
       }
-      
+
+      const goals: UserSettings[] = allDocs
+        .filter((d: any) => !!d.goalName)
+        .map((d: any) => ({
+          id: d.$id,
+          goalName: d.goalName,
+          isActive: d.isActive,
+          caloriesGoal: d.caloriesGoal,
+          proteinGoal: d.proteinGoal,
+          fatGoal: d.fatGoal,
+          carboGoal: d.carboGoal,
+          fiberGoal: d.fiberGoal,
+        }));
+      renderGoalsList(goals);
+
+      // Hide goal form if open
+      const goalFormContainer = document.getElementById('goalFormContainer');
+      if (goalFormContainer) goalFormContainer.classList.add('hidden');
+
       getButtonById('settingsBtn').textContent = '🔙 Back';
       getButtonById('settingsBtnMobile').textContent = '🔙 Back';
 
@@ -474,6 +475,215 @@ const previewCalories = (foodSelected?: FoodItem) => {
   showFoodPreview(true);
 }
 
+// ---- Goal management ----
+
+function renderGoalsList(goals: UserSettings[]) {
+  const container = document.getElementById('goalsContainer');
+  if (!container) return;
+
+  if (goals.length === 0) {
+    container.innerHTML = '<div class="no-goals-msg">No goals yet. Create one below.</div>';
+    return;
+  }
+
+  container.innerHTML = goals.map(goal => `
+    <div class="goal-card ${goal.isActive ? 'goal-card-active' : ''}">
+      <div class="goal-card-header">
+        <div class="goal-name">${goal.goalName}</div>
+        ${goal.isActive ? '<span class="goal-active-badge">&#10003; Active</span>' : ''}
+      </div>
+      <div class="goal-summary">
+        ${goal.caloriesGoal ? `<span>${goal.caloriesGoal} cal</span>` : ''}
+        ${goal.proteinGoal ? `<span>${goal.proteinGoal}g protein</span>` : ''}
+        ${goal.fatGoal ? `<span>${goal.fatGoal}g fat</span>` : ''}
+        ${goal.carboGoal ? `<span>${goal.carboGoal}g carbs</span>` : ''}
+        ${goal.fiberGoal ? `<span>${goal.fiberGoal}g fiber</span>` : ''}
+      </div>
+      <div class="goal-actions">
+        <button class="btn goal-edit-btn" data-goal-id="${goal.id}">Edit</button>
+        <button class="btn goal-delete-btn" data-goal-id="${goal.id}">Delete</button>
+        ${!goal.isActive ? `<button class="btn goal-select-btn" data-goal-id="${goal.id}">Select</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.goal-edit-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const goalId = (e.currentTarget as HTMLElement).getAttribute('data-goal-id');
+      const goal = goals.find(g => g.id === goalId);
+      if (goal) handleEditGoal(goal);
+    });
+  });
+
+  document.querySelectorAll('.goal-delete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const goalId = (e.currentTarget as HTMLElement).getAttribute('data-goal-id');
+      if (goalId) handleDeleteGoal(goalId);
+    });
+  });
+
+  document.querySelectorAll('.goal-select-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const goalId = (e.currentTarget as HTMLElement).getAttribute('data-goal-id');
+      if (goalId) handleSelectGoal(goalId, goals);
+    });
+  });
+}
+
+function handleAddGoal() {
+  const container = document.getElementById('goalFormContainer');
+  if (!container) return;
+  container.classList.remove('hidden');
+
+  getInputById('goalNameInput').value = '';
+  getInputById('goalCaloriesInput').value = '';
+  getInputById('goalProteinInput').value = '';
+  getInputById('goalFatInput').value = '';
+  getInputById('goalCarboInput').value = '';
+  getInputById('goalFiberInput').value = '';
+  getInputById('editingGoalId').value = '';
+}
+
+function handleEditGoal(goal: UserSettings) {
+  const container = document.getElementById('goalFormContainer');
+  if (!container) return;
+  container.classList.remove('hidden');
+
+  getInputById('goalNameInput').value = goal.goalName ?? '';
+  getInputById('goalCaloriesInput').value = goal.caloriesGoal?.toString() ?? '';
+  getInputById('goalProteinInput').value = goal.proteinGoal?.toString() ?? '';
+  getInputById('goalFatInput').value = goal.fatGoal?.toString() ?? '';
+  getInputById('goalCarboInput').value = goal.carboGoal?.toString() ?? '';
+  getInputById('goalFiberInput').value = goal.fiberGoal?.toString() ?? '';
+  getInputById('editingGoalId').value = goal.id ?? '';
+}
+
+async function handleSaveGoal(e: SubmitEvent) {
+  e.preventDefault();
+  showLoading();
+
+  try {
+    const goalName = getInputById('goalNameInput').value.trim();
+    const caloriesGoal = getInputById('goalCaloriesInput').value;
+    const proteinGoal = getInputById('goalProteinInput').value;
+    const fatGoal = getInputById('goalFatInput').value;
+    const carboGoal = getInputById('goalCarboInput').value;
+    const fiberGoal = getInputById('goalFiberInput').value;
+    const editingGoalId = getInputById('editingGoalId').value;
+
+    const goalData: UserSettings = {
+      goalName,
+      caloriesGoal: caloriesGoal ? parseInt(caloriesGoal) : undefined,
+      proteinGoal: proteinGoal ? parseInt(proteinGoal) : undefined,
+      fatGoal: fatGoal ? parseInt(fatGoal) : undefined,
+      carboGoal: carboGoal ? parseInt(carboGoal) : undefined,
+      fiberGoal: fiberGoal ? parseInt(fiberGoal) : undefined,
+    };
+
+    if (editingGoalId) {
+      await AppwriteDB.updateUserGoal(editingGoalId, goalData);
+    } else {
+      await AppwriteDB.saveUserGoal(goalData);
+    }
+
+    const allDocs = await AppwriteDB.getUserSettings();
+    const goals: UserSettings[] = allDocs
+      .filter((d: any) => !!d.goalName)
+      .map((d: any) => ({
+        id: d.$id,
+        goalName: d.goalName,
+        isActive: d.isActive,
+        caloriesGoal: d.caloriesGoal,
+        proteinGoal: d.proteinGoal,
+        fatGoal: d.fatGoal,
+        carboGoal: d.carboGoal,
+        fiberGoal: d.fiberGoal,
+      }));
+    renderGoalsList(goals);
+
+    const container = document.getElementById('goalFormContainer');
+    if (container) container.classList.add('hidden');
+
+    hideLoading();
+  } catch (error) {
+    hideLoading();
+    console.error('Save goal error:', error);
+    if (error instanceof Error) {
+      swal('Oh no!', 'Saving goal failed: ' + error.message, 'error');
+    }
+  }
+}
+
+async function handleDeleteGoal(id: string) {
+  const willDelete = await swal({
+    title: 'Delete Goal?',
+    text: 'Are you sure you want to delete this goal?',
+    icon: 'warning',
+    dangerMode: true,
+    buttons: ['Cancel', 'Delete'],
+  });
+
+  if (!willDelete) return;
+
+  showLoading();
+  try {
+    await AppwriteDB.deleteUserGoal(id);
+
+    const allDocs = await AppwriteDB.getUserSettings();
+    const goals: UserSettings[] = allDocs
+      .filter((d: any) => !!d.goalName)
+      .map((d: any) => ({
+        id: d.$id,
+        goalName: d.goalName,
+        isActive: d.isActive,
+        caloriesGoal: d.caloriesGoal,
+        proteinGoal: d.proteinGoal,
+        fatGoal: d.fatGoal,
+        carboGoal: d.carboGoal,
+        fiberGoal: d.fiberGoal,
+      }));
+    renderGoalsList(goals);
+    hideLoading();
+  } catch (error) {
+    hideLoading();
+    console.error('Delete goal error:', error);
+    if (error instanceof Error) {
+      swal('Oh no!', 'Deleting goal failed: ' + error.message, 'error');
+    }
+  }
+}
+
+async function handleSelectGoal(goalId: string, allGoals: UserSettings[]) {
+  showLoading();
+  try {
+    await AppwriteDB.setActiveGoal(goalId, allGoals);
+
+    const allDocs = await AppwriteDB.getUserSettings();
+    const goals: UserSettings[] = allDocs
+      .filter((d: any) => !!d.goalName)
+      .map((d: any) => ({
+        id: d.$id,
+        goalName: d.goalName,
+        isActive: d.isActive,
+        caloriesGoal: d.caloriesGoal,
+        proteinGoal: d.proteinGoal,
+        fatGoal: d.fatGoal,
+        carboGoal: d.carboGoal,
+        fiberGoal: d.fiberGoal,
+      }));
+    renderGoalsList(goals);
+    hideLoading();
+  } catch (error) {
+    hideLoading();
+    console.error('Select goal error:', error);
+    if (error instanceof Error) {
+      swal('Oh no!', 'Selecting goal failed: ' + error.message, 'error');
+    }
+  }
+}
+
+// ---- End goal management ----
+
 const setupEventListeners = () => {
   getInputById('foodSearchInput').addEventListener('change', (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -548,6 +758,14 @@ const setupEventListeners = () => {
 
   // Clear cache button
   getButtonById('clearCacheBtn')?.addEventListener('click', handleClearCache);
+
+  // Goal management buttons
+  document.getElementById('addGoalBtn')?.addEventListener('click', handleAddGoal);
+  document.getElementById('cancelGoalBtn')?.addEventListener('click', () => {
+    const container = document.getElementById('goalFormContainer');
+    if (container) container.classList.add('hidden');
+  });
+  document.getElementById('goalForm')?.addEventListener('submit', handleSaveGoal);
 
   // AI nutrition checkbox
   document.getElementById('enableAINutrition')?.addEventListener('change', handleAICheckboxChange);
@@ -1363,51 +1581,54 @@ async function loadFoodEntries(date: Date) {
     getDivById('fiberValue').textContent = (Math.round(totalFiber * 10) / 10).toString();
 
     // Update goals
-    const settings = await AppwriteDB.getUserSettings();
-    const hasGoals = Array.isArray(settings) && settings.length > 0;
-    if (hasGoals) {
-      const index = settings.length - 1;
-      const bodyWeight = parseInt(settings[index].bodyWeight);
+    const allDocs = await AppwriteDB.getUserSettings();
+    const globalSettings = allDocs.find((d: any) => !d.goalName);
+    const activeGoal = allDocs.find((d: any) => d.goalName && d.isActive);
+
+    if (activeGoal) {
+      const bodyWeight = globalSettings ? parseInt(globalSettings.bodyWeight) : 0;
+
       getDivById('caloriesGoalText').classList.add('hidden');
-      if (parseInt(settings[index].caloriesGoal) > 0) {
-        getDivById('caloriesGoalText').textContent = `of ${settings[index].caloriesGoal}`;
+      if (activeGoal.caloriesGoal && parseInt(activeGoal.caloriesGoal) > 0) {
+        getDivById('caloriesGoalText').textContent = `of ${activeGoal.caloriesGoal}`;
         getDivById('caloriesGoalText').classList.remove('hidden');
       }
 
       getDivById('proteinGoalText').classList.add('hidden');
-      if (parseInt(settings[index].proteinGoal) > 0) {
+      if (activeGoal.proteinGoal && parseInt(activeGoal.proteinGoal) > 0) {
         let percent = '';
         if (bodyWeight > 0) {
-          const proteinPerKg = Math.round((parseInt(settings[index].proteinGoal) / bodyWeight) * 10) / 10;
+          const proteinPerKg = Math.round((parseInt(activeGoal.proteinGoal) / bodyWeight) * 10) / 10;
           percent = ` (${proteinPerKg} g/kg)`;
         }
-        getDivById('proteinGoalText').textContent = `of ${settings[index].proteinGoal}${percent}`;
+        getDivById('proteinGoalText').textContent = `of ${activeGoal.proteinGoal}${percent}`;
         getDivById('proteinGoalText').classList.remove('hidden');
       }
 
       getDivById('fatGoalText').classList.add('hidden');
-      if (parseInt(settings[index].fatGoal) > 0) {
-        getDivById('fatGoalText').textContent = `of ${settings[index].fatGoal}`;
+      if (activeGoal.fatGoal && parseInt(activeGoal.fatGoal) > 0) {
+        getDivById('fatGoalText').textContent = `of ${activeGoal.fatGoal}`;
         getDivById('fatGoalText').classList.remove('hidden');
       }
 
       getDivById('carboGoalText').classList.add('hidden');
-      if (parseInt(settings[index].carboGoal) > 0) {
+      if (activeGoal.carboGoal && parseInt(activeGoal.carboGoal) > 0) {
         let percent = '';
         if (bodyWeight > 0) {
-          const carboPerKg = Math.round((parseInt(settings[index].carboGoal) / bodyWeight) * 10) / 10;
+          const carboPerKg = Math.round((parseInt(activeGoal.carboGoal) / bodyWeight) * 10) / 10;
           percent = ` (${carboPerKg} g/kg)`;
         }
-        getDivById('carboGoalText').textContent = `of ${settings[index].carboGoal}${percent}`;
+        getDivById('carboGoalText').textContent = `of ${activeGoal.carboGoal}${percent}`;
         getDivById('carboGoalText').classList.remove('hidden');
       }
 
       getDivById('fiberGoalText').classList.add('hidden');
-      if (parseInt(settings[index].fiberGoal) > 0) {
-        getDivById('fiberGoalText').textContent = `of ${settings[index].fiberGoal}`;
+      if (activeGoal.fiberGoal && parseInt(activeGoal.fiberGoal) > 0) {
+        getDivById('fiberGoalText').textContent = `of ${activeGoal.fiberGoal}`;
         getDivById('fiberGoalText').classList.remove('hidden');
       }
     } else {
+      getDivById('caloriesGoalText').classList.add('hidden');
       getDivById('proteinGoalText').classList.add('hidden');
       getDivById('fatGoalText').classList.add('hidden');
       getDivById('carboGoalText').classList.add('hidden');

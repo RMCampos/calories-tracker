@@ -23,14 +23,16 @@ export type FoodStorage = {
 export type UserSettings = {
   id?: string;
   caloriesGoal?: number;
-  proteinGoal: number;
-  fatGoal: number;
-  carboGoal: number;
-  fiberGoal: number;
+  proteinGoal?: number;
+  fatGoal?: number;
+  carboGoal?: number;
+  fiberGoal?: number;
   bodyWeight?: number;
   height?: number;
   bmi?: number;
   bmiResult?: string;
+  goalName?: string;
+  isActive?: boolean;
 };
 
 export type DailyTotalCalories = {

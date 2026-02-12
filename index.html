@@ -374,17 +374,16 @@
         <div class="container">
             <h1>⚙️ Settings</h1>
 
-            <div class="date-display">Define your daily macros goal</div>
+            <div class="date-display">Body Metrics</div>
 
             <form id="settingsForm" class="settings-form">
-                <!-- new - start -->
                 <div class="form-group">
                     <label for="bodyWeight">Body Weight (kg)</label>
-                    <input type="text" id="bodyWeight" placeholder="Body Weight" required>
+                    <input type="text" id="bodyWeight" placeholder="Body Weight">
                 </div>
                 <div class="form-group">
                     <label for="height">Height (cm)</label>
-                    <input type="number" id="height" placeholder="Height" required>
+                    <input type="number" id="height" placeholder="Height">
                 </div>
                 <div class="form-group">
                     <label for="bmi">Body Mass Index (BMI)</label>
@@ -394,29 +393,48 @@
                     <label for="bmiResult">Body Mass Index (BMI) Result</label>
                     <input type="text" id="bmiResult" placeholder="BMI Result" readonly>
                 </div>
-                <!-- new - end -->
-                <div class="form-group">
-                    <label for="caloriesGoal">Daily calorie goal</label>
-                    <input type="number" id="caloriesGoal" placeholder="Calories" required>
-                </div>
-                <div class="form-group">
-                    <label for="proteinGoal">Daily protein goal</label>
-                    <input type="number" id="proteinGoal" placeholder="Proteins in grams" required>
-                </div>
-                <div class="form-group">
-                    <label for="fatGoal">Daily fat goal</label>
-                    <input type="number" id="fatGoal" placeholder="Fat in grams" required>
-                </div>
-                <div class="form-group">
-                    <label for="carboGoal">Daily carbs goal</label>
-                    <input type="number" id="carboGoal" placeholder="Carbo in grams" required>
-                </div>
-                <div class="form-group">
-                    <label for="fiberGoal">Daily fiber goal</label>
-                    <input type="number" id="fiberGoal" placeholder="Fiber in grams" required>
-                </div>
                 <button type="submit" class="settings-btn">Save</button>
             </form>
+
+            <div class="date-display" style="margin-top: 40px;">Nutrition Goals</div>
+
+            <div id="goalsContainer">
+                <!-- Dynamically rendered list of goals -->
+            </div>
+
+            <button type="button" id="addGoalBtn" class="settings-btn" style="margin-top: 15px;">+ Add Goal</button>
+
+            <div id="goalFormContainer" class="hidden">
+                <form id="goalForm" class="settings-form" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <label for="goalNameInput">Goal Name</label>
+                        <input type="text" id="goalNameInput" placeholder="e.g. Workout Day" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalCaloriesInput">Daily calorie goal</label>
+                        <input type="number" id="goalCaloriesInput" placeholder="Calories">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalProteinInput">Daily protein goal (g)</label>
+                        <input type="number" id="goalProteinInput" placeholder="Proteins in grams">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalFatInput">Daily fat goal (g)</label>
+                        <input type="number" id="goalFatInput" placeholder="Fat in grams">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalCarboInput">Daily carbs goal (g)</label>
+                        <input type="number" id="goalCarboInput" placeholder="Carbs in grams">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalFiberInput">Daily fiber goal (g)</label>
+                        <input type="number" id="goalFiberInput" placeholder="Fiber in grams">
+                    </div>
+                    <input type="hidden" id="editingGoalId" value="">
+                    <button type="submit" class="settings-btn">Save Goal</button>
+                    <button type="button" id="cancelGoalBtn" class="settings-btn" style="margin-top: 10px; background: #555; border-color: #555;">Cancel</button>
+                </form>
+            </div>
 
             <div class="date-display" style="margin-top: 40px;">AI Nutrition Cache</div>
 
