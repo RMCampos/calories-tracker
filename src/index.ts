@@ -7,6 +7,7 @@ import { closeMobileMenu, delay, getCleanName, getIcon, handleMobileCalendarClic
 import { showAuthForms, toggleAuthForms, showRegisterForm, showLoginForm, hideAuthForms, closeAuthModal } from './auth';
 import { appState } from "./state";
 import { getNutritionInfo, NutritionInfo, clearNutritionCache, getCacheStats } from './claudeService';
+import { getCurrentDate } from './dateUtils';
 
 // PWA Service Worker Registration
 import { registerSW } from 'virtual:pwa-register';
@@ -42,6 +43,20 @@ document.addEventListener('DOMContentLoaded', async function() {
   setupEventListeners();
 });
 
+async function initTimezone() {
+  try {
+    const allDocs = await AppwriteDB.getUserSettings();
+    const globalSettings = allDocs.find((d: any) => !d.goalName);
+    appState.userTimezone = globalSettings?.timezone ?? '';
+  } catch {
+    appState.userTimezone = '';
+  }
+  const result = await getCurrentDate(appState.userTimezone);
+  selectedDate = result.dateTime;
+  currentViewDate = result.dateTime;
+  appState.todayDateString = result.date;
+}
+
 async function initializeAuth() {
   // Check if this is a shared view first
   const urlParams = new URLSearchParams(window.location.search);
@@ -60,6 +75,7 @@ async function initializeAuth() {
     if (isLoggedIn) {
       currentUser = await AppwriteAuth.getCurrentUser();
       await showMainApp();
+      await initTimezone();
       selectDate(selectedDate);
     } else {
       showAuthForms();
@@ -91,6 +107,7 @@ async function handleRegister(e: SubmitEvent) {
 
     closeAuthModal();
     await showMainApp();
+    await initTimezone();
     selectDate(selectedDate);
 
     swal('Registration successful! Welcome to Food Tracker.');
@@ -117,6 +134,7 @@ async function handleLogin(e: SubmitEvent) {
 
     closeAuthModal();
     await showMainApp();
+    await initTimezone();
     selectDate(selectedDate);
 
   } catch (error) {
@@ -192,12 +210,14 @@ async function handleSaveSettings(e: SubmitEvent) {
     const height = getInputById('height').value;
     const bmi = getInputById('bmi').value;
     const bmiResult = getInputById('bmiResult');
+    const timezone = getInputById('timezone').value;
 
     const metricsData = {
       bodyWeight: bodyWeight ? parseFloat(bodyWeight) : undefined,
       height: height ? parseFloat(height) : undefined,
       bmi: bmi ? parseFloat(bmi) : undefined,
       bmiResult: bmiResult ? bmiResult.value : undefined,
+      timezone: timezone || undefined,
     };
 
     // Find existing global settings doc (no goalName) and update it, or create new one
@@ -210,6 +230,7 @@ async function handleSaveSettings(e: SubmitEvent) {
       await AppwriteDB.saveUserSettings(metricsData);
     }
 
+    appState.userTimezone = timezone;
     hideLoading();
     toggleSettingsView();
     selectDate(selectedDate);
@@ -308,11 +329,13 @@ async function toggleSettingsView() {
         getInputById('height').value = globalSettings.height ?? '';
         getInputById('bmi').value = globalSettings.bmi ?? '';
         getInputById('bmiResult').value = globalSettings.bmiResult ?? '';
+        (document.getElementById('timezone') as HTMLSelectElement).value = globalSettings.timezone ?? '';
       } else {
         getInputById('bodyWeight').value = '';
         getInputById('height').value = '';
         getInputById('bmi').value = '';
         getInputById('bmiResult').value = '';
+        (document.getElementById('timezone') as HTMLSelectElement).value = '';
       }
 
       const goals: UserSettings[] = allDocs
@@ -1331,11 +1354,7 @@ const addFood = async () => {
       fiber: proportion.info.fiber,
       date: date.split('T')[0],
       alkaline: selectedFood.info.alkaline,
-      time: new Date().toLocaleTimeString('en-US', { 
-        hour12: false, 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      })
+      time: (await getCurrentDate(appState.userTimezone)).timeString
     };
 
     // Save to Appwrite
@@ -1961,7 +1980,7 @@ function createDayElement(day: number, isOtherMonth: boolean, year: number, mont
   }
   
   // Check if this is today
-  const today = new Date().toISOString().split('T')[0];
+  const today = appState.todayDateString || new Date().toISOString().split('T')[0];
   if (!isOtherMonth && dateString === today) {
     dayElement.classList.add('today');
   }

@@ -33,6 +33,7 @@ export type UserSettings = {
   bmiResult?: string;
   goalName?: string;
   isActive?: boolean;
+  timezone?: string;
 };
 
 export type DailyTotalCalories = {

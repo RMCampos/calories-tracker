@@ -7,6 +7,8 @@ interface AppState {
   calendarMonthlyCalories: DailyTotalCalories[];
   isSharedView: boolean;
   sharedData: SharedDay | null;
+  userTimezone: string;
+  todayDateString: string;
 }
 
 export const appState: AppState = {
@@ -15,5 +17,7 @@ export const appState: AppState = {
   searchResults: [],
   calendarMonthlyCalories: [],
   isSharedView: false,
-  sharedData: null
+  sharedData: null,
+  userTimezone: '',
+  todayDateString: ''
 };
