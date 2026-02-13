@@ -4,14 +4,14 @@ export const foodDatabase: FoodItem[] = [
   // Gorduras - Fats
   { name: 'Abacate', nameEn: 'Avocado', info: { calories: 96, protein: 1.2, fat: 8.4, carbs: 6, fiber: 6.3, category: 'fats', alkaline: true } },
   { name: 'Amêndoas', nameEn: 'Almonds', info: { calories: 581, protein: 18.6, fat: 47.3, carbs: 29.5, fiber: 11.6, category: 'fats', alkaline: false } },
-  { name: 'Amendoin natural', nameEn: 'Natural Peanut', info: { calories: 611, protein: 26, fat: 49, carbs: 16, fiber: 8.5, category: 'fats', alkaline: true } },
+  { name: 'Amendoin natural', nameEn: 'Natural Peanut', info: { calories: 611, protein: 26, fat: 49, carbs: 16, fiber: 8.5, category: 'fats', alkaline: false } },
   { name: 'Azeite de Oliva EV', nameEn: 'Extra Virgin Olive Oil', info: { calories: 844, protein: 0, fat: 100, carbs: 0, fiber: 0, category: 'fats', alkaline: false } },
   { name: 'Castanha de Caju', nameEn: 'Cashew Nut', info: { calories: 570, protein: 18.5, fat: 46.3, carbs: 29.1, fiber: 3.7, category: 'fats', alkaline: false } },
   { name: 'Castanha do Pará', nameEn: 'Brazil Nut', info: { calories: 643, protein: 14.5, fat: 63.5, carbs: 15.1, fiber: 7.9, category: 'fats', alkaline: false } },
   { name: 'Semente de Chia', nameEn: 'Chia Seed', info: { calories: 490, protein: 15.6, fat: 30.7, carbs: 43.8, fiber: 37.7, category: 'fats', alkaline: true } },
   { name: 'Semente de Linhaça Dourada', nameEn: 'Golden Flaxseed', info: { calories: 515, protein: 20, fat: 35, carbs: 30, fiber: 26, category: 'fats', alkaline: true } },
   { name: 'Semente de Gergelim', nameEn: 'Sesame Seed', info: { calories: 584, protein: 21.2, fat: 50.4, carbs: 21.6, fiber: 11.9, category: 'fats', alkaline: true } },
-  { name: 'Pasta de Amendoim Growth', nameEn: 'Growth Peanut Butter', info: { calories: 544, protein: 27, fat: 33, carbs: 20, fiber: 8, category: 'fats', alkaline: false } },
+  { name: 'Pasta de Amendoim DaColônia', nameEn: 'DaColônia Peanut Butter', info: { calories: 608, protein: 30, fat: 51, carbs: 7.3, fiber: 7.3, category: 'fats', alkaline: false } },
   { name: 'Semente de Abóbora', nameEn: 'Pumpkin Seed', info: { calories: 446, protein: 18.55, fat: 19.4, carbs: 53.75, fiber: 6, category: 'fats', alkaline: true } },
   { name: 'Semente de Girassol', nameEn: 'Sunflower Seed', info: { calories: 570, protein: 22.8, fat: 49.6, carbs: 18.7, fiber: 10.6, category: 'fats', alkaline: true } },
   { name: 'Pasta de Castanha (A Tal da Castanha)', nameEn: 'Cashew Butter (A Tal da Castanha)', info: { calories: 564, protein: 17, fat: 40, carbs: 34, fiber: 4.7, category: 'fats', alkaline: false } },
@@ -78,6 +78,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Bananinha Paraibuna zero', nameEn: 'Zero Paraibuna Banana', info: { calories: 296, protein: 4.8, fat: 0, carbs: 70, fiber: 4.3, category: 'carbs', alkaline: true } },
   { name: 'Farinha de castanha de caju (Zaya)', nameEn: 'Cashew Nut Flour (Zaya)', info: { calories: 500, protein: 20, fat: 53.3, carbs: 20, fiber: 13.3, category: 'carbs', alkaline: false } },
   { name: 'Batata baroa, cozida', nameEn: 'Cooked Baroa Potato', info: { calories: 80, protein: 0.9, fat: 0.2, carbs: 18.9, fiber: 1.8, category: 'carbs', alkaline: true } },
+  { name: 'Paçoquita original Santa Helena', nameEn: 'Original peanut candy Santa Helena', info: { calories: 532, protein: 18, fat: 28, carbs: 50, fiber: 4, category: 'carbs', alkaline: false } },
 
   // Folhas e verduras - Leaves
   { name: 'Agrião', nameEn: 'Watercress', info: { calories: 17, protein: 2.7, fat: 0.2, carbs: 2.3, fiber: 2.1, category: 'leaves', alkaline: true } },
