@@ -79,6 +79,9 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Farinha de castanha de caju (Zaya)', nameEn: 'Cashew Nut Flour (Zaya)', info: { calories: 500, protein: 20, fat: 53.3, carbs: 20, fiber: 13.3, category: 'carbs', alkaline: false } },
   { name: 'Batata baroa, cozida', nameEn: 'Cooked Baroa Potato', info: { calories: 80, protein: 0.9, fat: 0.2, carbs: 18.9, fiber: 1.8, category: 'carbs', alkaline: true } },
   { name: 'Paçoquita original Santa Helena', nameEn: 'Original peanut candy Santa Helena', info: { calories: 532, protein: 18, fat: 28, carbs: 50, fiber: 4, category: 'carbs', alkaline: false } },
+  { name: 'Barra de castanhas, amendoim e frutas Nuts', nameEn: 'Nuts, peanuts and fruits bar', info: { calories: 470, protein: 16, fat: 30, carbs: 34, fiber: 12, category: 'carbs', alkaline: false } },
+  { name: 'Barra de caramelo e chocolate Bold', nameEn: 'Caramelo and chocolate bar Bold', info: { calories: 348, protein: 30, fat: 16, carbs: 28, fiber: 10, category: 'carbs', alkaline: false } },
+  { name: 'Brownie proteico double chocolate Belive', nameEn: 'Protein Brownie double chocolate Belive', info: { calories: 305, protein: 15, fat: 18, carbs: 33, fiber: 13, category: 'carbs', alkaline: false } },
 
   // Folhas e verduras - Leaves
   { name: 'Agrião', nameEn: 'Watercress', info: { calories: 17, protein: 2.7, fat: 0.2, carbs: 2.3, fiber: 2.1, category: 'leaves', alkaline: true } },
