@@ -12,14 +12,14 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "vite": "^7.3.1",
     "vite-plugin-pwa": "^1.2.0",
     "workbox-window": "^7.4.0"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.74.0",
-    "appwrite": "^22.0.0",
+    "@anthropic-ai/sdk": "^0.89.0",
+    "appwrite": "^24.2.0",
     "sweetalert": "^2.1.2"
   }
 }
