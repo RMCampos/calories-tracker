@@ -1198,3 +1198,57 @@ label {
         font-size: 0.85rem;
     }
 }
+
+/* Alternatives Card */
+#alternatives-container {
+    margin-top: 20px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.alternatives-list-container {
+    background: rgba(40, 40, 40, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(107, 141, 214, 0.3);
+    border-radius: 12px;
+    padding: 20px 25px;
+}
+
+.alternatives-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    margin: 0 0 15px 0;
+}
+
+.alternative-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.alternative-item:last-child {
+    border-bottom: none;
+}
+
+.alternative-name {
+    color: #e0e0e0;
+    font-size: 0.9rem;
+}
+
+.alternative-quantity {
+    color: #6B8DD6;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    margin-left: 12px;
+}
+
+.no-alternatives {
+    color: #b0b0b0;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 10px 0;
+    font-style: italic;
+}
