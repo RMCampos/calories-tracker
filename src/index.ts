@@ -556,7 +556,8 @@ function updateAlternativesDisplay() {
   const alternatives = findAlternatives(selectedFood, grams, foodDatabase);
 
   const escapeHtml = (text: string): string =>
-    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
   if (alternatives.length === 0) {
     list.innerHTML = '<div class="no-alternatives">No equivalent alternatives found</div>';
