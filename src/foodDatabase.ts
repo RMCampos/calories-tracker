@@ -74,7 +74,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Cuscuz, de milho , cozido com sal', nameEn: 'Corn Couscous, cooked with salt', info: { calories: 113, protein: 2.2, fat: 0.7, carbs: 25.3, fiber: 2.1, category: 'carbs', alkaline: false, bestFor: ['breakfast', 'brunch'] } },
   { name: 'Paçoca, amendoim', nameEn: 'Peanut Paçoca', info: { calories: 487, protein: 16, fat: 26.1, carbs: 52.4, fiber: 7.3, category: 'carbs', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Tortelete de mousse chocolate zero Quiero Café', nameEn: 'Zero Chocolate Mousse Tartlet Quiero Café', info: { calories: 250, protein: 2.3, fat: 8.9, carbs: 40, fiber: 5, category: 'carbs', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
-  { name: 'Pão de beijo com chia e pequi Empório Veggie', nameEn: 'Kiss Bread with Chia and Pequi Empório Veggie', info: { calories: 316, protein: 0.6, fat: 14, carbs: 47, fiber: 1, category: 'carbs', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks] } },
+  { name: 'Pão de beijo com chia e pequi Empório Veggie', nameEn: 'Kiss Bread with Chia and Pequi Empório Veggie', info: { calories: 316, protein: 0.6, fat: 14, carbs: 47, fiber: 1, category: 'carbs', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Bananinha Paraibuna zero', nameEn: 'Zero Paraibuna Banana', info: { calories: 296, protein: 4.8, fat: 0, carbs: 70, fiber: 4.3, category: 'carbs', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Farinha de castanha de caju (Zaya)', nameEn: 'Cashew Nut Flour (Zaya)', info: { calories: 500, protein: 20, fat: 53.3, carbs: 20, fiber: 13.3, category: 'carbs', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Batata baroa, cozida', nameEn: 'Cooked Baroa Potato', info: { calories: 80, protein: 0.9, fat: 0.2, carbs: 18.9, fiber: 1.8, category: 'carbs', alkaline: true, bestFor: ['lunch', 'dinner'] } },
@@ -87,7 +87,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Agrião', nameEn: 'Watercress', info: { calories: 17, protein: 2.7, fat: 0.2, carbs: 2.3, fiber: 2.1, category: 'leaves', alkaline: true, bestFor: ['lunch', 'dinner'] } },
   { name: 'Espinafre', nameEn: 'Spinach', info: { calories: 16, protein: 2, fat: 0.2, carbs: 2.6, fiber: 2.1, category: 'leaves', alkaline: true, bestFor: ['lunch', 'dinner'] } },
   { name: 'Rúcula', nameEn: 'Arugula', info: { calories: 13, protein: 1.8, fat: 0.1, carbs: 2.2, fiber: 1.7, category: 'leaves', alkaline: true, bestFor: ['lunch', 'dinner'] } },
-  { name: 'Spirulina', nameEn: 'Spirulina', info: { calories: 290, protein: 57.5, fat: 23.9, carbs: 7.7, fiber: 0, category: 'leaves', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks] } },
+  { name: 'Spirulina', nameEn: 'Spirulina', info: { calories: 290, protein: 57.5, fat: 23.9, carbs: 7.7, fiber: 0, category: 'leaves', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
 
   // Frutas - Fruits
   { name: 'Ameixa, crua', nameEn: 'Raw Plum', info: { calories: 53, protein: 0.8, fat: 0, carbs: 13.9, fiber: 2.4, category: 'fruits', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
