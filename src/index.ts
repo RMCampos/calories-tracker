@@ -497,7 +497,7 @@ function findAlternatives(
     fat:      current.info.fat      * ratio,
   };
 
-  const sameBestFor = (a: Array<String>, b: Array<String>) =>
+  const sameBestFor = (a: string[], b: string[]) =>
     [...a].sort().join(',') === [...b].sort().join(',');
 
   return allFoods
@@ -555,12 +555,15 @@ function updateAlternativesDisplay() {
 
   const alternatives = findAlternatives(selectedFood, grams, foodDatabase);
 
+  const escapeHtml = (text: string): string =>
+    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
   if (alternatives.length === 0) {
     list.innerHTML = '<div class="no-alternatives">No equivalent alternatives found</div>';
   } else {
     list.innerHTML = alternatives.map(alt => `
       <div class="alternative-item">
-        <span class="alternative-name">${alt.food.name}</span>
+        <span class="alternative-name">${escapeHtml(alt.food.name)}</span>
         <span class="alternative-quantity">${alt.quantityGrams}g</span>
       </div>
     `).join('');
@@ -577,10 +580,7 @@ function handleAlternativesCheckboxChange(e: Event) {
     container.classList.add('display-block');
     updateAlternativesDisplay();
   } else {
-    container.classList.add('display-none');
-    container.classList.remove('display-block');
-    const list = document.getElementById('alternatives-list');
-    if (list) list.innerHTML = '';
+    hideAlternativesContainer();
   }
 }
 
