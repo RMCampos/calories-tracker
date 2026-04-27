@@ -429,6 +429,10 @@ function clearEditing() {
   getInputById('foodTimeToUpdate').value = '';
   getInputById('foodCaloriesToUpdate').value = '';
 
+  // Hide and reset the visible time input (only shown when editing)
+  getInputById('foodEntryTime').value = '';
+  getDivById('foodTimeGroup').classList.add('hidden');
+
   selectedFood = null;
 }
 
@@ -1048,6 +1052,10 @@ async function setFoodToEdit(foodId: string) {
     getInputById('foodTimeToUpdate').value = foodToEdit[0].time;
     getInputById('foodCaloriesToUpdate').value = foodToEdit[0].calories;
 
+    // Show the time input and populate it with the existing time
+    getDivById('foodTimeGroup').classList.remove('hidden');
+    getInputById('foodEntryTime').value = foodToEdit[0].time;
+
     // Scroll to top
     const titleDiv = getDivById('add-foot-title') as HTMLElement;
     if (titleDiv) {
@@ -1228,7 +1236,7 @@ const updateFood = async () => {
       fiber: proportion.info.fiber,
       date: date.split('T')[0],
       alkaline: selectedFood.info.alkaline,
-      time: getInputById('foodTimeToUpdate').value,
+      time: getInputById('foodEntryTime').value,
     };
 
     // Save to Appwrite
