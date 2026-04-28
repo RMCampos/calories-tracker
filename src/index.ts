@@ -500,24 +500,72 @@ function findAlternatives(
   const sameBestFor = (a: string[], b: string[]) =>
     [...a].sort().join(',') === [...b].sort().join(',');
 
-  return allFoods
+  // Consider different macros based in the food category
+  let filtered = allFoods
     .filter(f =>
-      f.name          !== current.name &&
+      f.name !== current.name &&
       f.info.category === current.info.category &&
       sameBestFor(f.info.bestFor, current.info.bestFor)
-    )
-    .flatMap(candidate => {
-      const p = candidate.info;
+    );
 
-      const maxGrams = Math.min(
-        p.calories > 0 ? (target.calories / p.calories) * 100 : Infinity,
-        p.protein  > 0 ? (target.protein  / p.protein)  * 100 : Infinity,
-        p.carbs    > 0 ? (target.carbs    / p.carbs)    * 100 : Infinity,
-        p.fat      > 0 ? (target.fat      / p.fat)      * 100 : Infinity,
-      );
+  // Consider calories and fat
+  if (current.info.category === 'fats' || current.info.category === 'dairy') {
+    filtered = filtered
+      .flatMap(candidate => {
+        const p = candidate.info;
 
-      return maxGrams > 0 ? [{ food: candidate, quantityGrams: Math.floor(maxGrams) }] : [];
-    })
+        const maxGrams = Math.min(
+          p.calories > 0 ? (target.calories / p.calories) * 100 : Infinity,
+          p.fat      > 0 ? (target.fat      / p.fat)      * 100 : Infinity,
+        );
+
+        return maxGrams > 0 ? [{ food: candidate, quantityGrams: Math.floor(maxGrams) }] : [];
+      });
+  }
+  // Consider calories and proteins
+  else if (current.info.category === 'proteins') {
+    filtered = filtered
+      .flatMap(candidate => {
+        const p = candidate.info;
+
+        const maxGrams = Math.min(
+          p.calories > 0 ? (target.calories / p.calories) * 100 : Infinity,
+          p.protein  > 0 ? (target.protein  / p.protein)  * 100 : Infinity,
+        );
+
+        return maxGrams > 0 ? [{ food: candidate, quantityGrams: Math.floor(maxGrams) }] : [];
+      });
+  }
+  // Consider calories and carbs
+  else if (current.info.category === 'carbs' || current.info.category === 'fruits' || current.info.category === 'low carb') {
+    filtered = filtered
+      .flatMap(candidate => {
+        const p = candidate.info;
+
+        const maxGrams = Math.min(
+          p.calories > 0 ? (target.calories / p.calories) * 100 : Infinity,
+          p.carbs    > 0 ? (target.carbs    / p.carbs)    * 100 : Infinity,
+        );
+
+        return maxGrams > 0 ? [{ food: candidate, quantityGrams: Math.floor(maxGrams) }] : [];
+      });
+  }
+  // Consider only calories
+  else if (current.info.category === 'leaves') {
+    filtered = filtered
+      .flatMap(candidate => {
+        const p = candidate.info;
+
+        const maxGrams = Math.min(
+          p.calories > 0 ? (target.calories / p.calories) * 100 : Infinity,
+        );
+
+        return maxGrams > 0 ? [{ food: candidate, quantityGrams: Math.floor(maxGrams) }] : [];
+      });
+  }
+
+  return filtered
+    .filter(f => f.quantityGrams > 0)
     .sort((a, b) => a.food.name.localeCompare(b.food.name));
 }
 

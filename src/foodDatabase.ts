@@ -3,11 +3,11 @@ import { FoodItem } from "./types";
 export const foodDatabase: FoodItem[] = [
   // Gorduras - Fats
   { name: 'Abacate', nameEn: 'Avocado', info: { calories: 96, protein: 1.2, fat: 8.4, carbs: 6, fiber: 6.3, category: 'fats', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
-  { name: 'Amêndoas', nameEn: 'Almonds', info: { calories: 581, protein: 18.6, fat: 47.3, carbs: 29.5, fiber: 11.6, category: 'fats', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks', 'lunch', 'dinner'] } },
-  { name: 'Amendoin natural', nameEn: 'Natural Peanut', info: { calories: 611, protein: 26, fat: 49, carbs: 16, fiber: 8.5, category: 'fats', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks', 'lunch', 'dinner'] } },
+  { name: 'Amêndoas', nameEn: 'Almonds', info: { calories: 581, protein: 18.6, fat: 47.3, carbs: 29.5, fiber: 11.6, category: 'fats', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
+  { name: 'Amendoin natural', nameEn: 'Natural Peanut', info: { calories: 611, protein: 26, fat: 49, carbs: 16, fiber: 8.5, category: 'fats', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Azeite de Oliva EV', nameEn: 'Extra Virgin Olive Oil', info: { calories: 844, protein: 0, fat: 100, carbs: 0, fiber: 0, category: 'fats', alkaline: false, bestFor: ['lunch', 'dinner'] } },
-  { name: 'Castanha de Caju', nameEn: 'Cashew Nut', info: { calories: 570, protein: 18.5, fat: 46.3, carbs: 29.1, fiber: 3.7, category: 'fats', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks', 'lunch', 'dinner'] } },
-  { name: 'Castanha do Pará', nameEn: 'Brazil Nut', info: { calories: 643, protein: 14.5, fat: 63.5, carbs: 15.1, fiber: 7.9, category: 'fats', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks', 'lunch', 'dinner'] } },
+  { name: 'Castanha de Caju', nameEn: 'Cashew Nut', info: { calories: 570, protein: 18.5, fat: 46.3, carbs: 29.1, fiber: 3.7, category: 'fats', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
+  { name: 'Castanha do Pará', nameEn: 'Brazil Nut', info: { calories: 643, protein: 14.5, fat: 63.5, carbs: 15.1, fiber: 7.9, category: 'fats', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Semente de Chia', nameEn: 'Chia Seed', info: { calories: 490, protein: 15.6, fat: 30.7, carbs: 43.8, fiber: 37.7, category: 'fats', alkaline: true, bestFor: ['breakfast', 'brunch'] } },
   { name: 'Semente de Linhaça Dourada', nameEn: 'Golden Flaxseed', info: { calories: 515, protein: 20, fat: 35, carbs: 30, fiber: 26, category: 'fats', alkaline: true, bestFor: ['breakfast', 'brunch'] } },
   { name: 'Semente de Gergelim', nameEn: 'Sesame Seed', info: { calories: 584, protein: 21.2, fat: 50.4, carbs: 21.6, fiber: 11.9, category: 'fats', alkaline: true, bestFor: ['breakfast', 'brunch'] } },
@@ -44,9 +44,6 @@ export const foodDatabase: FoodItem[] = [
   
   // Carboidratos, amiláceos - Carbs
   { name: 'Grão de Bico, cozido', nameEn: 'Chickpeas, cooked', info: { calories: 180, protein: 9.5, fat: 3, carbs: 30, fiber: 8.6, category: 'carbs', alkaline: false, bestFor: ['lunch', 'dinner'] } },
-  { name: 'Banana Nanica', nameEn: 'Banana Nanica', info: { calories: 92, protein: 1.4, fat: 0.1, carbs: 23.8, fiber: 1.9, category: 'carbs', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
-  { name: 'Manga Palmer', nameEn: 'Mango Palmer', info: { calories: 72, protein: 0.4, fat: 0.2, carbs: 19.4, fiber: 1.6, category: 'carbs', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
-  { name: 'Mamão', nameEn: 'Papaya', info: { calories: 40, protein: 0.5, fat: 0.1, carbs: 10.4, fiber: 1, category: 'carbs', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Batata doce, assada', nameEn: 'Sweet Potato, baked', info: { calories: 90, protein: 2.0, fat: 0.1, carbs: 20.7, fiber: 3.3, category: 'carbs', alkaline: true, bestFor: ['lunch', 'dinner'] } },
   { name: 'Batata doce, cozida', nameEn: 'Sweet Potato, boiled', info: { calories: 77, protein: 0.6, fat: 0.1, carbs: 18.4, fiber: 2.2, category: 'carbs', alkaline: true, bestFor: ['lunch', 'dinner'] } },
   { name: 'Batata inglesa, assada', nameEn: 'Potato, baked', info: { calories: 94, protein: 2.1, fat: 0.1, carbs: 21.8, fiber: 2.1, category: 'carbs', alkaline: true, bestFor: ['lunch', 'dinner'] } },
@@ -92,7 +89,11 @@ export const foodDatabase: FoodItem[] = [
   // Frutas - Fruits
   { name: 'Ameixa, crua', nameEn: 'Raw Plum', info: { calories: 53, protein: 0.8, fat: 0, carbs: 13.9, fiber: 2.4, category: 'fruits', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Abacaxi', nameEn: 'Pineapple', info: { calories: 48, protein: 0.9, fat: 0.1, carbs: 12.3, fiber: 1, category: 'fruits', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
+  { name: 'Banana Nanica', nameEn: 'Banana Nanica', info: { calories: 92, protein: 1.4, fat: 0.1, carbs: 23.8, fiber: 1.9, category: 'fruits', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Laranja', nameEn: 'Orange', info: { calories: 37, protein: 1, fat: 0.1, carbs: 8.9, fiber: 0.8, category: 'fruits', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
+  { name: 'Manga Palmer', nameEn: 'Mango Palmer', info: { calories: 72, protein: 0.4, fat: 0.2, carbs: 19.4, fiber: 1.6, category: 'fruits', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
+  { name: 'Mamão', nameEn: 'Papaya', info: { calories: 40, protein: 0.5, fat: 0.1, carbs: 10.4, fiber: 1, category: 'fruits', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
+
   { name: 'Maçã', nameEn: 'Apple', info: { calories: 56, protein: 0.3, fat: 0, carbs: 15.2, fiber: 1.3, category: 'fruits', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Melancia', nameEn: 'Watermelon', info: { calories: 33, protein: 0.9, fat: 0, carbs: 8.1, fiber: 0.1, category: 'fruits', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
   { name: 'Melão', nameEn: 'Melon', info: { calories: 29, protein: 0.7, fat: 0, carbs: 7.5, fiber: 0.3, category: 'fruits', alkaline: true, bestFor: ['breakfast', 'brunch', 'snacks'] } },
