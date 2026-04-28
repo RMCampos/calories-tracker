@@ -420,6 +420,7 @@ function clearEditing() {
   getInputById('gramAmount').value = '100';
   showFoodPreview(false);
   hideAINutritionCard();
+  hideAlternativesContainer();
   getDivById('add-foot-title').innerHTML = 'Add Food Entry';
   getButtonById('add-food-btn').innerHTML = 'Add Food';
   getButtonById('cancel-food-btn').style.display = 'none';
@@ -476,6 +477,162 @@ const getFoodItemByName = (foodName: string): FoodItem => {
   return foodDataSearch[0];
 }
 
+type AlternativeResult = {
+  food: FoodItem;
+  quantityGrams: number;
+};
+
+function findAlternatives(
+  current: FoodItem,
+  currentQuantityGrams: number,
+  allFoods: FoodItem[]
+): AlternativeResult[] {
+  if (currentQuantityGrams <= 0) return [];
+
+  const ratio = currentQuantityGrams / 100;
+  const target = {
+    calories: current.info.calories * ratio,
+    protein:  current.info.protein  * ratio,
+    carbs:    current.info.carbs    * ratio,
+    fat:      current.info.fat      * ratio,
+  };
+
+  const sameBestFor = (a: string[], b: string[]) =>
+    [...a].sort().join(',') === [...b].sort().join(',');
+
+  // Consider different macros based in the food category
+  let filtered = allFoods
+    .filter(f =>
+      f.name !== current.name &&
+      f.info.category === current.info.category &&
+      sameBestFor(f.info.bestFor, current.info.bestFor)
+    );
+
+  // Consider calories and fat
+  if (current.info.category === 'fats' || current.info.category === 'dairy') {
+    filtered = filtered
+      .flatMap(candidate => {
+        const p = candidate.info;
+
+        const maxGrams = Math.min(
+          p.calories > 0 ? (target.calories / p.calories) * 100 : Infinity,
+          p.fat      > 0 ? (target.fat      / p.fat)      * 100 : Infinity,
+        );
+
+        return maxGrams > 0 ? [{ food: candidate, quantityGrams: Math.floor(maxGrams) }] : [];
+      });
+  }
+  // Consider calories and proteins
+  else if (current.info.category === 'proteins') {
+    filtered = filtered
+      .flatMap(candidate => {
+        const p = candidate.info;
+
+        const maxGrams = Math.min(
+          p.calories > 0 ? (target.calories / p.calories) * 100 : Infinity,
+          p.protein  > 0 ? (target.protein  / p.protein)  * 100 : Infinity,
+        );
+
+        return maxGrams > 0 ? [{ food: candidate, quantityGrams: Math.floor(maxGrams) }] : [];
+      });
+  }
+  // Consider calories and carbs
+  else if (current.info.category === 'carbs' || current.info.category === 'fruits' || current.info.category === 'low carb') {
+    filtered = filtered
+      .flatMap(candidate => {
+        const p = candidate.info;
+
+        const maxGrams = Math.min(
+          p.calories > 0 ? (target.calories / p.calories) * 100 : Infinity,
+          p.carbs    > 0 ? (target.carbs    / p.carbs)    * 100 : Infinity,
+        );
+
+        return maxGrams > 0 ? [{ food: candidate, quantityGrams: Math.floor(maxGrams) }] : [];
+      });
+  }
+  // Consider only calories
+  else if (current.info.category === 'leaves') {
+    filtered = filtered
+      .flatMap(candidate => {
+        const p = candidate.info;
+
+        const maxGrams = Math.min(
+          p.calories > 0 ? (target.calories / p.calories) * 100 : Infinity,
+        );
+
+        return maxGrams > 0 ? [{ food: candidate, quantityGrams: Math.floor(maxGrams) }] : [];
+      });
+  }
+
+  return filtered
+    .filter(f => f.quantityGrams > 0)
+    .sort((a, b) => a.food.name.localeCompare(b.food.name));
+}
+
+function hideAlternativesContainer() {
+  const container = document.getElementById('alternatives-container');
+  if (container) {
+    container.classList.add('display-none');
+    container.classList.remove('display-block');
+  }
+  const list = document.getElementById('alternatives-list');
+  if (list) {
+    list.innerHTML = '';
+  }
+}
+
+function updateAlternativesDisplay() {
+  const checkbox = document.getElementById('enableAlternatives') as HTMLInputElement;
+  if (!checkbox || !checkbox.checked) return;
+
+  const list = document.getElementById('alternatives-list');
+  if (!list) return;
+
+  if (!selectedFood) {
+    list.innerHTML = '';
+    return;
+  }
+
+  const gramsInput = getInputById('gramAmount');
+  const grams = parseFloat(gramsInput.value);
+
+  if (isNaN(grams) || grams <= 0) {
+    list.innerHTML = '';
+    return;
+  }
+
+  const alternatives = findAlternatives(selectedFood, grams, foodDatabase);
+
+  const escapeHtml = (text: string): string =>
+    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  if (alternatives.length === 0) {
+    list.innerHTML = '<div class="no-alternatives">No equivalent alternatives found</div>';
+  } else {
+    list.innerHTML = alternatives.map(alt => `
+      <div class="alternative-item">
+        <span class="alternative-name">${escapeHtml(alt.food.name)}</span>
+        <span class="alternative-quantity">${alt.quantityGrams}g</span>
+      </div>
+    `).join('');
+  }
+}
+
+function handleAlternativesCheckboxChange(e: Event) {
+  const checkbox = e.target as HTMLInputElement;
+  const container = document.getElementById('alternatives-container');
+  if (!container) return;
+
+  if (checkbox.checked) {
+    container.classList.remove('display-none');
+    container.classList.add('display-block');
+    updateAlternativesDisplay();
+  } else {
+    hideAlternativesContainer();
+  }
+}
+
 const previewCalories = (foodSelected?: FoodItem) => {
   const foodToPreview = foodSelected ?? selectedFood;
   const gramAmount = getInputById('gramAmount');
@@ -500,6 +657,7 @@ const previewCalories = (foodSelected?: FoodItem) => {
   getDivById('fiberValuePreview').textContent = (Math.round(proportion.info.fiber * 10) / 10).toString ();
 
   showFoodPreview(true);
+  updateAlternativesDisplay();
 }
 
 // ---- Goal management ----
@@ -724,6 +882,10 @@ const setupEventListeners = () => {
     previewCalories();
   });
 
+  getInputById('gramAmount').addEventListener('input', () => {
+    updateAlternativesDisplay();
+  });
+
   getButtonById('add-food-btn').addEventListener('click', () => {
     if (getButtonById('add-food-btn').innerHTML === 'Add Food') {
       addFood();
@@ -796,6 +958,9 @@ const setupEventListeners = () => {
 
   // AI nutrition checkbox
   document.getElementById('enableAINutrition')?.addEventListener('change', handleAICheckboxChange);
+
+  // Alternatives checkbox
+  document.getElementById('enableAlternatives')?.addEventListener('change', handleAlternativesCheckboxChange);
 
   // Share button event listeners
   getButtonById('shareBtn').addEventListener('click', handleShareClick);
