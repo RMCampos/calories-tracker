@@ -8,3 +8,6 @@ senha.txt
 dist/sw.js
 dist/workbox-*.js
 dev-dist/
+
+# IDE
+.idea/
