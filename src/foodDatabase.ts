@@ -17,7 +17,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Pasta de Castanha (A Tal da Castanha)', nameEn: 'Cashew Butter (A Tal da Castanha)', info: { calories: 564, protein: 17, fat: 40, carbs: 34, fiber: 4.7, category: 'fats', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
 
   // Proteínas - Proteins
-  { name: 'Atum, conserva em óleo', nameEn: 'Tuna, canned in oil', info: { calories: 166, protein: 26.2, fat: 6, carbs: 0, fiber: 0, category: 'proteins', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
+  { name: 'Atum, conserva em óleo', nameEn: 'Tuna, canned in oil', info: { calories: 166, protein: 26.2, fat: 6, carbs: 0, fiber: 0, category: 'proteins', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks', 'lunch', 'dinner'] } },
   { name: 'Filé de Tilápia, cozido', nameEn: 'Tilapia Fillet, cooked', info: { calories: 128, protein: 26.1, fat: 2.6, carbs: 0, fiber: 0, category: 'proteins', alkaline: false, bestFor: ['lunch', 'dinner'] } },
   { name: 'Ovo, de galinha, inteiro, cozido', nameEn: 'Egg, whole, boiled', info: { calories: 146, protein: 13.3, fat: 9.5, carbs: 0.6, fiber: 0, category: 'proteins', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks', 'lunch', 'dinner'] } },
   { name: 'Ovo, de galinha, gema, cozida', nameEn: 'Egg, yolk, boiled', info: { calories: 353, protein: 15.9, fat: 30.8, carbs: 1.6, fiber: 0, category: 'proteins', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks', 'lunch', 'dinner'] } },
@@ -26,7 +26,7 @@ export const foodDatabase: FoodItem[] = [
   { name: 'Carne, bovina, patinho, sem gordura, grelhado', nameEn: 'Beef, round, lean, grilled', info: { calories: 219, protein: 35.9, fat: 7.3, carbs: 0, fiber: 0, category: 'proteins', alkaline: false, bestFor: ['lunch', 'dinner'] } },
   { name: 'Soja em Pó Growth', nameEn: 'Growth Soy Powder', info: { calories: 400, protein: 86.7, fat: 5, carbs: 3.3, fiber: 0, category: 'proteins', alkaline: false, bestFor: ['breakfast', 'brunch'] } },
   { name: 'Sobrecoxa s/pele, cozida', nameEn: 'Chicken Thigh, skinless, cooked', info: { calories: 245, protein: 24.9, fat: 15.4, carbs: 0, fiber: 0, category: 'proteins', alkaline: false, bestFor: ['lunch', 'dinner'] } },
-  { name: 'Soja, queijo (tofu)', nameEn: 'Soy, cheese (tofu)', info: { calories: 64, protein: 6.5, fat: 2, carbs: 4, fiber: 0.8, category: 'proteins', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks'] } },
+  { name: 'Soja, queijo (tofu)', nameEn: 'Soy, cheese (tofu)', info: { calories: 64, protein: 6.5, fat: 2, carbs: 4, fiber: 0.8, category: 'proteins', alkaline: false, bestFor: ['breakfast', 'brunch', 'snacks', 'lunch', 'dinner'] } },
   { name: 'Feijão preto, cozido', nameEn: 'Black Beans, cooked', info: { calories: 77, protein: 4.5, fat: 0.5, carbs: 14, fiber: 8.4, category: 'proteins', alkaline: false, bestFor: ['lunch', 'dinner'] } },
   { name: 'Lentilha, cozida', nameEn: 'Lentils, cooked', info: { calories: 116, protein: 9.4, fat: 0.2, carbs: 19.4, fiber: 5.5, category: 'proteins', alkaline: false, bestFor: ['lunch', 'dinner'] } },
   { name: 'Frango, peito, sem pele, cozido', nameEn: 'Chicken Breast, skinless, cooked', info: { calories: 163, protein: 31.5, fat: 3.2, carbs: 0, fiber: 0, category: 'proteins', alkaline: false, bestFor: ['lunch', 'dinner'] } },
