@@ -36,6 +36,13 @@ let currentViewDate = new Date();
 let selectedFood: FoodItem | null = null; // review here
 let currentUser: any | null = null;
 
+type AlternativeResult = {
+  food: FoodItem;
+  quantityGrams: number;
+};
+
+let currentAlternatives: AlternativeResult[] = [];
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', async function() {
   await initializeAuth();
@@ -477,11 +484,6 @@ const getFoodItemByName = (foodName: string): FoodItem => {
   return foodDataSearch[0];
 }
 
-type AlternativeResult = {
-  food: FoodItem;
-  quantityGrams: number;
-};
-
 function findAlternatives(
   current: FoodItem,
   currentQuantityGrams: number,
@@ -602,6 +604,7 @@ function updateAlternativesDisplay() {
   }
 
   const alternatives = findAlternatives(selectedFood, grams, foodDatabase);
+  currentAlternatives = alternatives;
 
   const escapeHtml = (text: string): string =>
     text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -610,12 +613,27 @@ function updateAlternativesDisplay() {
   if (alternatives.length === 0) {
     list.innerHTML = '<div class="no-alternatives">No equivalent alternatives found</div>';
   } else {
-    list.innerHTML = alternatives.map(alt => `
-      <div class="alternative-item">
+    list.innerHTML = alternatives.map((alt, index) => `
+      <div class="alternative-item" data-index="${index}" tabindex="0" title="Click to select this food">
         <span class="alternative-name">${escapeHtml(alt.food.name)}</span>
         <span class="alternative-quantity">${alt.quantityGrams}g</span>
       </div>
     `).join('');
+
+    list.querySelectorAll<HTMLElement>('.alternative-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const index = parseInt(item.dataset.index ?? '-1', 10);
+        if (index >= 0 && currentAlternatives[index]) {
+          selectAlternative(currentAlternatives[index].food, currentAlternatives[index].quantityGrams);
+        }
+      });
+      item.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          item.click();
+        }
+      });
+    });
   }
 }
 
@@ -1189,6 +1207,12 @@ function selectFood(food: FoodItem) {
   } else {
     hideAINutritionCard();
   }
+}
+
+function selectAlternative(food: FoodItem, grams: number) {
+  selectFood(food);
+  getInputById('gramAmount').value = grams.toString();
+  previewCalories(food);
 }
 
 async function setFoodToEdit(foodId: string) {
